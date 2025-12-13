@@ -1,0 +1,8 @@
+package com.example.petlorshop.models;
+
+public enum Role {
+    USER,
+    ADMIN,
+    DOCTOR,
+    RECEPTIONIST,
+}

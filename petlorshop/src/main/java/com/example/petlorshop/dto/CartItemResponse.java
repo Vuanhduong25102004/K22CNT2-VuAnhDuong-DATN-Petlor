@@ -1,0 +1,20 @@
+package com.example.petlorshop.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CartItemResponse {
+    private Integer chiTietGioHangId;
+    private Integer sanPhamId;
+    private String tenSanPham;
+    private String hinhAnh;
+    private BigDecimal donGia;
+    private int soLuong;
+    private BigDecimal thanhTien;
+}

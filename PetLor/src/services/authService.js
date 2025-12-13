@@ -1,0 +1,20 @@
+import apiClient from './apiClient';
+
+const authService = {
+  register: (userData) => apiClient.post('/auth/register', userData),
+  
+  login: async (credentials) => {
+    const data = await apiClient.post('/auth/login', credentials);
+    if (data && data.accessToken) {
+      localStorage.setItem('accessToken', data.accessToken);
+    }
+    return data;
+  },
+  
+  logout: () => {
+    localStorage.removeItem('accessToken');
+    // Có thể thêm logic redirect về trang login ở đây nếu cần
+  },
+};
+
+export default authService;
