@@ -1,5 +1,6 @@
 package com.example.petlorshop.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -37,17 +38,21 @@ public class LichHen {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private NguoiDung nguoiDung;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "thu_cung_id", nullable = false)
+    @JsonIgnore
     private ThuCung thuCung;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dich_vu_id", nullable = false)
+    @JsonIgnore
     private DichVu dichVu;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nhan_vien_id")
+    @JsonIgnore
     private NhanVien nhanVien;
 }

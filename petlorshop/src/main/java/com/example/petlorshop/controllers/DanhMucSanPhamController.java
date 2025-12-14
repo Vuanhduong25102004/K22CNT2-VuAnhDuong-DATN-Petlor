@@ -1,5 +1,6 @@
 package com.example.petlorshop.controllers;
 
+import com.example.petlorshop.dto.DanhMucSanPhamRequest;
 import com.example.petlorshop.models.DanhMucSanPham;
 import com.example.petlorshop.services.DanhMucSanPhamService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,14 +30,14 @@ public class DanhMucSanPhamController {
     }
 
     @PostMapping
-    public DanhMucSanPham createDanhMucSanPham(@RequestBody DanhMucSanPham danhMucSanPham) {
-        return danhMucSanPhamService.createDanhMucSanPham(danhMucSanPham);
+    public DanhMucSanPham createDanhMucSanPham(@RequestBody DanhMucSanPhamRequest request) {
+        return danhMucSanPhamService.createDanhMucSanPham(request);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<DanhMucSanPham> updateDanhMucSanPham(@PathVariable Integer id, @RequestBody DanhMucSanPham danhMucSanPhamDetails) {
+    public ResponseEntity<DanhMucSanPham> updateDanhMucSanPham(@PathVariable Integer id, @RequestBody DanhMucSanPhamRequest request) {
         try {
-            DanhMucSanPham updatedDanhMucSanPham = danhMucSanPhamService.updateDanhMucSanPham(id, danhMucSanPhamDetails);
+            DanhMucSanPham updatedDanhMucSanPham = danhMucSanPhamService.updateDanhMucSanPham(id, request);
             return ResponseEntity.ok(updatedDanhMucSanPham);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

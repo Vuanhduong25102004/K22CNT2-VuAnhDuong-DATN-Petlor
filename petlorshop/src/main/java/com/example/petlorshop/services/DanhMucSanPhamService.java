@@ -1,5 +1,6 @@
 package com.example.petlorshop.services;
 
+import com.example.petlorshop.dto.DanhMucSanPhamRequest;
 import com.example.petlorshop.models.DanhMucSanPham;
 import com.example.petlorshop.repositories.DanhMucSanPhamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,16 +23,19 @@ public class DanhMucSanPhamService {
         return danhMucSanPhamRepository.findById(id);
     }
 
-    public DanhMucSanPham createDanhMucSanPham(DanhMucSanPham danhMucSanPham) {
-        return danhMucSanPhamRepository.save(danhMucSanPham);
+    public DanhMucSanPham createDanhMucSanPham(DanhMucSanPhamRequest request) {
+        DanhMucSanPham newDanhMuc = new DanhMucSanPham();
+        newDanhMuc.setTenDanhMuc(request.getTenDanhMuc());
+        newDanhMuc.setMoTa(request.getMoTa());
+        return danhMucSanPhamRepository.save(newDanhMuc);
     }
 
-    public DanhMucSanPham updateDanhMucSanPham(Integer id, DanhMucSanPham danhMucSanPhamDetails) {
+    public DanhMucSanPham updateDanhMucSanPham(Integer id, DanhMucSanPhamRequest request) {
         DanhMucSanPham danhMucSanPham = danhMucSanPhamRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Danh mục sản phẩm không tồn tại với id: " + id));
 
-        danhMucSanPham.setTenDanhMuc(danhMucSanPhamDetails.getTenDanhMuc());
-        danhMucSanPham.setMoTa(danhMucSanPhamDetails.getMoTa());
+        danhMucSanPham.setTenDanhMuc(request.getTenDanhMuc());
+        danhMucSanPham.setMoTa(request.getMoTa());
 
         return danhMucSanPhamRepository.save(danhMucSanPham);
     }

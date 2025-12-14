@@ -42,6 +42,7 @@ public class SanPham {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "danh_muc_id")
+    @JsonIgnore
     private DanhMucSanPham danhMucSanPham;
 
     @JsonIgnore

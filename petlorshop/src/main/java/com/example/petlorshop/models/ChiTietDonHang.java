@@ -37,5 +37,6 @@ public class ChiTietDonHang {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "san_pham_id", nullable = false)
+    @JsonIgnore
     private SanPham sanPham;
 }

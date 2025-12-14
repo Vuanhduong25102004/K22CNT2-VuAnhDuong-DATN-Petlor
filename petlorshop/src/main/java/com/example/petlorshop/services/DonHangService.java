@@ -1,7 +1,6 @@
 package com.example.petlorshop.services;
 
-import com.example.petlorshop.dto.ChiTietDonHangRequest;
-import com.example.petlorshop.dto.DonHangRequest;
+import com.example.petlorshop.dto.*;
 import com.example.petlorshop.models.*;
 import com.example.petlorshop.repositories.DonHangRepository;
 import com.example.petlorshop.repositories.NguoiDungRepository;
@@ -15,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class DonHangService {
@@ -26,12 +26,14 @@ public class DonHangService {
     @Autowired
     private SanPhamRepository sanPhamRepository;
 
-    public List<DonHang> getAllDonHang() {
-        return donHangRepository.findAll();
+    public List<DonHangResponse> getAllDonHang() {
+        return donHangRepository.findAll().stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
-    public Optional<DonHang> getDonHangById(Integer id) {
-        return donHangRepository.findById(id);
+    public Optional<DonHangResponse> getDonHangById(Integer id) {
+        return donHangRepository.findById(id).map(this::convertToResponse);
     }
 
     @Transactional
@@ -52,7 +54,6 @@ public class DonHangService {
             SanPham sanPham = sanPhamRepository.findById(itemRequest.getSanPhamId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + itemRequest.getSanPhamId()));
 
-            // a. Kiểm tra xem số lượng tồn kho có đủ không.
             if (sanPham.getSoLuongTonKho() < itemRequest.getSoLuong()) {
                 throw new RuntimeException("Sản phẩm '" + sanPham.getTenSanPham() + "' không đủ số lượng tồn kho.");
             }
@@ -64,28 +65,23 @@ public class DonHangService {
             chiTiet.setDonGiaLucMua(sanPham.getGia());
             chiTietItems.add(chiTiet);
 
-            // b. Tính toán tong_tien
             tongTien = tongTien.add(sanPham.getGia().multiply(BigDecimal.valueOf(itemRequest.getSoLuong())));
 
-            // d. Trừ đi số lượng tồn kho của sản phẩm đã bán.
             sanPham.setSoLuongTonKho(sanPham.getSoLuongTonKho() - itemRequest.getSoLuong());
             sanPhamRepository.save(sanPham);
         }
 
         donHang.setTongTien(tongTien);
-        // c. Gán danh sách chi tiết vào đơn hàng
         donHang.setChiTietDonHangs(chiTietItems);
 
         return donHangRepository.save(donHang);
     }
 
-
-    public DonHang updateDonHang(Integer id, DonHang donHangDetails) {
+    public DonHang updateDonHangStatus(Integer id, DonHangUpdateRequest updateRequest) {
         DonHang donHang = donHangRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Đơn hàng không tồn tại với id: " + id));
 
-        donHang.setTrangThaiDonHang(donHangDetails.getTrangThaiDonHang());
-        donHang.setDiaChiGiaoHang(donHangDetails.getDiaChiGiaoHang());
+        donHang.setTrangThaiDonHang(updateRequest.getTrangThaiDonHang());
 
         return donHangRepository.save(donHang);
     }
@@ -94,5 +90,34 @@ public class DonHangService {
         DonHang donHang = donHangRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Đơn hàng không tồn tại với id: " + id));
         donHangRepository.delete(donHang);
+    }
+
+    private DonHangResponse convertToResponse(DonHang donHang) {
+        List<ChiTietDonHangResponse> chiTietResponses = donHang.getChiTietDonHangs().stream()
+                .map(this::convertChiTietToResponse)
+                .collect(Collectors.toList());
+
+        return new DonHangResponse(
+                donHang.getDonHangId(),
+                donHang.getNgayDatHang(),
+                donHang.getTongTien(),
+                donHang.getTrangThaiDonHang(),
+                donHang.getDiaChiGiaoHang(),
+                donHang.getNguoiDung() != null ? donHang.getNguoiDung().getUserId() : null,
+                donHang.getNguoiDung() != null ? donHang.getNguoiDung().getHoTen() : null,
+                chiTietResponses
+        );
+    }
+
+    private ChiTietDonHangResponse convertChiTietToResponse(ChiTietDonHang chiTiet) {
+        SanPham sanPham = chiTiet.getSanPham();
+        return new ChiTietDonHangResponse(
+                chiTiet.getChiTietId(),
+                chiTiet.getSoLuong(),
+                chiTiet.getDonGiaLucMua(),
+                sanPham != null ? sanPham.getSanPhamId() : null,
+                sanPham != null ? sanPham.getTenSanPham() : null,
+                sanPham != null ? sanPham.getHinhAnhUrl() : null
+        );
     }
 }

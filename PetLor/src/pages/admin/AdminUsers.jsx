@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import userService from "../../services/userservice";
 
 // Helper: Format ngày tháng từ chuỗi ISO
 const formatDate = (dateString) => {
@@ -22,55 +23,6 @@ const getRoleStyle = (role) => {
       return "bg-green-100 text-green-800 border-green-200";
   }
 };
-
-// Dữ liệu giả lập (Mock Data) theo cấu trúc bạn yêu cầu
-const usersData = [
-  {
-    userId: 7,
-    hoTen: "Vu Anh Duong",
-    email: "vuanhduong251020042@gmail.com",
-    soDienThoai: null,
-    diaChi: null,
-    ngayTao: "2025-10-31T09:47:14",
-    role: "ADMIN",
-  },
-  {
-    userId: 10,
-    hoTen: "Nguyễn Văn A",
-    email: "nguyenvana@example.com",
-    soDienThoai: "0912345678",
-    diaChi: "123 Đường ABC, Quận 1, TP. HCM",
-    ngayTao: "2025-12-12T09:01:15",
-    role: "USER",
-  },
-  {
-    userId: 11,
-    hoTen: "Trần Thị Admin",
-    email: "admin@petcare.com",
-    soDienThoai: "0909999888",
-    diaChi: "Tòa nhà Bitexco, Quận 1",
-    ngayTao: "2025-10-01T08:30:00",
-    role: "ADMIN",
-  },
-  {
-    userId: 12,
-    hoTen: "Lê Văn Staff",
-    email: "staff.le@petcare.com",
-    soDienThoai: "0987654321",
-    diaChi: "456 Lê Lợi, Đà Nẵng",
-    ngayTao: "2025-11-15T14:20:00",
-    role: "STAFF",
-  },
-  {
-    userId: 13,
-    hoTen: "Phạm Thị Khách",
-    email: "phamthi@gmail.com",
-    soDienThoai: "0911223344",
-    diaChi: "789 Nguyễn Trãi, Hà Nội",
-    ngayTao: "2025-12-01T10:05:45",
-    role: "USER",
-  },
-];
 
 // Dữ liệu thống kê (Giữ nguyên hoặc chỉnh sửa tùy logic backend)
 const stats = [
@@ -101,6 +53,23 @@ const stats = [
 ];
 
 const AdminUsers = () => {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const data = await userService.getAllUsers();
+        setUsers(data);
+      } catch (error) {
+        console.error("Lỗi khi tải danh sách người dùng:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
+  }, []);
+
   return (
     <>
       {/* Page Heading */}
@@ -167,9 +136,9 @@ const AdminUsers = () => {
             <div className="relative inline-block text-left">
               <select className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md h-10">
                 <option value="">Tất cả vai trò</option>
-                <option value="USER">User (Khách hàng)</option>
-                <option value="STAFF">Staff (Nhân viên)</option>
-                <option value="ADMIN">Admin (Quản trị)</option>
+                <option value="USER">Khách hàng</option>
+                <option value="STAFF">Nhân viên</option>
+                <option value="ADMIN">Quản trị</option>
               </select>
             </div>
           </div>
@@ -245,93 +214,112 @@ const AdminUsers = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {usersData.map((user, index) => (
-                <tr key={index} className="hover:bg-gray-50 transition-colors">
-                  {/* ID */}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    #{user.userId}
-                  </td>
-
-                  {/* Họ Tên + Avatar giả lập */}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 flex-shrink-0">
-                        {/* Tạo avatar placeholder từ tên */}
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
-                          {user.hoTen.charAt(0).toUpperCase()}
-                        </div>
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
-                          {user.hoTen}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-
-                  {/* Liên hệ (Email & SĐT) */}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{user.email}</div>
-                    <div className="text-xs text-gray-500">
-                      {user.soDienThoai}
-                    </div>
-                  </td>
-
-                  {/* Địa chỉ (Truncate nếu dài) */}
-                  <td
-                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-[200px] truncate"
-                    title={user.diaChi}
-                  >
-                    {user.diaChi}
-                  </td>
-
-                  {/* Role */}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full border ${getRoleStyle(
-                        user.role
-                      )}`}
-                    >
-                      {user.role}
-                    </span>
-                  </td>
-
-                  {/* Ngày tạo */}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDate(user.ngayTao)}
-                  </td>
-
-                  {/* Actions */}
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex items-center justify-end space-x-2">
-                      <button
-                        title="Xem chi tiết"
-                        className="text-gray-400 hover:text-primary transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-base">
-                          visibility
-                        </span>
-                      </button>
-                      <button
-                        title="Chỉnh sửa"
-                        className="text-gray-400 hover:text-blue-500 transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-base">
-                          edit
-                        </span>
-                      </button>
-                      <button
-                        title="Xóa/Khóa"
-                        className="text-gray-400 hover:text-red-500 transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-base">
-                          delete
-                        </span>
-                      </button>
-                    </div>
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="px-6 py-4 text-center">
+                    Đang tải dữ liệu...
                   </td>
                 </tr>
-              ))}
+              ) : users.length > 0 ? (
+                users.map((user, index) => (
+                  <tr
+                    key={user.userId || index}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    {/* ID */}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      #{user.userId}
+                    </td>
+
+                    {/* Họ Tên + Avatar giả lập */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 flex-shrink-0">
+                          {/* Tạo avatar placeholder từ tên */}
+                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                            {user.hoTen
+                              ? user.hoTen.charAt(0).toUpperCase()
+                              : "U"}
+                          </div>
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">
+                            {user.hoTen}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Liên hệ (Email & SĐT) */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{user.email}</div>
+                      <div className="text-xs text-gray-500">
+                        {user.soDienThoai}
+                      </div>
+                    </td>
+
+                    {/* Địa chỉ (Truncate nếu dài) */}
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-[200px] truncate"
+                      title={user.diaChi}
+                    >
+                      {user.diaChi}
+                    </td>
+
+                    {/* Role */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full border ${getRoleStyle(
+                          user.role
+                        )}`}
+                      >
+                        {user.role}
+                      </span>
+                    </td>
+
+                    {/* Ngày tạo */}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {formatDate(user.ngayTao)}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex items-center justify-end space-x-2">
+                        <button
+                          title="Xem chi tiết"
+                          className="text-gray-400 hover:text-primary transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-base">
+                            visibility
+                          </span>
+                        </button>
+                        <button
+                          title="Chỉnh sửa"
+                          className="text-gray-400 hover:text-blue-500 transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-base">
+                            edit_note
+                          </span>
+                        </button>
+                        <button
+                          title="Xóa/Khóa"
+                          className="text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-base">
+                            delete
+                          </span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="px-6 py-4 text-center">
+                    Không có dữ liệu
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -342,7 +330,7 @@ const AdminUsers = () => {
             <div>
               <p className="text-sm text-gray-700">
                 Hiển thị <span className="font-medium">1</span> đến{" "}
-                <span className="font-medium">{usersData.length}</span> trong số{" "}
+                <span className="font-medium">{users.length}</span> trong số{" "}
                 <span className="font-medium">1,204</span> kết quả
               </p>
             </div>
