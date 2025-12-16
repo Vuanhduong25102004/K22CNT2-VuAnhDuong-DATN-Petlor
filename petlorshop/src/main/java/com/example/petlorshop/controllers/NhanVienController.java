@@ -3,10 +3,14 @@ package com.example.petlorshop.controllers;
 import com.example.petlorshop.dto.NhanVienRequest;
 import com.example.petlorshop.dto.NhanVienResponse;
 import com.example.petlorshop.services.NhanVienService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,13 +23,18 @@ public class NhanVienController {
     @Autowired
     private NhanVienService nhanVienService;
 
-    @PostMapping
-    public ResponseEntity<?> createNhanVien(@RequestBody NhanVienRequest request) {
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<?> createNhanVien(@RequestPart("nhanVien") String nhanVienJson,
+                                            @RequestPart(name = "anhDaiDien", required = false) MultipartFile anhDaiDien) {
         try {
-            NhanVienResponse newStaff = nhanVienService.createNhanVien(request);
+            NhanVienRequest request = objectMapper.readValue(nhanVienJson, NhanVienRequest.class);
+            NhanVienResponse newStaff = nhanVienService.createNhanVien(request, anhDaiDien);
             return ResponseEntity.ok(newStaff);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -41,13 +50,18 @@ public class NhanVienController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateNhanVien(@PathVariable Integer id, @RequestBody NhanVienRequest request) {
+    @PutMapping(value = "/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<?> updateNhanVien(@PathVariable Integer id,
+                                            @RequestPart("nhanVien") String nhanVienJson,
+                                            @RequestPart(name = "anhDaiDien", required = false) MultipartFile anhDaiDien) {
         try {
-            NhanVienResponse updatedStaff = nhanVienService.updateNhanVien(id, request);
+            NhanVienRequest request = objectMapper.readValue(nhanVienJson, NhanVienRequest.class);
+            NhanVienResponse updatedStaff = nhanVienService.updateNhanVien(id, request, anhDaiDien);
             return ResponseEntity.ok(updatedStaff);
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid JSON format for 'nhanVien' part."));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 

@@ -28,8 +28,9 @@ public class LichHen {
     @Column(name = "thoi_gian_ket_thuc", nullable = false)
     private LocalDateTime thoiGianKetThuc;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai_lich_hen", length = 50)
-    private String trangThaiLichHen;
+    private TrangThaiLichHen status; // Đổi tên biến để ép Hibernate refresh
 
     @Column(name = "ghi_chu_khach_hang", columnDefinition = "TEXT")
     private String ghiChuKhachHang;

@@ -42,6 +42,9 @@ public class NguoiDung implements UserDetails {
     @Column(name = "dia_chi", columnDefinition = "TEXT")
     private String diaChi;
 
+    @Column(name = "anh_dai_dien", columnDefinition = "TEXT")
+    private String anhDaiDien;
+
     @CreationTimestamp
     @Column(name = "ngay_tao", nullable = false, updatable = false)
     private LocalDateTime ngayTao;

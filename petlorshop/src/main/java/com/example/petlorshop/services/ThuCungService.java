@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,9 @@ public class ThuCungService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private FileStorageService fileStorageService;
+
     public List<ThuCung> getAllThuCung() {
         return thuCungRepository.findAll();
     }
@@ -37,9 +41,14 @@ public class ThuCungService {
     }
 
     @Transactional
-    public ThuCung createThuCung(ThuCungRequest request) {
+    public ThuCung createThuCung(ThuCungRequest request, MultipartFile hinhAnh) {
         // Logic "Find or Create" NguoiDung
         NguoiDung chuSoHuu = findOrCreateOwner(request);
+
+        String fileName = null;
+        if (hinhAnh != null && !hinhAnh.isEmpty()) {
+            fileName = fileStorageService.storeFile(hinhAnh);
+        }
 
         ThuCung thuCung = new ThuCung();
         thuCung.setTenThuCung(request.getTenThuCung());
@@ -48,6 +57,7 @@ public class ThuCungService {
         thuCung.setNgaySinh(request.getNgaySinh());
         thuCung.setGioiTinh(request.getGioiTinh());
         thuCung.setGhiChuSucKhoe(request.getGhiChuSucKhoe());
+        thuCung.setHinhAnh(fileName);
         thuCung.setNguoiDung(chuSoHuu);
 
         return thuCungRepository.save(thuCung);
@@ -86,9 +96,14 @@ public class ThuCungService {
     }
 
 
-    public ThuCung updateThuCung(Integer id, ThuCungUpdateRequest request) {
+    public ThuCung updateThuCung(Integer id, ThuCungUpdateRequest request, MultipartFile hinhAnh) {
         ThuCung thuCung = thuCungRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy thú cưng với ID: " + id));
+
+        if (hinhAnh != null && !hinhAnh.isEmpty()) {
+            String fileName = fileStorageService.storeFile(hinhAnh);
+            thuCung.setHinhAnh(fileName);
+        }
 
         thuCung.setTenThuCung(request.getTenThuCung());
         thuCung.setChungLoai(request.getChungLoai());

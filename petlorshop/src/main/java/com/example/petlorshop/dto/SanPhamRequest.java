@@ -16,6 +16,5 @@ public class SanPhamRequest {
     private String moTaChiTiet;
     private BigDecimal gia;
     private Integer soLuongTonKho;
-    private String hinhAnhUrl;
     private Integer danhMucId;
 }

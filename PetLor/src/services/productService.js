@@ -6,9 +6,15 @@ const productService = {
   
   getProductById: (id) => apiClient.get(`/san-pham/${id}`),
   
-  createProduct: (data) => apiClient.post('/san-pham', data),
+  createProduct: (data) => {
+    const headers = data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {};
+    return apiClient.post('/san-pham', data, { headers });
+  },
   
-  updateProduct: (id, data) => apiClient.put(`/san-pham/${id}`, data),
+  updateProduct: (id, data) => {
+    const headers = data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {};
+    return apiClient.put(`/san-pham/${id}`, data, { headers });
+  },
   
   deleteProduct: (id) => apiClient.delete(`/san-pham/${id}`),
 

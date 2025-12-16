@@ -17,5 +17,6 @@ public class NhanVienResponse {
     private String email;
     private String chuyenKhoa;
     private String kinhNghiem;
+    private String anhDaiDien; // Thêm trường ảnh đại diện
     private Integer userId;
 }

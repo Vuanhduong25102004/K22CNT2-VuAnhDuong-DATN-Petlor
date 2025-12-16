@@ -34,7 +34,7 @@ const AdminRoute = () => {
       return <Outlet />;
     } else {
       // Đã đăng nhập nhưng không phải Admin -> Về trang chủ
-      return <Navigate to="/" replace />;
+      return <Navigate to="/admin/dashboard" replace />;
     }
   } catch (error) {
     // Token lỗi -> Xóa token và về login

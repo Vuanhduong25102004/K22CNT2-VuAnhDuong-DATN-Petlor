@@ -1,40 +1,23 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import petService from "../services/petService";
 
-// Dữ liệu dịch vụ
-const services = [
-  {
-    title: "Cắt Tỉa & Tắm Rửa",
-    desc: "Quy trình tắm, sấy, cắt tỉa chuyên nghiệp theo yêu cầu.",
-    price: "Từ 500.000 VNĐ",
-    imgUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAlUPzYQu3Kt8yja-2KhY76pWJ0xDZWKyiOoNvFMlh1OBOV6EUc91DSZbgiFIn0gBelh6GmTQ3wjYVIqDl6hAlm1HnDEjACsz5OrbP67UJ9kSzqsGBlVgzpBuH1q8BOWG_kcmxOT8jQ91wlzsmyHTrTGsCoyNdHSrIHTltp8WmwUAzILv3L1SbxlKZblF6SM7uNi_5C19M_FlveT1XnqeYMErOyINY_Ic-7oEs52S3-lvlIuV6P3nTnY7vZFDcHt7bjjmcjnb3hWMUV",
-  },
-  {
-    title: "Trông Giữ Thú Cưng",
-    desc: "Không gian an toàn, chế độ chăm sóc tận tình, hoạt động vui chơi.",
-    price: "Từ 300.000 VNĐ/ngày",
-    imgUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuD2ORUkBfRHB-ck4eWeR3YQGZ6B86xk16AoSJz7-nDKfUYFuD5huDUtgmrbaQvnE8TYj1WKiDgA-fPBNPB0PcMfZ520m0OmLyfI9iiX0w2ME1WMJ9u6UeC0m6OuUhVLhC1k3f0-f11cshyE0o4-lQ6TtZmEdpS8ioxa_9wF4mb4gowmVrT-mDGaB7UoIsUG-QdIHFzAHA95hJlpUUKgzuby_iDUnc_xkXtGA7mkD6jha07H9du5JvJh87ssaFFyPwX0JPr7X9dXcf8o",
-  },
-  {
-    title: "Huấn Luyện Cơ Bản",
-    desc: "Các bài học vâng lời cơ bản với phương pháp huấn luyện tích cực.",
-    price: "Từ 2.000.000 VNĐ/khóa",
-    imgUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAvqPwwLHeV4gGAVGlEkJ1m9CgmkLPjbbjw_pQ0Vda030ZMhycuw8WW1cdzIlemhJFq-vl6ElifVOmK05lJn5Fx3CvgKbEou2GAxGGi-Bl4UBcOaLfbpKF2E-Z3lw6r0xZFVTZx3IBU4I474Mq4Xkh7JfCouwWPBGYSK1MrLCe2I-p4gCKt9x4tvfus5M9ir7YXnXS8C8wbZbnrhPEg4a8cD-MAE_onZeedmd7SlyerwDPLeEsgkJaODojZpsytNVRkGT8ggMynkvs9",
-  },
-  {
-    title: "Dịch Vụ Spa & Thư Giãn",
-    desc: "Các liệu pháp chăm sóc đặc biệt giúp thú cưng thư giãn tối đa.",
-    price: "Liên hệ để biết giá",
-    imgUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCDAHUwBeXZGS8t9hdUFHNWKEfUj9ccXlh5YrAi3jBq4PyImz8oQmjFpHQ3AzT_Hs-nCipMuUGX6bnsCdTWSw5cV-5g9e13BvNVKRGG6HIo836UVpcBVvgf-bzePOFY28w9Mgif8_OHCkUZjykLZrQS5Tk9zfvON3QEfoekeCz4H6CFxzEb1IsyN6dV6ssPxvdvdJbnLbdeRhnB7-u4Qwkg5W-KNoHHEFwXMUY5gb8dc0Nyyki54IkesnDNQKj6ig5DS2YFrFyvWhXT",
-  },
-];
+// Helper: Format tiền tệ
+const formatCurrency = (amount) => {
+  if (typeof amount !== "number") {
+    return "Liên hệ";
+  }
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(amount);
+};
 
 const ServicesPage = () => {
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const aosInit = setTimeout(() => {
       AOS.init({
@@ -45,6 +28,20 @@ const ServicesPage = () => {
       });
       AOS.refresh();
     }, 100);
+
+    const fetchServices = async () => {
+      try {
+        const data = await petService.getAllServices();
+        setServices(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Lỗi khi tải dịch vụ:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+
     return () => clearTimeout(aosInit);
   }, []);
 
@@ -117,53 +114,50 @@ const ServicesPage = () => {
 
               {/* Grid Services */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-4">
-                {services.map((item, index) => (
-                  // --- KỸ THUẬT WRAPPER ĐỂ FIX LỖI ---
-
-                  // 1. Div CHA: Chỉ chịu trách nhiệm chạy AOS (Xuất hiện)
-                  <div
-                    key={index}
-                    data-aos="fade-up"
-                    data-aos-delay={index * 100 + 100}
-                    className="h-full" // Đảm bảo chiều cao full để grid đều nhau
-                  >
-                    {/* 2. Div CON: Chịu trách nhiệm Giao diện & Hover (Không dính dáng AOS) */}
-                    <div className="flex flex-col gap-4 overflow-hidden rounded-xl bg-white border border-gray-200 h-full transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-2">
-                      <div
-                        className="w-full bg-center bg-no-repeat aspect-video bg-cover"
-                        style={{ backgroundImage: `url("${item.imgUrl}")` }}
-                      ></div>
-                      <div className="flex flex-col p-4 pt-0 gap-3 flex-1">
-                        {" "}
-                        {/* flex-1 để đẩy nút xuống đáy nếu cần */}
-                        <p className="text-gray-900 text-lg font-bold leading-normal">
-                          {item.title}
-                        </p>
-                        <p className="text-gray-600 text-sm font-normal leading-normal">
-                          {item.desc}
-                        </p>
-                        <p className="text-gray-700 text-sm font-semibold leading-normal mt-auto">
-                          {" "}
-                          {/* mt-auto đẩy giá xuống dưới */}
-                          {item.price}
-                        </p>
-                        {/* Button Swipe Right + Scale */}
-                        <button className="relative group mt-2 w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-[#111813] text-sm font-bold shadow-sm transition-all duration-300 ease-out hover:scale-105">
-                          <span className="absolute left-0 top-0 h-full w-0 bg-[#0dbd47] transition-all duration-300 ease-out group-hover:w-full"></span>
-                          <span className="relative z-10 truncate">
-                            Xem Chi Tiết
-                          </span>
-                        </button>
+                {loading ? (
+                  <p>Đang tải dịch vụ...</p>
+                ) : (
+                  services.map((service, index) => (
+                    <div
+                      key={service.dichVuId || index}
+                      data-aos="fade-up"
+                      data-aos-delay={index * 100 + 100}
+                      className="h-full"
+                    >
+                      <div className="flex flex-col gap-4 overflow-hidden rounded-xl bg-white border border-gray-200 h-full transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-2">
+                        <div
+                          className="w-full bg-center bg-no-repeat aspect-video bg-cover"
+                          style={{
+                            backgroundImage: `url("http://localhost:8080/uploads/${service.hinhAnh}")`,
+                          }}
+                        ></div>
+                        <div className="flex flex-col p-4 pt-0 gap-3 flex-1">
+                          <p className="text-gray-900 text-lg font-bold leading-normal">
+                            {service.tenDichVu}
+                          </p>
+                          <p className="text-gray-600 text-sm font-normal leading-normal">
+                            {service.moTa}
+                          </p>
+                          <p className="text-gray-700 text-sm font-semibold leading-normal mt-auto">
+                            {formatCurrency(service.giaDichVu)}
+                          </p>
+                          <button className="relative group mt-2 w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-[#111813] text-sm font-bold shadow-sm transition-all duration-300 ease-out hover:scale-105">
+                            <span className="absolute left-0 top-0 h-full w-0 bg-[#0dbd47] transition-all duration-300 ease-out group-hover:w-full"></span>
+                            <span className="relative z-10 truncate">
+                              Xem Chi Tiết
+                            </span>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>
         </section>
 
-        {/* PROCESS SECTION - (MỚI THÊM) */}
+        {/* PROCESS SECTION */}
         <section className="py-12 sm:py-16 lg:py-20 bg-white border-y border-gray-100">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16" data-aos="fade-up">
@@ -177,9 +171,7 @@ const ServicesPage = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
-              {/* Connecting Line (Desktop only) */}
               <div className="hidden md:block absolute top-8 left-[16%] right-[16%] h-0.5 bg-gray-200 -z-10"></div>
-
               {[
                 {
                   step: "01",
@@ -226,7 +218,7 @@ const ServicesPage = () => {
           </div>
         </section>
 
-        {/* PRICING SECTION - (MỚI THÊM) */}
+        {/* PRICING SECTION */}
         <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12" data-aos="fade-up">
@@ -237,7 +229,6 @@ const ServicesPage = () => {
                 Chọn gói dịch vụ phù hợp nhất với nhu cầu của bé cưng nhà bạn.
               </p>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
                 {
@@ -325,7 +316,6 @@ const ServicesPage = () => {
                 </div>
               ))}
             </div>
-
             <div className="mt-8 text-center" data-aos="fade-up">
               <p className="text-sm text-gray-500 italic">
                 * Giá trên chỉ mang tính chất tham khảo và có thể thay đổi tùy
@@ -347,8 +337,6 @@ const ServicesPage = () => {
                 nhất từ đội ngũ chuyên gia của chúng tôi. Thú cưng của bạn xứng
                 đáng được yêu thương và chăm sóc đặc biệt!
               </p>
-
-              {/* Button CTA */}
               <button className="relative group flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-[#111813] text-base font-bold shadow-sm transition-all duration-300 ease-out hover:scale-105">
                 <span className="absolute left-0 top-0 h-full w-0 bg-[#0dbd47] transition-all duration-300 ease-out group-hover:w-full"></span>
                 <span className="relative z-10 truncate">Đặt Lịch Ngay</span>

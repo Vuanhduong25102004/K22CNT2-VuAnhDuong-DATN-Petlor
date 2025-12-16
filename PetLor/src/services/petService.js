@@ -6,9 +6,15 @@ const petService = {
   
   getPetById: (id) => apiClient.get(`/thu-cung/${id}`),
   
-  createPet: (data) => apiClient.post('/thu-cung', data),
+  createPet: (data) => {
+    const headers = data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {};
+    return apiClient.post('/thu-cung', data, { headers });
+  },
   
-  updatePet: (id, data) => apiClient.put(`/thu-cung/${id}`, data),
+  updatePet: (id, data) => {
+    const headers = data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {};
+    return apiClient.put(`/thu-cung/${id}`, data, { headers });
+  },
   
   deletePet: (id) => apiClient.delete(`/thu-cung/${id}`),
 
@@ -17,9 +23,15 @@ const petService = {
   
   getServiceById: (id) => apiClient.get(`/dich-vu/${id}`),
   
-  createService: (data) => apiClient.post('/dich-vu', data),
+  createService: (data) => {
+    const headers = data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {};
+    return apiClient.post('/dich-vu', data, { headers });
+  },
   
-  updateService: (id, data) => apiClient.put(`/dich-vu/${id}`, data),
+  updateService: (id, data) => {
+    const headers = data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {};
+    return apiClient.put(`/dich-vu/${id}`, data, { headers });
+  },
   
   deleteService: (id) => apiClient.delete(`/dich-vu/${id}`),
 

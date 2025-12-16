@@ -47,6 +47,7 @@ public class AuthenticationService {
             savedUser.getEmail(),
             savedUser.getSoDienThoai(),
             savedUser.getDiaChi(),
+            savedUser.getAnhDaiDien(), // Thêm trường ảnh đại diện (sẽ là null)
             savedUser.getNgayTao(),
             savedUser.getRole(),
             null // nhanVienId is null for new users

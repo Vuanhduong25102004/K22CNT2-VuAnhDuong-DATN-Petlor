@@ -17,7 +17,7 @@ public class SanPhamResponse {
     private String moTaChiTiet;
     private BigDecimal gia;
     private Integer soLuongTonKho;
-    private String hinhAnhUrl;
+    private String hinhAnh;
     private Integer danhMucId;
     private String tenDanhMuc;
 }

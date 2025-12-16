@@ -34,13 +34,13 @@ const AdminEmployees = () => {
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [avatarFile, setAvatarFile] = useState(null);
   const [newEmployeeData, setNewEmployeeData] = useState({
     hoTen: "",
     email: "",
     password: "",
     soDienThoai: "",
     diaChi: "",
-    chucVu: "",
     chuyenKhoa: "",
     kinhNghiem: "",
     role: "STAFF",
@@ -68,12 +68,9 @@ const AdminEmployees = () => {
             chuyenKhoa: emp.chuyenKhoa || "---",
             kinhNghiem: emp.kinhNghiem || "---",
             // Ảnh đại diện
-            img:
-              emp.hinhAnhUrl &&
-              emp.hinhAnhUrl !== "null" &&
-              emp.hinhAnhUrl !== "undefined"
-                ? emp.hinhAnhUrl
-                : "https://placehold.co/100x100?text=Staff",
+            img: emp.anhDaiDien
+              ? `http://localhost:8080/uploads/${emp.anhDaiDien}`
+              : "https://placehold.co/100x100?text=Staff",
             userId: emp.userId || (emp.user ? emp.user.id : null),
           }))
         : [];
@@ -120,30 +117,40 @@ const AdminEmployees = () => {
 
   const handleEditClick = (emp) => {
     setEditingEmployee({ ...emp });
+    setAvatarFile(null);
     setIsEditModalOpen(true);
   };
 
   const handleSaveEmployee = async () => {
     if (!editingEmployee) return;
+
+    const formData = new FormData();
+    const employeeData = {
+      hoTen: editingEmployee.hoTen,
+      chucVu: editingEmployee.chucVu,
+      soDienThoai: editingEmployee.soDienThoai,
+      email: editingEmployee.email,
+      chuyenKhoa: editingEmployee.chuyenKhoa,
+      kinhNghiem: editingEmployee.kinhNghiem,
+      userId: editingEmployee.userId,
+    };
+
+    // Gửi dữ liệu nhân viên dưới dạng Blob với Content-Type application/json
+    const jsonBlob = new Blob([JSON.stringify(employeeData)], {
+      type: "application/json",
+    });
+    formData.append("nhanVien", jsonBlob);
+
+    // Append file if it exists
+    if (avatarFile) {
+      formData.append("anhDaiDien", avatarFile);
+    }
+
     try {
-      const payload = {
-        hoTen: editingEmployee.hoTen,
-        chucVu: editingEmployee.chucVu,
-        soDienThoai: editingEmployee.soDienThoai,
-        email: editingEmployee.email,
-        chuyenKhoa: editingEmployee.chuyenKhoa,
-        kinhNghiem: editingEmployee.kinhNghiem,
-        userId: editingEmployee.userId,
-      };
-
-      await userService.updateStaff(editingEmployee.nhanVienId, payload);
-
-      setEmployees((prev) =>
-        prev.map((e) =>
-          e.nhanVienId === editingEmployee.nhanVienId ? { ...e, ...payload } : e
-        )
-      );
+      await userService.updateStaff(editingEmployee.nhanVienId, formData);
+      fetchEmployees();
       setIsEditModalOpen(false);
+      setAvatarFile(null);
       alert("Cập nhật thành công!");
     } catch (error) {
       console.error("Lỗi cập nhật:", error);
@@ -158,11 +165,11 @@ const AdminEmployees = () => {
       password: "",
       soDienThoai: "",
       diaChi: "",
-      chucVu: "",
       chuyenKhoa: "",
       kinhNghiem: "",
       role: "STAFF",
     });
+    setAvatarFile(null);
     setIsAddModalOpen(true);
   };
 
@@ -177,11 +184,25 @@ const AdminEmployees = () => {
       return;
     }
 
+    const formData = new FormData();
+    // Gửi dữ liệu nhân viên dưới dạng Blob với Content-Type application/json
+    // Key là 'nguoiDung' theo yêu cầu API tạo mới unified
+    const jsonBlob = new Blob([JSON.stringify(newEmployeeData)], {
+      type: "application/json",
+    });
+    formData.append("nguoiDung", jsonBlob);
+
+    // Gửi file ảnh (nếu có) với key 'anhDaiDien'
+    if (avatarFile) {
+      formData.append("anhDaiDien", avatarFile);
+    }
+
     try {
       // Sử dụng endpoint chung để tạo user và nhân viên
-      await userService.createUnifiedUser(newEmployeeData);
+      await userService.createUnifiedUser(formData);
       alert("Tạo mới nhân viên thành công!");
       setIsAddModalOpen(false);
+      setAvatarFile(null);
       fetchEmployees(); // Tải lại danh sách
     } catch (error) {
       console.error("Lỗi tạo nhân viên:", error);
@@ -614,8 +635,9 @@ const AdminEmployees = () => {
               <div className="flex justify-center mb-4">
                 <img
                   src={
-                    selectedEmployee.hinhAnhUrl ||
-                    "https://placehold.co/100x100?text=Staff"
+                    selectedEmployee.anhDaiDien
+                      ? `http://localhost:8080/uploads/${selectedEmployee.anhDaiDien}`
+                      : "https://placehold.co/100x100?text=Staff"
                   }
                   alt={selectedEmployee.hoTen}
                   className="h-32 w-32 rounded-full object-cover border-4 border-gray-100 shadow-sm"
@@ -713,6 +735,27 @@ const AdminEmployees = () => {
                     })
                   }
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Ảnh đại diện
+                </label>
+                <div className="mt-2 flex items-center space-x-4">
+                  <img
+                    src={
+                      avatarFile
+                        ? URL.createObjectURL(avatarFile)
+                        : editingEmployee.img // 'img' is already the full URL
+                    }
+                    alt="Avatar"
+                    className="h-16 w-16 rounded-full object-cover"
+                  />
+                  <input
+                    type="file"
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                    onChange={(e) => setAvatarFile(e.target.files[0])}
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -858,6 +901,27 @@ const AdminEmployees = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
+                      Ảnh đại diện
+                    </label>
+                    <div className="mt-2 flex items-center space-x-4">
+                      <img
+                        src={
+                          avatarFile
+                            ? URL.createObjectURL(avatarFile)
+                            : "https://placehold.co/100x100?text=Staff"
+                        }
+                        alt="Avatar Preview"
+                        className="h-12 w-12 rounded-full object-cover"
+                      />
+                      <input
+                        type="file"
+                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                        onChange={(e) => setAvatarFile(e.target.files[0])}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
                       Email <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -929,23 +993,6 @@ const AdminEmployees = () => {
                   2. Thông tin Hồ sơ Nhân viên
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Chức vụ
-                    </label>
-                    <input
-                      type="text"
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                      value={newEmployeeData.chucVu}
-                      onChange={(e) =>
-                        setNewEmployeeData({
-                          ...newEmployeeData,
-                          chucVu: e.target.value,
-                        })
-                      }
-                      placeholder="VD: Bác sĩ thú y, Groomer..."
-                    />
-                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
                       Vai trò (Role) <span className="text-red-500">*</span>

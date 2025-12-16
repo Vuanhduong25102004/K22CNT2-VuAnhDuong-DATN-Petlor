@@ -59,6 +59,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // == PUBLIC ENDPOINTS ==
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll() // Cho phép truy cập ảnh
                         .requestMatchers(HttpMethod.GET, "/api/san-pham/**", "/api/dich-vu/**", "/api/danh-muc-san-pham/**").permitAll()
 
                         // == SPECIFIC RULES FIRST ==
@@ -77,6 +78,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/lich-hen/**").hasAuthority(admin)
 
                         // == ANY AUTHENTICATED USER ==
+                        .requestMatchers(HttpMethod.PUT, "/api/nguoi-dung/me/avatar").authenticated() // Cho phép tự cập nhật avatar
                         .requestMatchers(HttpMethod.GET, "/api/nhan-vien/**").authenticated() // Xem thông tin nhân viên
                         .requestMatchers("/api/thu-cung/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/don-hang").authenticated()

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import petService from "../../services/petService"; // Dùng chung service với Pet
-import userService from "../../services/userservice"; // Thêm service để lấy nhân viên
+import userService from "../../services/userService"; // Dùng chung service với User
 
 // Helper: Format ngày giờ
 const formatDateTime = (dateString) => {
@@ -43,10 +43,10 @@ const AdminAppointments = () => {
     tenKhachHang: "",
     soDienThoaiKhachHang: "",
     tenThuCung: "",
-    chungLoai: "Chó",
+    chungLoai: "",
     giongLoai: "",
     ngaySinh: "",
-    gioiTinh: "Đực",
+    gioiTinh: "",
     ghiChu: "",
   });
   const [services, setServices] = useState([]);
@@ -180,7 +180,6 @@ const AdminAppointments = () => {
     setEditingAppointment({
       ...app,
       thoiGianBatDau: formatForInput(app.thoiGianBatDau),
-      thoiGianKetThuc: formatForInput(app.thoiGianKetThuc),
       trangThaiLichHen: app.trangThai,
       ghiChuKhachHang: app.ghiChu,
     });
@@ -189,30 +188,30 @@ const AdminAppointments = () => {
 
   const handleSaveAppointment = async () => {
     if (!editingAppointment) return;
+
+    // Validate Time Format and Business Hours
+    const selectedDate = new Date(editingAppointment.thoiGianBatDau);
+    if (isNaN(selectedDate.getTime())) {
+      alert("Định dạng thời gian không hợp lệ. Vui lòng nhập theo dạng HH:mm.");
+      return;
+    }
+    const hours = selectedDate.getHours();
+    if (hours < 8 || hours >= 18) {
+      alert("Vui lòng chọn giờ hẹn trong khoảng 08:00 đến 18:00.");
+      return;
+    }
+
     try {
       const payload = {
         thoiGianBatDau: editingAppointment.thoiGianBatDau + ":00",
-        thoiGianKetThuc: editingAppointment.thoiGianKetThuc + ":00",
         trangThaiLichHen: editingAppointment.trangThaiLichHen,
         ghiChuKhachHang: editingAppointment.ghiChuKhachHang,
       };
 
       await petService.updateAppointment(editingAppointment.lichHenId, payload);
 
-      setAppointments((prev) =>
-        prev.map((a) =>
-          a.lichHenId === editingAppointment.lichHenId
-            ? {
-                ...a,
-                thoiGianBatDau: payload.thoiGianBatDau,
-                thoiGianKetThuc: payload.thoiGianKetThuc,
-                trangThai: payload.trangThaiLichHen,
-                ghiChu: payload.ghiChuKhachHang,
-              }
-            : a
-        )
-      );
       setIsEditModalOpen(false);
+      fetchAppointments(); // Tải lại để lấy dữ liệu mới nhất từ server
       alert("Cập nhật thành công!");
     } catch (error) {
       console.error("Lỗi cập nhật:", error);
@@ -233,6 +232,18 @@ const AdminAppointments = () => {
       return;
     }
 
+    // Validate Time Format and Business Hours
+    const selectedDate = new Date(newAppointment.thoiGianBatDau);
+    if (isNaN(selectedDate.getTime())) {
+      alert("Định dạng thời gian không hợp lệ. Vui lòng nhập theo dạng HH:mm.");
+      return;
+    }
+    const hours = selectedDate.getHours();
+    if (hours < 8 || hours >= 18) {
+      alert("Vui lòng chọn giờ hẹn trong khoảng 08:00 đến 18:00.");
+      return;
+    }
+
     // Find service to get duration
     const selectedService = services.find(
       (s) => s.dichVuId == newAppointment.dichVuId
@@ -242,43 +253,51 @@ const AdminAppointments = () => {
       return;
     }
 
-    // Calculate end time based on service duration
-    const startDate = new Date(newAppointment.thoiGianBatDau);
-    const durationMinutes = selectedService.thoiLuongUocTinhPhut || 60; // Default to 60 mins if not set
-    const endDate = new Date(startDate.getTime() + durationMinutes * 60000);
-
     // Prepare payload
-    const payload = {
-      ...newAppointment,
+    const { nhanVienId, ...appointmentData } = newAppointment;
+    const rawPayload = {
+      ...appointmentData,
       thoiGianBatDau: newAppointment.thoiGianBatDau + ":00",
-      thoiGianKetThuc: endDate.toISOString(), // Backend should handle this format
       dichVuId: parseInt(newAppointment.dichVuId),
-      nhanVienId: newAppointment.nhanVienId
-        ? parseInt(newAppointment.nhanVienId)
-        : null,
     };
 
+    // Filter out empty fields
+    const payload = Object.keys(rawPayload).reduce((acc, key) => {
+      if (
+        rawPayload[key] !== "" &&
+        rawPayload[key] !== null &&
+        rawPayload[key] !== undefined
+      ) {
+        acc[key] = rawPayload[key];
+      }
+      return acc;
+    }, {});
+
     try {
+      console.log("Payload createAppointment:", payload);
       await petService.createAppointment(payload);
       alert("Tạo lịch hẹn thành công!");
       setIsAddModalOpen(false);
       setNewAppointment({
         thoiGianBatDau: "",
         dichVuId: "",
-        nhanVienId: "",
         tenKhachHang: "",
         soDienThoaiKhachHang: "",
         tenThuCung: "",
-        chungLoai: "Chó",
+        chungLoai: "",
         giongLoai: "",
         ngaySinh: "",
-        gioiTinh: "Đực",
+        gioiTinh: "",
         ghiChu: "",
       }); // Reset form
       fetchAppointments(); // Refresh list
     } catch (error) {
       console.error("Lỗi tạo lịch hẹn:", error);
-      alert("Tạo lịch hẹn thất bại. Vui lòng kiểm tra lại thông tin.");
+      const errorMessage =
+        error.response?.data?.message ||
+        (typeof error.response?.data === "string" ? error.response.data : "") ||
+        "Tạo lịch hẹn thất bại. Vui lòng kiểm tra lại thông tin.";
+      alert(errorMessage);
     }
   };
 
@@ -768,37 +787,52 @@ const AdminAppointments = () => {
             </div>
 
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Thời gian bắt đầu
-                </label>
-                <input
-                  type="datetime-local"
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                  value={editingAppointment.thoiGianBatDau || ""}
-                  onChange={(e) =>
-                    setEditingAppointment({
-                      ...editingAppointment,
-                      thoiGianBatDau: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Thời gian kết thúc
-                </label>
-                <input
-                  type="datetime-local"
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                  value={editingAppointment.thoiGianKetThuc || ""}
-                  onChange={(e) =>
-                    setEditingAppointment({
-                      ...editingAppointment,
-                      thoiGianKetThuc: e.target.value,
-                    })
-                  }
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Ngày hẹn
+                  </label>
+                  <input
+                    type="date"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                    value={
+                      (editingAppointment.thoiGianBatDau || "").split("T")[0]
+                    }
+                    onChange={(e) => {
+                      const timePart =
+                        (editingAppointment.thoiGianBatDau || "").split(
+                          "T"
+                        )[1] || "08:00";
+                      setEditingAppointment({
+                        ...editingAppointment,
+                        thoiGianBatDau: `${e.target.value}T${timePart}`,
+                      });
+                    }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Giờ hẹn
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="HH:mm"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                    value={
+                      (editingAppointment.thoiGianBatDau || "").split("T")[1]
+                    }
+                    onChange={(e) => {
+                      const datePart =
+                        (editingAppointment.thoiGianBatDau || "").split(
+                          "T"
+                        )[0] || new Date().toISOString().split("T")[0];
+                      setEditingAppointment({
+                        ...editingAppointment,
+                        thoiGianBatDau: `${datePart}T${e.target.value}`,
+                      });
+                    }}
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -926,21 +960,52 @@ const AdminAppointments = () => {
                       ))}
                     </select>
                   </div>
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Thời gian bắt đầu <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="datetime-local"
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                      value={newAppointment.thoiGianBatDau}
-                      onChange={(e) =>
-                        setNewAppointment({
-                          ...newAppointment,
-                          thoiGianBatDau: e.target.value,
-                        })
-                      }
-                    />
+                  <div className="col-span-2 grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Ngày hẹn <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="date"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                        value={
+                          (newAppointment.thoiGianBatDau || "").split("T")[0]
+                        }
+                        onChange={(e) => {
+                          const timePart =
+                            (newAppointment.thoiGianBatDau || "").split(
+                              "T"
+                            )[1] || "08:00";
+                          setNewAppointment({
+                            ...newAppointment,
+                            thoiGianBatDau: `${e.target.value}T${timePart}`,
+                          });
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Giờ hẹn <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="HH:mm"
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                        value={
+                          (newAppointment.thoiGianBatDau || "").split("T")[1]
+                        }
+                        onChange={(e) => {
+                          const datePart =
+                            (newAppointment.thoiGianBatDau || "").split(
+                              "T"
+                            )[0] || new Date().toISOString().split("T")[0];
+                          setNewAppointment({
+                            ...newAppointment,
+                            thoiGianBatDau: `${datePart}T${e.target.value}`,
+                          });
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1021,6 +1086,7 @@ const AdminAppointments = () => {
                           })
                         }
                       >
+                        <option value="">-- Chọn chủng loại --</option>
                         <option value="Chó">Chó</option>
                         <option value="Mèo">Mèo</option>
                         <option value="Khác">Khác</option>
@@ -1040,6 +1106,7 @@ const AdminAppointments = () => {
                           })
                         }
                       >
+                        <option value="">-- Chọn giới tính --</option>
                         <option value="Đực">Đực</option>
                         <option value="Cái">Cái</option>
                       </select>

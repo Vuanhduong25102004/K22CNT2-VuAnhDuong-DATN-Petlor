@@ -40,6 +40,9 @@ public class NhanVien {
     @Column(name = "kinh_nghiem", columnDefinition = "TEXT")
     private String kinhNghiem; // Ví dụ: "5 năm kinh nghiệm tại PetCare"
 
+    @Column(name = "anh_dai_dien", columnDefinition = "TEXT")
+    private String anhDaiDien;
+
     // --- Relationships ---
 
     @OneToOne(fetch = FetchType.LAZY)

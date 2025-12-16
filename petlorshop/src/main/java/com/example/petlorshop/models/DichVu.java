@@ -35,6 +35,9 @@ public class DichVu {
     @Column(name = "thoi_luong_uoc_tinh_phut")
     private Integer thoiLuongUocTinhPhut;
 
+    @Column(name = "hinh_anh", columnDefinition = "TEXT")
+    private String hinhAnh;
+
     // --- Relationships ---
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -41,6 +41,9 @@ public class ThuCung {
     @Column(name = "ghi_chu_suc_khoe", columnDefinition = "TEXT")
     private String ghiChuSucKhoe;
 
+    @Column(name = "hinh_anh", columnDefinition = "TEXT")
+    private String hinhAnh;
+
     // --- Relationships ---
 
     @ManyToOne(fetch = FetchType.LAZY)

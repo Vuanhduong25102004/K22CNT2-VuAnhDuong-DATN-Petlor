@@ -35,8 +35,8 @@ public class SanPham {
     @Column(name = "so_luong_ton_kho")
     private Integer soLuongTonKho;
 
-    @Column(name = "hinh_anh_url", length = 255)
-    private String hinhAnhUrl;
+    @Column(name = "hinh_anh", columnDefinition = "TEXT")
+    private String hinhAnh;
 
     // --- Relationships ---
 

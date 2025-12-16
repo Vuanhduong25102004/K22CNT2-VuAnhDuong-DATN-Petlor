@@ -35,6 +35,7 @@ const AdminUsers = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [avatarFile, setAvatarFile] = useState(null); // State for avatar file
 
   // State cho Modal Tạo mới (Unified)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -57,17 +58,18 @@ const AdminUsers = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
 
+  const fetchUsers = async () => {
+    try {
+      const data = await userService.getAllUsers();
+      setUsers(data);
+    } catch (error) {
+      console.error("Lỗi khi tải danh sách người dùng:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const data = await userService.getAllUsers();
-        setUsers(data);
-      } catch (error) {
-        console.error("Lỗi khi tải danh sách người dùng:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchUsers();
   }, []);
 
@@ -83,17 +85,40 @@ const AdminUsers = () => {
 
   const handleEditClick = (user) => {
     setEditingUser({ ...user });
+    setAvatarFile(null); // Reset file input on new edit
     setIsEditModalOpen(true);
   };
 
   const handleSaveUser = async () => {
     if (!editingUser) return;
+
+    const formData = new FormData();
+    // Chuẩn bị đối tượng JSON chứa dữ liệu người dùng
+    const userData = {
+      hoTen: editingUser.hoTen,
+      email: editingUser.email,
+      soDienThoai: editingUser.soDienThoai,
+      diaChi: editingUser.diaChi,
+      role: editingUser.role,
+    };
+
+    // Gửi dữ liệu người dùng dưới dạng Blob với Content-Type application/json
+    const jsonBlob = new Blob([JSON.stringify(userData)], {
+      type: "application/json",
+    });
+    formData.append("nguoiDung", jsonBlob);
+
+    // Thêm file ảnh mới (nếu có) với key là 'anhDaiDien'
+    if (avatarFile) {
+      formData.append("anhDaiDien", avatarFile);
+    }
+
     try {
-      await userService.updateUser(editingUser.userId, editingUser);
-      setUsers((prev) =>
-        prev.map((u) => (u.userId === editingUser.userId ? editingUser : u))
-      );
+      // Assuming updateUser can handle FormData
+      await userService.updateUser(editingUser.userId, formData);
+      fetchUsers();
       setIsEditModalOpen(false);
+      setAvatarFile(null); // Reset file state
       alert("Cập nhật thành công!");
     } catch (error) {
       console.error("Lỗi cập nhật:", error);
@@ -114,6 +139,7 @@ const AdminUsers = () => {
       kinhNghiem: "",
     });
     setCreationType("USER");
+    setAvatarFile(null); // Reset avatar file
     setIsCreateModalOpen(true);
   };
 
@@ -123,23 +149,33 @@ const AdminUsers = () => {
       return;
     }
 
+    const formData = new FormData();
+    const userData = { ...newUserData };
+
+    if (creationType === "USER") {
+      userData.role = "USER";
+      delete userData.chucVu;
+      delete userData.chuyenKhoa;
+      delete userData.kinhNghiem;
+    }
+
+    // Gửi dữ liệu người dùng dưới dạng Blob với Content-Type application/json
+    const jsonBlob = new Blob([JSON.stringify(userData)], {
+      type: "application/json",
+    });
+    formData.append("nguoiDung", jsonBlob);
+
+    // Gửi file ảnh (nếu có) với key 'anhDaiDien'
+    if (avatarFile) {
+      formData.append("anhDaiDien", avatarFile);
+    }
+
     try {
-      const payload = { ...newUserData };
+      await userService.createUnifiedUser(formData);
 
-      // Nếu là USER thường, loại bỏ các trường của nhân viên
-      if (creationType === "USER") {
-        payload.role = "USER";
-        delete payload.chucVu;
-        delete payload.chuyenKhoa;
-        delete payload.kinhNghiem;
-      }
-
-      // Gọi API create unified
-      await userService.createUnifiedUser(payload);
-
-      const data = await userService.getAllUsers();
-      setUsers(data);
+      fetchUsers(); // Refresh the user list
       setIsCreateModalOpen(false);
+      setAvatarFile(null); // Reset file state
       alert("Tạo mới thành công!");
     } catch (error) {
       console.error("Lỗi tạo mới:", error);
@@ -403,13 +439,20 @@ const AdminUsers = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="h-10 w-10 flex-shrink-0">
-                          {/* Tạo avatar placeholder từ tên */}
-                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
-                            {user.hoTen
-                              ? user.hoTen.charAt(0).toUpperCase()
-                              : "U"}
-                          </div>
-                        </div>
+                          {user.anhDaiDien ? (
+                            <img
+                              className="h-10 w-10 rounded-full object-cover"
+                              src={`http://localhost:8080/uploads/${user.anhDaiDien}`}
+                              alt={user.hoTen}
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                              {user.hoTen
+                                ? user.hoTen.charAt(0).toUpperCase()
+                                : "U"}
+                            </div>
+                          )}
+                        </div>{" "}
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
                             {user.hoTen}
@@ -585,70 +628,76 @@ const AdminUsers = () => {
               </button>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex justify-center mb-4">
+            <div className="flex justify-center mb-4">
+              {selectedUser.anhDaiDien ? (
+                <img
+                  className="h-24 w-24 rounded-full object-cover"
+                  src={`http://localhost:8080/uploads/${selectedUser.anhDaiDien}`}
+                  alt={selectedUser.hoTen}
+                />
+              ) : (
                 <div className="h-24 w-24 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-4xl">
                   {selectedUser.hoTen
                     ? selectedUser.hoTen.charAt(0).toUpperCase()
                     : "U"}
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Họ và tên</p>
-                  <p className="font-medium text-gray-900">
-                    {selectedUser.hoTen}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Vai trò</p>
-                  <span
-                    className={`px-2 py-1 text-xs font-medium rounded-full border ${getRoleStyle(
-                      selectedUser.role
-                    )}`}
-                  >
-                    {selectedUser.role}
-                  </span>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm text-gray-500">Email</p>
-                  <p
-                    className="font-medium text-gray-900 truncate"
-                    title={selectedUser.email}
-                  >
-                    {selectedUser.email}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Số điện thoại</p>
-                  <p className="font-medium text-gray-900">
-                    {selectedUser.soDienThoai}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-sm text-gray-500">Địa chỉ</p>
-                  <p className="font-medium text-gray-900">
-                    {selectedUser.diaChi}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Ngày tạo</p>
-                  <p className="font-medium text-gray-900">
-                    {formatDate(selectedUser.ngayTao)}
-                  </p>
-                </div>
-              </div>
+              )}
             </div>
 
-            <div className="flex justify-end mt-6">
-              <button
-                onClick={() => setIsDetailModalOpen(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 font-medium"
-              >
-                Đóng
-              </button>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-500">Họ và tên</p>
+                <p className="font-medium text-gray-900">
+                  {selectedUser.hoTen}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Vai trò</p>
+                <span
+                  className={`px-2 py-1 text-xs font-medium rounded-full border ${getRoleStyle(
+                    selectedUser.role
+                  )}`}
+                >
+                  {selectedUser.role}
+                </span>
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm text-gray-500">Email</p>
+                <p
+                  className="font-medium text-gray-900 truncate"
+                  title={selectedUser.email}
+                >
+                  {selectedUser.email}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Số điện thoại</p>
+                <p className="font-medium text-gray-900">
+                  {selectedUser.soDienThoai}
+                </p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-sm text-gray-500">Địa chỉ</p>
+                <p className="font-medium text-gray-900">
+                  {selectedUser.diaChi}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Ngày tạo</p>
+                <p className="font-medium text-gray-900">
+                  {formatDate(selectedUser.ngayTao)}
+                </p>
+              </div>
             </div>
+          </div>
+
+          <div className="flex justify-end mt-6">
+            <button
+              onClick={() => setIsDetailModalOpen(false)}
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 font-medium"
+            >
+              Đóng
+            </button>
           </div>
         </div>
       )}
@@ -725,6 +774,30 @@ const AdminUsers = () => {
                   }
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Ảnh đại diện
+                </label>
+                <div className="mt-2 flex items-center space-x-4">
+                  <img
+                    src={
+                      avatarFile
+                        ? URL.createObjectURL(avatarFile)
+                        : editingUser.anhDaiDien
+                        ? `http://localhost:8080/uploads/${editingUser.anhDaiDien}`
+                        : "https://placehold.co/100x100?text=User"
+                    }
+                    alt="Avatar"
+                    className="h-16 w-16 rounded-full object-cover"
+                  />
+                  <input
+                    type="file"
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                    onChange={(e) => setAvatarFile(e.target.files[0])}
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Vai trò
@@ -823,6 +896,27 @@ const AdminUsers = () => {
                     setNewUserData({ ...newUserData, hoTen: e.target.value })
                   }
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Ảnh đại diện
+                </label>
+                <div className="mt-2 flex items-center space-x-4">
+                  <img
+                    src={
+                      avatarFile
+                        ? URL.createObjectURL(avatarFile)
+                        : "https://placehold.co/100x100?text=User"
+                    }
+                    alt="Avatar Preview"
+                    className="h-16 w-16 rounded-full object-cover"
+                  />
+                  <input
+                    type="file"
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                    onChange={(e) => setAvatarFile(e.target.files[0])}
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">

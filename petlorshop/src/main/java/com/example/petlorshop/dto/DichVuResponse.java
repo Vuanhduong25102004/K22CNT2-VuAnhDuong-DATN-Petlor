@@ -18,6 +18,7 @@ public class DichVuResponse {
     private String moTa;
     private BigDecimal giaDichVu;
     private Integer thoiLuongUocTinhPhut;
+    private String hinhAnh; // Thêm trường hình ảnh
 
     // Thông tin danh mục
     private Integer danhMucDvId;

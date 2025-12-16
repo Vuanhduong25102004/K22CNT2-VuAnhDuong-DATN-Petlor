@@ -1,6 +1,47 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import authService from "../../../services/authService";
 
 const AdminHeader = ({ user, title }) => {
+  const [avatarUrl, setAvatarUrl] = useState(
+    "https://placehold.co/40x40?text=A"
+  );
+
+  useEffect(() => {
+    // Create a revocable object URL
+    let objectUrl = null;
+
+    const fetchAvatar = async () => {
+      if (user?.anhDaiDien) {
+        try {
+          // Use axios directly to call the correct non-API endpoint for images
+          const imageUrl = `http://localhost:8080/uploads/${user.anhDaiDien}`;
+          const response = await axios.get(imageUrl, {
+            headers: authService.getAuthHeader(), // Add auth token
+            responseType: "blob",
+          });
+          objectUrl = URL.createObjectURL(response.data);
+          setAvatarUrl(objectUrl);
+        } catch (error) {
+          console.error("Không thể tải ảnh đại diện:", error);
+          setAvatarUrl("https://placehold.co/40x40?text=A");
+        }
+      } else {
+        // Reset to placeholder if user has no avatar
+        setAvatarUrl("https://placehold.co/40x40?text=A");
+      }
+    };
+
+    fetchAvatar();
+
+    // Cleanup function to revoke the object URL to prevent memory leaks
+    return () => {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [user]);
+
   return (
     <header className="flex items-center justify-between whitespace-nowrap border-b border-gray-200 bg-white px-6 py-3 sticky top-0 z-10">
       <div className="flex items-center gap-8">
@@ -30,7 +71,11 @@ const AdminHeader = ({ user, title }) => {
           <img
             alt="Admin Avatar"
             className="h-8 w-8 rounded-full object-cover border border-gray-200"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCV6y4lZmkVlNnJEk9ogR8aoltDIevXs019Tfv0KxcR7zSA-RhRyYjWgMOVpi1GuHA7Dd7CQKaEsbiONx7LvKYFCcjIcPOttg58G0haDZbMLJDSw7vepI5qBJNPgSu_cFLW1AiEbByELRIthiyUHcwwfKPUbeZbFfrtrURSdetxxwdnXH9u0joRv0OKaOiZhyIwm6_O7AKsRtSUyBTJUVFG3ExVnXlL56UTnZgv7vL-haHmrt8zk9ZrYtgP99Xtq8EFnJqhheyVvhcI"
+            src={avatarUrl}
+            onError={(e) => {
+              e.target.onerror = null; // prevent infinite loop
+              e.target.src = "https://placehold.co/40x40?text=A";
+            }}
           />
           <span className="ml-2 text-sm font-medium text-gray-700 hidden md:block">
             {user?.hoTen || "Admin"}

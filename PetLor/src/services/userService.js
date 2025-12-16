@@ -8,9 +8,15 @@ const userService = {
   
   createUser: (data) => apiClient.post('/nguoi-dung', data),
 
-  createUnifiedUser: (data) => apiClient.post('/nguoi-dung/create-unified', data),
+  createUnifiedUser: (data) => {
+    const headers = data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {};
+    return apiClient.post('/nguoi-dung/create-unified', data, { headers });
+  },
   
-  updateUser: (id, data) => apiClient.put(`/nguoi-dung/${id}`, data),
+  updateUser: (id, data) => {
+    const headers = data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {};
+    return apiClient.put(`/nguoi-dung/${id}`, data, { headers });
+  },
   
   deleteUser: (id) => apiClient.delete(`/nguoi-dung/${id}`),
 
@@ -21,7 +27,10 @@ const userService = {
 
   createStaff: (data) => apiClient.post('/nhan-vien', data),
 
-  updateStaff: (id, data) => apiClient.put(`/nhan-vien/${id}`, data),
+  updateStaff: (id, data) => {
+    const headers = data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {};
+    return apiClient.put(`/nhan-vien/${id}`, data, { headers });
+  },
 
   deleteStaff: (id) => apiClient.delete(`/nhan-vien/${id}`),
 };

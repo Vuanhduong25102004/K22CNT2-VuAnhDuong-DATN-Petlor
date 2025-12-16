@@ -117,7 +117,7 @@ public class DonHangService {
                 chiTiet.getDonGiaLucMua(),
                 sanPham != null ? sanPham.getSanPhamId() : null,
                 sanPham != null ? sanPham.getTenSanPham() : null,
-                sanPham != null ? sanPham.getHinhAnhUrl() : null
+                sanPham != null ? sanPham.getHinhAnh() : null
         );
     }
 }

@@ -6,6 +6,7 @@ import com.example.petlorshop.dto.LichHenUpdateRequest;
 import com.example.petlorshop.models.LichHen;
 import com.example.petlorshop.services.LichHenService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,36 +29,24 @@ public class LichHenController {
     public ResponseEntity<LichHenResponse> getLichHenById(@PathVariable Integer id) {
         return lichHenService.getLichHenById(id)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch hẹn với ID: " + id));
     }
 
     @PostMapping
-    public ResponseEntity<?> createLichHen(@RequestBody LichHenRequest request) {
-        try {
-            LichHenResponse createdLichHen = lichHenService.createLichHen(request);
-            return ResponseEntity.ok(createdLichHen);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<LichHenResponse> createLichHen(@RequestBody LichHenRequest request) {
+        LichHenResponse createdLichHen = lichHenService.createLichHen(request);
+        return new ResponseEntity<>(createdLichHen, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<LichHen> updateLichHen(@PathVariable Integer id, @RequestBody LichHenUpdateRequest request) {
-        try {
-            LichHen updatedLichHen = lichHenService.updateLichHen(id, request);
-            return ResponseEntity.ok(updatedLichHen);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        LichHen updatedLichHen = lichHenService.updateLichHen(id, request);
+        return ResponseEntity.ok(updatedLichHen);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteLichHen(@PathVariable Integer id) {
-        try {
-            lichHenService.deleteLichHen(id);
-            return ResponseEntity.ok(Map.of("message", "Xóa lịch hẹn thành công"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        lichHenService.deleteLichHen(id);
+        return ResponseEntity.ok(Map.of("message", "Xóa lịch hẹn thành công"));
     }
 }

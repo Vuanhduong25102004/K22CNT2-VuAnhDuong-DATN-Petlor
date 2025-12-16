@@ -1,5 +1,7 @@
 package com.example.petlorshop.dto;
 
+import com.example.petlorshop.models.TrangThaiLichHen;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +16,9 @@ import java.time.LocalDateTime;
 public class LichHenUpdateRequest {
     private LocalDateTime thoiGianBatDau;
     private LocalDateTime thoiGianKetThuc;
-    private String trangThaiLichHen;
+    
+    @JsonProperty("trangThaiLichHen") // Giữ tên JSON là "trangThaiLichHen" cho Frontend
+    private TrangThaiLichHen status;
+    
     private String ghiChuKhachHang;
 }

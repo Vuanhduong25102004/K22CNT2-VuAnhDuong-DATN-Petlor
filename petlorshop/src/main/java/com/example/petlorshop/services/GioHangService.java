@@ -137,7 +137,7 @@ public class GioHangService {
                 chiTiet.getChiTietGioHangId(),
                 sanPham.getSanPhamId(),
                 sanPham.getTenSanPham(),
-                sanPham.getHinhAnhUrl(),
+                sanPham.getHinhAnh(),
                 sanPham.getGia(),
                 chiTiet.getSoLuong(),
                 thanhTien

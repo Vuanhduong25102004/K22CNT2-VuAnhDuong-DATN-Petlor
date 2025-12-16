@@ -8,6 +8,8 @@ import com.example.petlorshop.repositories.DanhMucSanPhamRepository;
 import com.example.petlorshop.repositories.SanPhamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +24,9 @@ public class SanPhamService {
     @Autowired
     private DanhMucSanPhamRepository danhMucSanPhamRepository;
 
+    @Autowired
+    private FileStorageService fileStorageService;
+
     public List<SanPhamResponse> getAllSanPham() {
         return sanPhamRepository.findAll().stream()
                 .map(this::convertToResponse)
@@ -32,7 +37,7 @@ public class SanPhamService {
         return sanPhamRepository.findById(id).map(this::convertToResponse);
     }
 
-    public SanPham createSanPham(SanPhamRequest request) {
+    public SanPham createSanPham(SanPhamRequest request, MultipartFile hinhAnh) {
         DanhMucSanPham danhMuc = danhMucSanPhamRepository.findById(request.getDanhMucId())
                 .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại với id: " + request.getDanhMucId()));
 
@@ -41,25 +46,38 @@ public class SanPhamService {
         newSanPham.setMoTaChiTiet(request.getMoTaChiTiet());
         newSanPham.setGia(request.getGia());
         newSanPham.setSoLuongTonKho(request.getSoLuongTonKho());
-        newSanPham.setHinhAnhUrl(request.getHinhAnhUrl());
         newSanPham.setDanhMucSanPham(danhMuc);
+
+        if (hinhAnh != null && !hinhAnh.isEmpty()) {
+            String fileName = fileStorageService.storeFile(hinhAnh);
+            newSanPham.setHinhAnh(fileName);
+        }
 
         return sanPhamRepository.save(newSanPham);
     }
 
-    public SanPham updateSanPham(Integer id, SanPhamRequest request) {
+    public SanPham updateSanPham(Integer id, SanPhamRequest request, MultipartFile hinhAnh) {
         SanPham sanPham = sanPhamRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại với id: " + id));
 
-        DanhMucSanPham danhMuc = danhMucSanPhamRepository.findById(request.getDanhMucId())
-                .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại với id: " + request.getDanhMucId()));
-
+        // Cập nhật các trường cơ bản
         sanPham.setTenSanPham(request.getTenSanPham());
         sanPham.setMoTaChiTiet(request.getMoTaChiTiet());
         sanPham.setGia(request.getGia());
         sanPham.setSoLuongTonKho(request.getSoLuongTonKho());
-        sanPham.setHinhAnhUrl(request.getHinhAnhUrl());
-        sanPham.setDanhMucSanPham(danhMuc);
+
+        // Chỉ cập nhật hình ảnh nếu có file mới được cung cấp
+        if (hinhAnh != null && !hinhAnh.isEmpty()) {
+            String fileName = fileStorageService.storeFile(hinhAnh);
+            sanPham.setHinhAnh(fileName);
+        }
+
+        // Chỉ cập nhật danh mục nếu có ID mới được cung cấp
+        if (request.getDanhMucId() != null) {
+            DanhMucSanPham danhMuc = danhMucSanPhamRepository.findById(request.getDanhMucId())
+                    .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại với id: " + request.getDanhMucId()));
+            sanPham.setDanhMucSanPham(danhMuc);
+        }
 
         return sanPhamRepository.save(sanPham);
     }
@@ -77,7 +95,7 @@ public class SanPhamService {
                 sanPham.getMoTaChiTiet(),
                 sanPham.getGia(),
                 sanPham.getSoLuongTonKho(),
-                sanPham.getHinhAnhUrl(),
+                sanPham.getHinhAnh(),
                 sanPham.getDanhMucSanPham() != null ? sanPham.getDanhMucSanPham().getDanhMucId() : null,
                 sanPham.getDanhMucSanPham() != null ? sanPham.getDanhMucSanPham().getTenDanhMuc() : null
         );

@@ -29,6 +29,7 @@ const AdminPets = () => {
   const [editingPet, setEditingPet] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [petImageFile, setPetImageFile] = useState(null);
   const [newPet, setNewPet] = useState({
     tenThuCung: "",
     chungLoai: "Chó",
@@ -76,12 +77,9 @@ const AdminPets = () => {
                 ? pet.user.userId || pet.user.id
                 : pet.nguoiDungId),
             // Ảnh: Nếu null thì dùng ảnh mặc định
-            img:
-              pet.hinhAnhUrl &&
-              pet.hinhAnhUrl !== "null" &&
-              pet.hinhAnhUrl !== "undefined"
-                ? pet.hinhAnhUrl
-                : "https://placehold.co/100x100?text=Pet",
+            img: pet.hinhAnh
+              ? `http://localhost:8080/uploads/${pet.hinhAnh}`
+              : "https://placehold.co/100x100?text=Pet",
             // Các trường khác map thẳng
             tenThuCung: pet.tenThuCung || "Chưa đặt tên",
             chungLoai: pet.chungLoai || "Khác",
@@ -124,27 +122,36 @@ const AdminPets = () => {
       }
     }
     setEditingPet({ ...pet, ngaySinh: formattedDate });
+    setPetImageFile(null);
     setIsEditModalOpen(true);
   };
 
   const handleSavePet = async () => {
     if (!editingPet) return;
+
+    const formData = new FormData();
+    const petData = {
+      tenThuCung: editingPet.tenThuCung,
+      chungLoai: editingPet.chungLoai,
+      giongLoai: editingPet.giongLoai,
+      ngaySinh: editingPet.ngaySinh,
+      gioiTinh: editingPet.gioiTinh,
+      ghiChuSucKhoe: editingPet.ghiChuSucKhoe,
+    };
+
+    // Gửi dữ liệu pet dưới dạng một chuỗi JSON với key 'thuCung'
+    formData.append("thuCung", JSON.stringify(petData));
+
+    // Gửi file ảnh (nếu có) với key 'hinhAnh' để khớp với yêu cầu của backend
+    if (petImageFile) {
+      formData.append("hinhAnh", petImageFile);
+    }
+
     try {
-      const payload = {
-        tenThuCung: editingPet.tenThuCung,
-        chungLoai: editingPet.chungLoai,
-        giongLoai: editingPet.giongLoai,
-        ngaySinh: editingPet.ngaySinh,
-        gioiTinh: editingPet.gioiTinh,
-        ghiChuSucKhoe: editingPet.ghiChuSucKhoe,
-      };
-      await petService.updatePet(editingPet.thuCungId, payload);
-      setPets((prev) =>
-        prev.map((p) =>
-          p.thuCungId === editingPet.thuCungId ? { ...p, ...payload } : p
-        )
-      );
+      await petService.updatePet(editingPet.thuCungId, formData);
+      fetchPets(); // Refresh list
       setIsEditModalOpen(false);
+      setPetImageFile(null);
       alert("Cập nhật thành công!");
     } catch (error) {
       console.error("Lỗi cập nhật:", error);
@@ -153,16 +160,26 @@ const AdminPets = () => {
   };
 
   const handleCreatePet = async () => {
+    if (
+      !newPet.tenThuCung ||
+      !newPet.tenChuSoHuu ||
+      !newPet.soDienThoaiChuSoHuu
+    ) {
+      alert("Vui lòng nhập đầy đủ thông tin bắt buộc (*)");
+      return;
+    }
+
+    const formData = new FormData();
+    // Gửi dữ liệu pet dưới dạng một chuỗi JSON với key 'thuCung'
+    formData.append("thuCung", JSON.stringify(newPet));
+
+    // Gửi file ảnh (nếu có) với key 'hinhAnh' để khớp với yêu cầu của backend
+    if (petImageFile) {
+      formData.append("hinhAnh", petImageFile);
+    }
+
     try {
-      if (
-        !newPet.tenThuCung ||
-        !newPet.tenChuSoHuu ||
-        !newPet.soDienThoaiChuSoHuu
-      ) {
-        alert("Vui lòng nhập đầy đủ thông tin bắt buộc (*)");
-        return;
-      }
-      await petService.createPet(newPet);
+      await petService.createPet(formData);
       alert("Thêm mới thành công!");
       setIsAddModalOpen(false);
       setNewPet({
@@ -175,11 +192,27 @@ const AdminPets = () => {
         tenChuSoHuu: "",
         soDienThoaiChuSoHuu: "",
       });
+      setPetImageFile(null);
       fetchPets();
     } catch (error) {
       console.error("Lỗi thêm mới:", error);
       alert("Thêm mới thất bại.");
     }
+  };
+
+  const handleOpenAddModal = () => {
+    setNewPet({
+      tenThuCung: "",
+      chungLoai: "Chó",
+      giongLoai: "",
+      ngaySinh: "",
+      gioiTinh: "Đực",
+      ghiChuSucKhoe: "",
+      tenChuSoHuu: "",
+      soDienThoaiChuSoHuu: "",
+    });
+    setPetImageFile(null);
+    setIsAddModalOpen(true);
   };
 
   // 3. Handle Actions (Xóa)
@@ -366,7 +399,7 @@ const AdminPets = () => {
             <button
               className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-green-600 focus:outline-none"
               type="button"
-              onClick={() => setIsAddModalOpen(true)}
+              onClick={handleOpenAddModal}
             >
               <span className="material-symbols-outlined text-sm mr-2">
                 add
@@ -768,6 +801,28 @@ const AdminPets = () => {
                 />
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Hình ảnh
+                </label>
+                <div className="mt-2 flex items-center space-x-4">
+                  <img
+                    src={
+                      petImageFile
+                        ? URL.createObjectURL(petImageFile)
+                        : editingPet.img // 'img' is already the full URL
+                    }
+                    alt="Pet Avatar"
+                    className="h-16 w-16 rounded-full object-cover"
+                  />
+                  <input
+                    type="file"
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                    onChange={(e) => setPetImageFile(e.target.files[0])}
+                  />
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
@@ -899,6 +954,28 @@ const AdminPets = () => {
                     setNewPet({ ...newPet, tenThuCung: e.target.value })
                   }
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Hình ảnh
+                </label>
+                <div className="mt-2 flex items-center space-x-4">
+                  <img
+                    src={
+                      petImageFile
+                        ? URL.createObjectURL(petImageFile)
+                        : "https://placehold.co/100x100?text=Pet"
+                    }
+                    alt="Pet Preview"
+                    className="h-16 w-16 rounded-full object-cover"
+                  />
+                  <input
+                    type="file"
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                    onChange={(e) => setPetImageFile(e.target.files[0])}
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

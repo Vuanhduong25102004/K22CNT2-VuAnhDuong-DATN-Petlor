@@ -9,6 +9,13 @@ const formatCurrency = (amount) => {
   }).format(amount);
 };
 
+// Helper: Xử lý URL hình ảnh
+const getImageUrl = (imagePath, fallbackText = "Service") => {
+  if (!imagePath) return `https://placehold.co/100x100?text=${fallbackText}`;
+  if (imagePath.startsWith("http")) return imagePath;
+  return `http://localhost:8080/uploads/${imagePath}`;
+};
+
 const AdminServices = () => {
   // 1. State
   const [services, setServices] = useState([]);
@@ -19,13 +26,14 @@ const AdminServices = () => {
   const [selectedService, setSelectedService] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [serviceImageFile, setServiceImageFile] = useState(null);
   const [newService, setNewService] = useState({
     tenDichVu: "",
     moTa: "",
     giaDichVu: 0,
     thoiLuongUocTinhPhut: 30,
     danhMucDvId: "",
-    roleCanThucHien: "SPA",
+    hinhAnh: "",
   });
   const [serviceCategories, setServiceCategories] = useState([]);
 
@@ -45,6 +53,7 @@ const AdminServices = () => {
             giaDichVu: svc.giaDichVu || svc.gia || 0,
             thoiLuongUocTinhPhut: svc.thoiLuongUocTinhPhut || 0, // Phút
             trangThai: svc.trangThai || "Hoạt động",
+            hinhAnh: svc.hinhAnh,
           }))
         : [];
 
@@ -101,27 +110,35 @@ const AdminServices = () => {
 
   const handleEditClick = (service) => {
     setEditingService({ ...service });
+    setServiceImageFile(null);
     setIsEditModalOpen(true);
   };
 
   const handleSaveService = async () => {
     if (!editingService) return;
+
+    const formData = new FormData();
+    const serviceData = {
+      tenDichVu: editingService.tenDichVu,
+      moTa: editingService.moTa,
+      giaDichVu: Number(editingService.giaDichVu),
+      thoiLuongUocTinhPhut: Number(editingService.thoiLuongUocTinhPhut),
+      danhMucDvId: Number(editingService.danhMucDvId),
+    };
+
+    // Gửi dữ liệu dịch vụ dưới dạng một chuỗi JSON với key 'dichVu'
+    formData.append("dichVu", JSON.stringify(serviceData));
+
+    // Gửi file ảnh (nếu có) với key 'hinhAnh' để khớp với yêu cầu của backend
+    if (serviceImageFile) {
+      formData.append("hinhAnh", serviceImageFile);
+    }
+
     try {
-      const payload = {
-        tenDichVu: editingService.tenDichVu,
-        moTa: editingService.moTa,
-        giaDichVu: Number(editingService.giaDichVu),
-        thoiLuongUocTinhPhut: Number(editingService.thoiLuongUocTinhPhut),
-      };
-
-      await petService.updateService(editingService.dichVuId, payload);
-
-      setServices((prev) =>
-        prev.map((s) =>
-          s.dichVuId === editingService.dichVuId ? { ...s, ...payload } : s
-        )
-      );
+      await petService.updateService(editingService.dichVuId, formData);
+      fetchServices();
       setIsEditModalOpen(false);
+      setServiceImageFile(null);
       alert("Cập nhật thành công!");
     } catch (error) {
       console.error("Lỗi cập nhật:", error);
@@ -136,8 +153,9 @@ const AdminServices = () => {
       giaDichVu: 0,
       thoiLuongUocTinhPhut: 30,
       danhMucDvId: "",
-      roleCanThucHien: "SPA",
+      hinhAnh: "",
     });
+    setServiceImageFile(null);
     setIsAddModalOpen(true);
   };
 
@@ -151,18 +169,29 @@ const AdminServices = () => {
       return;
     }
 
-    try {
-      const payload = {
-        ...newService,
-        giaDichVu: Number(newService.giaDichVu),
-        thoiLuongUocTinhPhut: Number(newService.thoiLuongUocTinhPhut),
-        danhMucDvId: Number(newService.danhMucDvId),
-      };
+    const formData = new FormData();
+    const serviceData = {
+      ...newService,
+      giaDichVu: Number(newService.giaDichVu),
+      thoiLuongUocTinhPhut: Number(newService.thoiLuongUocTinhPhut),
+      danhMucDvId: Number(newService.danhMucDvId),
+    };
+    delete serviceData.hinhAnh; // Remove the old text field
 
-      await petService.createService(payload);
+    // Gửi dữ liệu dịch vụ dưới dạng một chuỗi JSON với key 'dichVu'
+    formData.append("dichVu", JSON.stringify(serviceData));
+
+    // Gửi file ảnh (nếu có) với key 'hinhAnh' để khớp với yêu cầu của backend
+    if (serviceImageFile) {
+      formData.append("hinhAnh", serviceImageFile);
+    }
+
+    try {
+      await petService.createService(formData);
 
       alert("Thêm dịch vụ thành công!");
       setIsAddModalOpen(false);
+      setServiceImageFile(null);
       fetchServices(); // Refresh list
     } catch (error) {
       console.error("Lỗi tạo dịch vụ:", error);
@@ -320,6 +349,9 @@ const AdminServices = () => {
                   Tên Dịch Vụ
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Hình ảnh
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Mô tả
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -348,6 +380,23 @@ const AdminServices = () => {
                     {/* Tên */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {service.tenDichVu}
+                    </td>
+
+                    {/* Hình ảnh */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {service.hinhAnh ? (
+                        <img
+                          src={getImageUrl(service.hinhAnh)}
+                          alt={service.tenDichVu}
+                          className="h-12 w-12 rounded-md object-cover"
+                        />
+                      ) : (
+                        <div className="h-12 w-12 rounded-md bg-gray-100 flex items-center justify-center">
+                          <span className="material-symbols-outlined text-gray-400">
+                            image
+                          </span>
+                        </div>
+                      )}
                     </td>
 
                     {/* Mô tả (Truncate) */}
@@ -407,7 +456,7 @@ const AdminServices = () => {
               ) : (
                 <tr>
                   <td
-                    colSpan="6"
+                    colSpan="7"
                     className="px-6 py-4 text-center text-gray-500"
                   >
                     Chưa có dịch vụ nào.
@@ -468,6 +517,27 @@ const AdminServices = () => {
                   }
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Hình ảnh
+                </label>
+                <div className="mt-2 flex items-center space-x-4">
+                  <img
+                    src={
+                      serviceImageFile
+                        ? URL.createObjectURL(serviceImageFile)
+                        : getImageUrl(editingService.hinhAnh)
+                    }
+                    alt="Service"
+                    className="h-16 w-16 rounded-md object-cover"
+                  />
+                  <input
+                    type="file"
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                    onChange={(e) => setServiceImageFile(e.target.files[0])}
+                  />
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
@@ -501,6 +571,30 @@ const AdminServices = () => {
                     }
                   />
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Danh mục
+                </label>
+                <select
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                  value={editingService.danhMucDvId || ""}
+                  onChange={(e) =>
+                    setEditingService({
+                      ...editingService,
+                      danhMucDvId: e.target.value,
+                    })
+                  }
+                >
+                  <option value="" disabled>
+                    -- Chọn danh mục --
+                  </option>
+                  {serviceCategories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.tenDanhMucDv}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -549,6 +643,16 @@ const AdminServices = () => {
                 <p className="text-sm text-gray-500">Mô tả</p>
                 <p className="text-gray-900">{selectedService.moTa}</p>
               </div>
+              {selectedService.hinhAnh && (
+                <div>
+                  <p className="text-sm text-gray-500">Hình ảnh</p>
+                  <img
+                    src={getImageUrl(selectedService.hinhAnh)}
+                    alt={selectedService.tenDichVu}
+                    className="mt-2 rounded-lg max-w-xs h-auto shadow-md"
+                  />
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-gray-500">Giá dịch vụ</p>
@@ -620,6 +724,27 @@ const AdminServices = () => {
                   }
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Hình ảnh
+                </label>
+                <div className="mt-2 flex items-center space-x-4">
+                  <img
+                    src={
+                      serviceImageFile
+                        ? URL.createObjectURL(serviceImageFile)
+                        : "https://placehold.co/100x100?text=Service"
+                    }
+                    alt="Service Preview"
+                    className="h-16 w-16 rounded-md object-cover"
+                  />
+                  <input
+                    type="file"
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                    onChange={(e) => setServiceImageFile(e.target.files[0])}
+                  />
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
@@ -656,48 +781,27 @@ const AdminServices = () => {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Danh mục <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                    value={newService.danhMucDvId}
-                    onChange={(e) =>
-                      setNewService({
-                        ...newService,
-                        danhMucDvId: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="">-- Chọn danh mục --</option>
-                    {serviceCategories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.tenDanhMucDv}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Role thực hiện
-                  </label>
-                  <select
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                    value={newService.roleCanThucHien}
-                    onChange={(e) =>
-                      setNewService({
-                        ...newService,
-                        roleCanThucHien: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="SPA">Spa</option>
-                    <option value="DOCTOR">Bác sĩ</option>
-                    <option value="STAFF">Nhân viên</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Danh mục <span className="text-red-500">*</span>
+                </label>
+                <select
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                  value={newService.danhMucDvId}
+                  onChange={(e) =>
+                    setNewService({
+                      ...newService,
+                      danhMucDvId: e.target.value,
+                    })
+                  }
+                >
+                  <option value="">-- Chọn danh mục --</option>
+                  {serviceCategories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.tenDanhMucDv}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 

@@ -17,6 +17,7 @@ public class ThuCungResponse {
     private LocalDate ngaySinh;
     private String gioiTinh;
     private String ghiChuSucKhoe;
+    private String hinhAnh; // Thêm trường hình ảnh
     private Integer userId;
     private String tenChu;
 }

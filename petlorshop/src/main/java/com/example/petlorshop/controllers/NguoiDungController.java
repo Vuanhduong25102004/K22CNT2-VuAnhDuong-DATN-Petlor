@@ -5,12 +5,16 @@ import com.example.petlorshop.dto.NguoiDungUpdateRequest;
 import com.example.petlorshop.dto.UnifiedCreateUserRequest;
 import com.example.petlorshop.models.NguoiDung;
 import com.example.petlorshop.services.NguoiDungService;
-import jakarta.validation.Valid;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -24,17 +28,14 @@ public class NguoiDungController {
     private NguoiDungService nguoiDungService;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private ObjectMapper objectMapper;
 
-    // --- API THỐNG NHẤT ĐỂ TẠO USER/NHÂN VIÊN ---
-    @PostMapping("/create-unified")
-    public ResponseEntity<?> createUnifiedUser(@RequestBody UnifiedCreateUserRequest request) {
-        try {
-            NguoiDungResponse response = nguoiDungService.createUnifiedUser(request);
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @PostMapping(value = "/create-unified", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<NguoiDungResponse> createUnifiedUser(@RequestPart("nguoiDung") String userJson,
+                                               @RequestPart(name = "anhDaiDien", required = false) MultipartFile anhDaiDien) throws JsonProcessingException {
+        UnifiedCreateUserRequest request = objectMapper.readValue(userJson, UnifiedCreateUserRequest.class);
+        NguoiDungResponse response = nguoiDungService.createUnifiedUser(request, anhDaiDien);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     private NguoiDungResponse toNguoiDungResponse(NguoiDung user) {
@@ -45,6 +46,7 @@ public class NguoiDungController {
                 user.getEmail(),
                 user.getSoDienThoai(),
                 user.getDiaChi(),
+                user.getAnhDaiDien(),
                 user.getNgayTao(),
                 user.getRole(),
                 nhanVienId
@@ -60,28 +62,31 @@ public class NguoiDungController {
 
     @GetMapping("/{id}")
     public ResponseEntity<NguoiDungResponse> getNguoiDungById(@PathVariable Integer id) {
-        return nguoiDungService.getNguoiDungById(id)
-                .map(user -> ResponseEntity.ok(toNguoiDungResponse(user)))
-                .orElse(ResponseEntity.notFound().build());
+        NguoiDung user = nguoiDungService.getNguoiDungById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + id));
+        return ResponseEntity.ok(toNguoiDungResponse(user));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<NguoiDungResponse> updateNguoiDung(@PathVariable Integer id, @Valid @RequestBody NguoiDungUpdateRequest request) {
-        try {
-            NguoiDung updatedNguoiDung = nguoiDungService.updateNguoiDung(id, request);
-            return ResponseEntity.ok(toNguoiDungResponse(updatedNguoiDung));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+    @PutMapping(value = "/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<NguoiDungResponse> updateNguoiDung(@PathVariable Integer id,
+                                             @RequestPart("nguoiDung") String nguoiDungJson,
+                                             @RequestPart(name = "anhDaiDien", required = false) MultipartFile anhDaiDien) throws JsonProcessingException {
+        NguoiDungUpdateRequest request = objectMapper.readValue(nguoiDungJson, NguoiDungUpdateRequest.class);
+        NguoiDung updatedNguoiDung = nguoiDungService.updateNguoiDung(id, request, anhDaiDien);
+        return ResponseEntity.ok(toNguoiDungResponse(updatedNguoiDung));
+    }
+
+    @PutMapping(value = "/me/avatar", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<NguoiDungResponse> updateMyAvatar(@RequestPart("avatar") MultipartFile avatarFile) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        NguoiDung updatedUser = nguoiDungService.updateAvatar(userEmail, avatarFile);
+        return ResponseEntity.ok(toNguoiDungResponse(updatedUser));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteNguoiDung(@PathVariable Integer id) {
-        try {
-            nguoiDungService.deleteNguoiDung(id);
-            return ResponseEntity.ok(Map.of("message", "Xóa người dùng thành công"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
-        }
+        nguoiDungService.deleteNguoiDung(id);
+        return ResponseEntity.ok(Map.of("message", "Xóa người dùng thành công"));
     }
 }

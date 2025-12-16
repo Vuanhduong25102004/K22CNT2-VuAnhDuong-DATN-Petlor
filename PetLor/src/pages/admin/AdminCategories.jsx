@@ -9,6 +9,8 @@ const AdminCategories = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newCategory, setNewCategory] = useState({ tenDanhMuc: "", moTa: "" });
   const [editingId, setEditingId] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // 2. Hàm gọi API lấy danh sách danh mục
   const fetchCategories = async () => {
@@ -86,6 +88,11 @@ const AdminCategories = () => {
       console.error("Lỗi lưu danh mục:", error);
       alert("Thao tác thất bại!");
     }
+  };
+
+  const handleViewDetail = (category) => {
+    setSelectedCategory(category);
+    setIsDetailModalOpen(true);
   };
 
   // 5. Tính toán thống kê (Stats) dựa trên dữ liệu thật
@@ -231,6 +238,7 @@ const AdminCategories = () => {
                         <button
                           title="Xem chi tiết"
                           className="text-gray-400 hover:text-green-600 transition-colors"
+                          onClick={() => handleViewDetail(cat)}
                         >
                           <span className="material-symbols-outlined text-base">
                             visibility
@@ -340,6 +348,55 @@ const AdminCategories = () => {
                   Lưu lại
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Chi tiết Danh mục */}
+      {isDetailModalOpen && selectedCategory && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <div className="flex justify-between items-center mb-4 border-b pb-2">
+              <h3 className="text-xl font-bold text-gray-900">
+                Chi tiết Danh mục #{selectedCategory.danhMucId}
+              </h3>
+              <button
+                onClick={() => setIsDetailModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-gray-500">Tên danh mục</p>
+                <p className="font-medium text-gray-900 text-lg">
+                  {selectedCategory.tenDanhMuc}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Số lượng sản phẩm</p>
+                <p className="font-medium text-gray-900">
+                  {selectedCategory.soLuongSanPham}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Mô tả</p>
+                <div className="mt-1 p-3 bg-gray-50 rounded-md text-sm text-gray-700 border border-gray-100 min-h-[80px]">
+                  {selectedCategory.moTa || "Không có mô tả"}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => setIsDetailModalOpen(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 font-medium"
+              >
+                Đóng
+              </button>
             </div>
           </div>
         </div>

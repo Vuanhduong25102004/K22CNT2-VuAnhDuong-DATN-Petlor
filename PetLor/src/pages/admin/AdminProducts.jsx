@@ -27,6 +27,13 @@ const getStockStatus = (quantity) => {
   };
 };
 
+// Helper: Xử lý URL hình ảnh để tránh lỗi khi URL đã là tuyệt đối
+const getImageUrl = (imagePath, fallbackText = "No+Image") => {
+  if (!imagePath) return `https://placehold.co/100x100?text=${fallbackText}`;
+  if (imagePath.startsWith("http")) return imagePath;
+  return `http://localhost:8080/uploads/${imagePath}`;
+};
+
 const AdminProducts = () => {
   // 1. State
   const [products, setProducts] = useState([]);
@@ -50,9 +57,10 @@ const AdminProducts = () => {
     moTaChiTiet: "",
     gia: 0,
     soLuongTonKho: 0,
-    hinhAnhUrl: "",
+    hinhAnh: "",
     danhMucId: "",
   });
+  const [productImageFile, setProductImageFile] = useState(null);
 
   // State cho Modal Chi tiết
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -86,8 +94,7 @@ const AdminProducts = () => {
               gia: p.gia || 0,
               soLuongTonKho: p.soLuongTonKho || 0,
               categoryName: catName,
-              hinhAnhUrl:
-                p.hinhAnhUrl || "https://placehold.co/100x100?text=No+Image",
+              hinhAnh: p.hinhAnh,
             };
           })
         : [];
@@ -132,22 +139,38 @@ const AdminProducts = () => {
       return;
     }
 
-    try {
-      const payload = {
-        ...formData,
-        gia: parseFloat(formData.gia),
-        soLuongTonKho: parseInt(formData.soLuongTonKho) || 0,
-        danhMucId: parseInt(formData.danhMucId),
-      };
+    const formDataPayload = new FormData();
+    const productData = {
+      ...formData,
+      gia: parseFloat(formData.gia),
+      soLuongTonKho: parseInt(formData.soLuongTonKho) || 0,
+      danhMucId: parseInt(formData.danhMucId),
+    };
 
+    // Xóa trường hinhAnh thừa trong JSON (vì đã gửi qua multipart)
+    delete productData.hinhAnh;
+
+    // Gửi dữ liệu sản phẩm dưới dạng Blob với Content-Type application/json
+    const jsonBlob = new Blob([JSON.stringify(productData)], {
+      type: "application/json",
+    });
+    formDataPayload.append("sanPham", jsonBlob);
+
+    // Gửi file ảnh (nếu có) với key 'hinhAnh'
+    if (productImageFile) {
+      formDataPayload.append("hinhAnh", productImageFile);
+    }
+
+    try {
       if (editingId) {
-        await productService.updateProduct(editingId, payload);
+        await productService.updateProduct(editingId, formDataPayload);
         alert("Cập nhật sản phẩm thành công!");
       } else {
-        await productService.createProduct(payload);
+        await productService.createProduct(formDataPayload);
         alert("Thêm sản phẩm thành công!");
       }
       setIsModalOpen(false);
+      setProductImageFile(null);
       fetchData();
     } catch (error) {
       console.error("Lỗi lưu sản phẩm:", error);
@@ -372,12 +395,13 @@ const AdminProducts = () => {
                   moTaChiTiet: "",
                   gia: 0,
                   soLuongTonKho: 0,
-                  hinhAnhUrl: "",
+                  hinhAnh: "",
                   danhMucId:
                     categories.length > 0
                       ? categories[0].id || categories[0].danhMucId
                       : "",
                 });
+                setProductImageFile(null);
                 setIsModalOpen(true);
               }}
             >
@@ -451,12 +475,12 @@ const AdminProducts = () => {
                           <div className="h-10 w-10 flex-shrink-0">
                             <img
                               className="h-10 w-10 rounded-md object-cover border border-gray-200"
-                              src={product.hinhAnhUrl}
+                              src={getImageUrl(product.hinhAnh)}
                               alt={product.tenSanPham}
                               onError={(e) => {
                                 e.target.onerror = null;
                                 e.target.src =
-                                  "https://via.placeholder.com/40?text=Pet";
+                                  "https://placehold.co/40?text=Pet";
                               }}
                             />
                           </div>
@@ -526,7 +550,7 @@ const AdminProducts = () => {
                                 moTaChiTiet: product.moTaChiTiet || "",
                                 gia: product.gia,
                                 soLuongTonKho: product.soLuongTonKho,
-                                hinhAnhUrl: product.hinhAnhUrl || "",
+                                hinhAnh: product.hinhAnh || "",
                                 danhMucId:
                                   product.danhMucId ||
                                   (product.danhMuc
@@ -534,6 +558,7 @@ const AdminProducts = () => {
                                       product.danhMuc.danhMucId
                                     : ""),
                               });
+                              setProductImageFile(null);
                               setIsModalOpen(true);
                             }}
                           >
@@ -731,17 +756,24 @@ const AdminProducts = () => {
 
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Link Hình ảnh (URL)
+                  Hình ảnh
                 </label>
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-primary focus:border-primary"
-                  value={formData.hinhAnhUrl}
-                  onChange={(e) =>
-                    setFormData({ ...formData, hinhAnhUrl: e.target.value })
-                  }
-                  placeholder="http://example.com/image.jpg"
-                />
+                <div className="mt-2 flex items-center space-x-4">
+                  <img
+                    src={
+                      productImageFile
+                        ? URL.createObjectURL(productImageFile)
+                        : getImageUrl(formData.hinhAnh, "Product")
+                    }
+                    alt="Product Preview"
+                    className="h-16 w-16 rounded-md object-cover"
+                  />
+                  <input
+                    type="file"
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                    onChange={(e) => setProductImageFile(e.target.files[0])}
+                  />
+                </div>
               </div>
 
               <div className="col-span-2">
@@ -797,10 +829,7 @@ const AdminProducts = () => {
             <div className="space-y-4">
               <div className="flex justify-center">
                 <img
-                  src={
-                    selectedProduct.hinhAnhUrl ||
-                    "https://placehold.co/100x100?text=No+Image"
-                  }
+                  src={getImageUrl(selectedProduct.hinhAnh)}
                   alt={selectedProduct.tenSanPham}
                   className="h-48 w-48 object-cover rounded-lg border border-gray-200"
                   onError={(e) => {
