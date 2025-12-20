@@ -22,12 +22,11 @@ public class DanhMucDichVu {
     @Column(name = "danh_muc_dv_id")
     private Integer danhMucDvId;
 
-    @Column(name = "ten_danh_muc_dv", nullable = false, length = 255)
+    @Column(name = "ten_danh_muc_dv", nullable = false, length = 100)
     private String tenDanhMucDv;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role_can_thuc_hien", nullable = false)
-    private Role roleCanThucHien;
+    @Column(name = "mo_ta", columnDefinition = "TEXT")
+    private String moTa;
 
     @JsonIgnore
     @OneToMany(mappedBy = "danhMucDichVu")

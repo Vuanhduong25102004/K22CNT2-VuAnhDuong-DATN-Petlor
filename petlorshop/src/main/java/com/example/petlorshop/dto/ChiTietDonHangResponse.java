@@ -12,9 +12,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChiTietDonHangResponse {
-    private Integer chiTietId;
+    private Integer id;
     private Integer soLuong;
-    private BigDecimal donGiaLucMua;
+    private BigDecimal donGia;
     private Integer sanPhamId;
     private String tenSanPham;
     private String hinhAnhUrl;

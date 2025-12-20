@@ -12,10 +12,10 @@ const PetFormModal = ({
 
   const [formData, setFormData] = useState({
     tenThuCung: "",
-    chungLoai: "Chó",
+    chungLoai: "",
     giongLoai: "",
     ngaySinh: "",
-    gioiTinh: "Đực",
+    gioiTinh: "",
     ghiChuSucKhoe: "",
     tenChuSoHuu: "",
     soDienThoaiChuSoHuu: "",
@@ -41,12 +41,12 @@ const PetFormModal = ({
 
         setFormData({
           tenThuCung: initialData.tenThuCung || "",
-          chungLoai: initialData.chungLoai || "Chó",
+          chungLoai: initialData.chungLoai || "",
           giongLoai: initialData.giongLoai || "",
           ngaySinh: formattedDate,
-          gioiTinh: initialData.gioiTinh || "Đực",
+          gioiTinh: initialData.gioiTinh || "",
           ghiChuSucKhoe: initialData.ghiChuSucKhoe || "",
-          tenChuSoHuu: initialData.tenChuSoHuu || "",
+          tenChuSoHuu: initialData.tenChu || "",
           soDienThoaiChuSoHuu: initialData.soDienThoaiChuSoHuu || "",
         });
         setPreviewImage(getImageUrl(initialData.img));
@@ -54,10 +54,10 @@ const PetFormModal = ({
         // Create mode
         setFormData({
           tenThuCung: "",
-          chungLoai: "Chó",
+          chungLoai: "",
           giongLoai: "",
           ngaySinh: "",
-          gioiTinh: "Đực",
+          gioiTinh: "",
           ghiChuSucKhoe: "",
           tenChuSoHuu: "",
           soDienThoaiChuSoHuu: "",
@@ -175,6 +175,9 @@ const PetFormModal = ({
                       value={formData.chungLoai}
                       onChange={handleChange}
                     >
+                      <option value="" disabled>
+                        -- Chọn chủng loại --
+                      </option>
                       <option value="Chó">Chó</option>
                       <option value="Mèo">Mèo</option>
                       <option value="Khác">Khác</option>
@@ -188,6 +191,9 @@ const PetFormModal = ({
                       value={formData.gioiTinh}
                       onChange={handleChange}
                     >
+                      <option value="" disabled>
+                        -- Chọn giới tính --
+                      </option>
                       <option value="Đực">Đực</option>
                       <option value="Cái">Cái</option>
                       <option value="Chưa rõ">Chưa rõ</option>

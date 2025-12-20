@@ -1,9 +1,8 @@
 /**
  * @file index.jsx
- * @description Trang quản lý Dịch vụ (Container).
+ * @description Trang quản lý Dịch vụ (Container) - Đã cập nhật Stats Logic.
  */
 import React, { useEffect, useState } from "react";
-// Giữ nguyên import productService như yêu cầu gốc
 import productService from "../../../services/productService";
 import { toast } from "react-toastify";
 
@@ -14,11 +13,19 @@ import ServiceTable from "./components/ServiceTable";
 import ServiceDetailModal from "./components/modals/ServiceDetailModal";
 import ServiceFormModal from "./components/modals/ServiceFormModal";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
+
 const AdminServices = () => {
   // --- 1. State Management ---
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [serviceCategories, setServiceCategories] = useState([]);
+
+  // State Thống kê (Mới)
+  const [stats, setStats] = useState({
+    totalServices: 0,
+    maxPriceName: "---",
+    avgPrice: 0,
+  });
 
   // Modals
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -28,7 +35,7 @@ const AdminServices = () => {
 
   // Data selection
   const [selectedService, setSelectedService] = useState(null);
-  const [editingService, setEditingService] = useState(null); // null = Create Mode
+  const [editingService, setEditingService] = useState(null);
   const [serviceToDeleteId, setServiceToDeleteId] = useState(null);
 
   // Filters & Pagination
@@ -38,7 +45,45 @@ const AdminServices = () => {
   const [totalElements, setTotalElements] = useState(0);
   const ITEMS_PER_PAGE = 5;
 
-  // --- 2. Data Fetching ---
+  // --- 2. Logic Fetch Stats (MỚI) ---
+  const fetchStats = async () => {
+    try {
+      // Tải danh sách lớn để tính toán chính xác
+      const response = await productService.getAllServices({
+        page: 0,
+        size: 1000,
+      });
+      const allServices = response?.content || [];
+
+      let maxName = "---";
+      let average = 0;
+
+      if (allServices.length > 0) {
+        // 1. Tìm dịch vụ giá cao nhất
+        const maxService = allServices.reduce((prev, current) =>
+          (prev.giaDichVu || 0) > (current.giaDichVu || 0) ? prev : current
+        );
+        maxName = maxService.tenDichVu || "---";
+
+        // 2. Tính giá trung bình
+        const totalValue = allServices.reduce(
+          (sum, svc) => sum + (svc.giaDichVu || 0),
+          0
+        );
+        average = totalValue / allServices.length;
+      }
+
+      setStats({
+        totalServices: response?.totalElements || allServices.length,
+        maxPriceName: maxName,
+        avgPrice: average,
+      });
+    } catch (error) {
+      console.error("Lỗi tính thống kê dịch vụ:", error);
+    }
+  };
+
+  // --- 3. Data Fetching (Table & Categories) ---
   const fetchServices = async () => {
     setLoading(true);
     try {
@@ -51,7 +96,6 @@ const AdminServices = () => {
       if (term) {
         const data = await productService.searchGlobal(term);
         const allSearchResults = data.dichVus || [];
-
         totalE = allSearchResults.length;
         totalP = Math.ceil(totalE / ITEMS_PER_PAGE);
 
@@ -77,7 +121,8 @@ const AdminServices = () => {
         tenDichVu: svc.tenDichVu || "Chưa đặt tên",
         moTa: svc.moTa || "Không có mô tả",
         giaDichVu: svc.giaDichVu || svc.gia || 0,
-        thoiLuongUocTinhPhut: svc.thoiLuongUocTinhPhut || 0,
+        thoiLuongUocTinhPhut:
+          svc.thoiLuongUocTinh || svc.thoiLuongUocTinhPhut || 0,
         trangThai: svc.trangThai || "Hoạt động",
         hinhAnh: svc.hinhAnh,
       }));
@@ -93,7 +138,7 @@ const AdminServices = () => {
     }
   };
 
-  // Lấy danh mục (logic trích xuất từ 200 items đầu tiên như code gốc)
+  // Lấy danh mục
   useEffect(() => {
     const fetchServiceCategories = async () => {
       try {
@@ -116,14 +161,17 @@ const AdminServices = () => {
         setServiceCategories(Array.from(categoriesMap.values()));
       } catch (error) {
         console.error("Lỗi tải danh mục dịch vụ:", error);
-        toast.warning(
-          "Không thể tải danh sách danh mục. Tính năng thêm/sửa có thể bị hạn chế."
-        );
       }
     };
     fetchServiceCategories();
   }, []);
 
+  // Effect: Load Stats 1 lần
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  // Effect: Load Table khi filter/search đổi
   useEffect(() => {
     fetchServices();
   }, [currentPage, searchTerm]);
@@ -141,9 +189,8 @@ const AdminServices = () => {
     return () => document.removeEventListener("keydown", handleEscKey);
   }, []);
 
-  // --- 3. Handlers ---
+  // --- Handlers ---
 
-  // Xóa
   const handleDeleteClick = (id) => {
     setServiceToDeleteId(id);
     setIsConfirmDeleteModalOpen(true);
@@ -155,6 +202,7 @@ const AdminServices = () => {
       await productService.deleteService(serviceToDeleteId);
       toast.success("Xóa thành công!");
       fetchServices();
+      fetchStats(); // Update stats
     } catch (error) {
       console.error(error);
       toast.error("Xóa thất bại! Có thể dịch vụ đang được sử dụng.");
@@ -164,11 +212,14 @@ const AdminServices = () => {
     }
   };
 
-  // Chi tiết
   const handleViewDetail = async (id) => {
     try {
       const data = await productService.getServiceById(id);
-      setSelectedService(data);
+      const formattedService = {
+        ...data,
+        thoiLuongUocTinhPhut: data.thoiLuongUocTinh || 0,
+      };
+      setSelectedService(formattedService);
       setIsDetailModalOpen(true);
     } catch (error) {
       console.error("Lỗi tải chi tiết dịch vụ:", error);
@@ -176,7 +227,6 @@ const AdminServices = () => {
     }
   };
 
-  // Mở Form
   const handleOpenCreateModal = () => {
     setEditingService(null);
     setIsFormModalOpen(true);
@@ -187,7 +237,6 @@ const AdminServices = () => {
     setIsFormModalOpen(true);
   };
 
-  // Submit Form (Chung cho Create và Update)
   const handleFormSubmit = async (formData, imageFile) => {
     if (!formData.tenDichVu || !formData.giaDichVu || !formData.danhMucDvId) {
       toast.warning("Vui lòng điền Tên dịch vụ, Giá và chọn Danh mục.");
@@ -199,7 +248,7 @@ const AdminServices = () => {
       tenDichVu: formData.tenDichVu,
       moTa: formData.moTa,
       giaDichVu: Number(formData.giaDichVu),
-      thoiLuongUocTinhPhut: Number(formData.thoiLuongUocTinhPhut),
+      thoiLuongUocTinh: Number(formData.thoiLuongUocTinhPhut),
       danhMucDvId: Number(formData.danhMucDvId),
     };
 
@@ -213,28 +262,25 @@ const AdminServices = () => {
 
     try {
       if (editingService) {
-        // Update logic
         await productService.updateService(editingService.dichVuId, payload);
         toast.success("Cập nhật thành công!");
       } else {
-        // Create logic
         await productService.createService(payload);
         toast.success("Thêm dịch vụ thành công!");
       }
       setIsFormModalOpen(false);
       fetchServices();
+      fetchStats(); // Update stats
     } catch (error) {
       console.error("Lỗi thao tác dịch vụ:", error);
       toast.error("Thao tác thất bại. Vui lòng kiểm tra lại thông tin.");
     }
   };
 
-  // Pagination
   const handlePageChange = (page) => {
     if (page > 0 && page <= totalPages) setCurrentPage(page);
   };
 
-  // Stats Data
   const indexOfFirstItem = (currentPage - 1) * ITEMS_PER_PAGE;
 
   return (
@@ -245,7 +291,12 @@ const AdminServices = () => {
         </p>
       </div>
 
-      <ServiceStats services={services} totalServices={totalElements} />
+      {/* Truyền giá trị tính toán xuống component con */}
+      <ServiceStats
+        totalServices={stats.totalServices}
+        maxPriceName={stats.maxPriceName}
+        avgPrice={stats.avgPrice}
+      />
 
       <ServiceFilters
         searchTerm={searchTerm}
@@ -268,23 +319,21 @@ const AdminServices = () => {
         onDelete={handleDeleteClick}
       />
 
-      {/* Modal Detail */}
+      {/* Modals giữ nguyên */}
       <ServiceDetailModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         service={selectedService}
       />
 
-      {/* Modal Form Gộp */}
       <ServiceFormModal
         isOpen={isFormModalOpen}
         onClose={() => setIsFormModalOpen(false)}
-        initialData={editingService} // null = Create, object = Edit
+        initialData={editingService}
         serviceCategories={serviceCategories}
         onSubmit={handleFormSubmit}
       />
 
-      {/* Modal Confirm Delete */}
       <ConfirmDeleteModal
         isOpen={isConfirmDeleteModalOpen}
         onClose={() => setIsConfirmDeleteModalOpen(false)}

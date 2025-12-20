@@ -18,4 +18,9 @@ public class ThuCungUpdateRequest {
     private LocalDate ngaySinh;
     private String gioiTinh;
     private String ghiChuSucKhoe;
+    
+    // Thông tin đổi chủ
+    private Integer userId; 
+    private String tenChuSoHuu;
+    private String soDienThoaiChuSoHuu;
 }

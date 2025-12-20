@@ -31,7 +31,7 @@ public class JwtService {
             NguoiDung nguoiDung = (NguoiDung) userDetails;
             claims.put("userId", nguoiDung.getUserId());
             claims.put("hoTen", nguoiDung.getHoTen());
-            claims.put("role", nguoiDung.getRole().name());
+            claims.put("role", nguoiDung.getRole().name()); // Use .name() for Enum
         }
         return Jwts.builder()
                 .claims(claims)

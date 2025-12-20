@@ -1,6 +1,5 @@
 package com.example.petlorshop.dto;
 
-import com.example.petlorshop.models.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,6 +22,6 @@ public class NhanVienRequest {
     private String kinhNghiem;
 
     // Thông tin để tạo/sửa tài khoản
-    private String password; // Bắt buộc khi tạo, tùy chọn khi sửa
-    private Role role;       // Bắt buộc khi tạo
+    private String password;
+    private String role; // Sửa thành String
 }

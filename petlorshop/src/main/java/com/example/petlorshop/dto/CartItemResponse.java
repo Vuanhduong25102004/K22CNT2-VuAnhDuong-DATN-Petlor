@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CartItemResponse {
-    private Integer chiTietGioHangId;
+    private Integer id; // Sửa ở đây
     private Integer sanPhamId;
     private String tenSanPham;
     private String hinhAnh;

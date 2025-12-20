@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "DonHang")
+@Table(name = "don_hang")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,14 +29,28 @@ public class DonHang {
     @Column(name = "ngay_dat_hang", nullable = false, updatable = false)
     private LocalDateTime ngayDatHang;
 
-    @Column(name = "tong_tien", nullable = false, precision = 10, scale = 2)
-    private BigDecimal tongTien;
+    @Column(name = "tong_tien_hang", nullable = false, precision = 10, scale = 2)
+    private BigDecimal tongTienHang;
 
-    @Column(name = "trang_thai_don_hang", length = 50)
-    private String trangThaiDonHang;
+    @Column(name = "so_tien_giam", precision = 10, scale = 2)
+    private BigDecimal soTienGiam = BigDecimal.ZERO;
+
+    @Column(name = "tong_thanh_toan", nullable = false, precision = 10, scale = 2)
+    private BigDecimal tongThanhToan;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "trang_thai")
+    private TrangThaiDonHang trangThai = TrangThaiDonHang.CHO_XU_LY;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "phuong_thuc_thanh_toan")
+    private PhuongThucThanhToan phuongThucThanhToan = PhuongThucThanhToan.COD;
 
     @Column(name = "dia_chi_giao_hang", nullable = false, columnDefinition = "TEXT")
     private String diaChiGiaoHang;
+
+    @Column(name = "so_dien_thoai_nhan", nullable = false, length = 20)
+    private String soDienThoaiNhan;
 
     // --- Relationships ---
 
@@ -45,7 +59,34 @@ public class DonHang {
     @JsonIgnore
     private NguoiDung nguoiDung;
 
-    @OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "khuyen_mai_id")
     @JsonIgnore
+    private KhuyenMai khuyenMai;
+
+    @OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChiTietDonHang> chiTietDonHangs;
+
+    // --- Enums ---
+    public enum TrangThaiDonHang {
+        CHO_XU_LY("Chờ xử lý"),
+        DA_XAC_NHAN("Đã xác nhận"),
+        DANG_GIAO("Đang giao"),
+        DA_GIAO("Đã giao"),// Đã đổi từ DA_GIAO sang HOAN_THANH
+        DA_HUY("Đã hủy");
+
+        private final String displayName;
+
+        TrangThaiDonHang(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+    }
+
+    public enum PhuongThucThanhToan {
+        COD, VNPAY, MOMO
+    }
 }

@@ -10,6 +10,6 @@ import java.util.List;
 
 @Repository
 public interface DonHangRepository extends JpaRepository<DonHang, Integer> {
-    @Query("SELECT d FROM DonHang d WHERE LOWER(d.trangThaiDonHang) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(d.diaChiGiaoHang) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    @Query("SELECT d FROM DonHang d WHERE LOWER(d.trangThai) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(d.diaChiGiaoHang) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<DonHang> searchByKeyword(@Param("keyword") String keyword);
 }

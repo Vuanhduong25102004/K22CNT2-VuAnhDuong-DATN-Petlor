@@ -44,6 +44,7 @@ const EmployeeFilters = ({
               <option value="Bác sĩ thú y">Bác sĩ thú y</option>
               <option value="Groomer">Groomer (Spa)</option>
               <option value="Huấn luyện viên">Huấn luyện viên</option>
+              <option value="Nhân viên lễ tân">Nhân viên lễ tân</option>
               <option value="Quản lý">Quản lý</option>
             </select>
           </div>

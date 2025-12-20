@@ -1,5 +1,5 @@
 import React from "react";
-import { formatDate, getStatusBadge } from "../utils";
+import { getStatusBadge, formatAppointmentTime } from "../utils";
 
 const SkeletonRow = () => (
   <tr className="animate-pulse border-b border-gray-100 last:border-0">
@@ -27,6 +27,9 @@ const SkeletonRow = () => (
       <div className="h-6 bg-gray-200 rounded w-24"></div>
     </td>
     <td className="px-6 py-4">
+      <div className="h-4 bg-gray-200 rounded w-28"></div>
+    </td>
+    <td className="px-6 py-4">
       <div className="h-8 bg-gray-200 rounded w-20 ml-auto"></div>
     </td>
   </tr>
@@ -38,8 +41,9 @@ const AppointmentTable = ({
   totalElements,
   totalPages,
   currentPage,
-  setCurrentPage,
   ITEMS_PER_PAGE,
+  indexOfFirstItem,
+  onPageChange,
   onViewDetail,
   onEdit,
   onDelete,
@@ -71,6 +75,9 @@ const AppointmentTable = ({
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Trạng thái
               </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Ghi chú
+              </th>
               <th className="relative px-6 py-3">
                 <span className="sr-only">Hành động</span>
               </th>
@@ -90,8 +97,13 @@ const AppointmentTable = ({
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     #{apt.lichHenId}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {apt.tenKhachHang}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <div className="font-medium text-gray-900">
+                      {apt.tenKhachHang}
+                    </div>
+                    <div className="text-gray-500">
+                      SĐT:{apt.soDienThoaiKhachHang}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {apt.tenThuCung || "Chưa có"}
@@ -100,13 +112,21 @@ const AppointmentTable = ({
                     {apt.tenDichVu}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDate(apt.thoiGianBatDau)}
+                    {formatAppointmentTime(
+                      apt.thoiGianBatDau,
+                      apt.thoiGianKetThuc
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {apt.tenNhanVien || "Chưa gán"}
                   </td>
+
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {getStatusBadge(apt.trangThaiLichHen)}
+                  </td>
+
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate">
+                    {apt.ghiChuKhachHang || "Không có"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end space-x-2">
@@ -140,7 +160,7 @@ const AppointmentTable = ({
               ))
             ) : (
               <tr>
-                <td colSpan="8" className="px-6 py-4 text-center text-gray-500">
+                <td colSpan="9" className="px-6 py-4 text-center text-gray-500">
                   Không tìm thấy lịch hẹn nào.
                 </td>
               </tr>
@@ -149,18 +169,18 @@ const AppointmentTable = ({
         </table>
       </div>
 
-      {/* Phân trang */}
+      {/* Pagination */}
       <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
         <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
             <p className="text-sm text-gray-700">
               Hiển thị{" "}
               <span className="font-medium">
-                {totalElements > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0}
+                {totalElements > 0 ? indexOfFirstItem + 1 : 0}
               </span>{" "}
               đến{" "}
               <span className="font-medium">
-                {(currentPage - 1) * ITEMS_PER_PAGE + appointments.length}
+                {indexOfFirstItem + appointments.length}
               </span>{" "}
               trong số <span className="font-medium">{totalElements}</span> kết
               quả
@@ -173,7 +193,7 @@ const AppointmentTable = ({
                 aria-label="Pagination"
               >
                 <button
-                  onClick={() => setCurrentPage(currentPage - 1)}
+                  onClick={() => onPageChange(currentPage - 1)}
                   disabled={currentPage === 1}
                   className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                 >
@@ -186,7 +206,7 @@ const AppointmentTable = ({
                   (number) => (
                     <button
                       key={number}
-                      onClick={() => setCurrentPage(number)}
+                      onClick={() => onPageChange(number)}
                       className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                         currentPage === number
                           ? "z-10 bg-primary border-primary text-white"
@@ -198,7 +218,7 @@ const AppointmentTable = ({
                   )
                 )}
                 <button
-                  onClick={() => setCurrentPage(currentPage + 1)}
+                  onClick={() => onPageChange(currentPage + 1)}
                   disabled={currentPage === totalPages || totalPages === 0}
                   className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                 >

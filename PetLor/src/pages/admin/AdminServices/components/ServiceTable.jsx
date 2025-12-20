@@ -7,13 +7,13 @@ const SkeletonRow = () => (
       <div className="h-4 bg-gray-200 rounded w-8"></div>
     </td>
     <td className="px-6 py-4">
-      <div className="h-4 bg-gray-200 rounded w-32"></div>
+      <div className="flex items-center gap-4">
+        <div className="h-10 w-10 bg-gray-200 rounded-full flex-shrink-0"></div>
+        <div className="h-4 bg-gray-200 rounded w-32"></div>
+      </div>
     </td>
     <td className="px-6 py-4">
       <div className="h-4 bg-gray-200 rounded w-24"></div>
-    </td>
-    <td className="px-6 py-4">
-      <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
     </td>
     <td className="px-6 py-4">
       <div className="h-4 bg-gray-200 rounded w-40"></div>
@@ -59,9 +59,6 @@ const ServiceTable = ({
                 Danh mục
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Hình ảnh
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Mô tả
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -89,24 +86,28 @@ const ServiceTable = ({
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       #{service.dichVuId}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {service.tenDichVu}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 flex-shrink-0">
+                          <img
+                            className="h-10 w-10 rounded-full object-cover border border-gray-200"
+                            src={getImageUrl(service.hinhAnh)}
+                            alt={service.tenDichVu}
+                            onError={(e) => {
+                              e.target.src =
+                                "https://via.placeholder.com/40?text=DV";
+                            }}
+                          />
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">
+                            {service.tenDichVu}
+                          </div>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {service.tenDanhMucDv || "Chưa phân loại"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="h-10 w-10 flex-shrink-0">
-                        <img
-                          className="h-10 w-10 rounded-full object-cover border border-gray-200"
-                          src={getImageUrl(service.hinhAnh)}
-                          alt={service.tenDichVu}
-                          onError={(e) => {
-                            e.target.src =
-                              "https://via.placeholder.com/40?text=DV";
-                          }}
-                        />
-                      </div>
                     </td>
                     <td
                       className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-[300px] truncate"
@@ -158,7 +159,7 @@ const ServiceTable = ({
               : !loading && (
                   <tr>
                     <td
-                      colSpan="8"
+                      colSpan="7"
                       className="px-6 py-4 text-center text-gray-500"
                     >
                       Không tìm thấy dịch vụ nào phù hợp.

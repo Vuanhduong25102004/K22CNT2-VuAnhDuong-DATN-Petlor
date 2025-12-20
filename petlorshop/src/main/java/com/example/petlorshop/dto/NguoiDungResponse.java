@@ -18,8 +18,8 @@ public class NguoiDungResponse {
     private String email;
     private String soDienThoai;
     private String diaChi;
-    private String anhDaiDien; // Thêm trường ảnh đại diện
+    private String anhDaiDien;
     private LocalDateTime ngayTao;
-    private Role role;
-    private Integer nhanVienId; // Thêm trường này
+    private Role role; // Đã đổi từ String sang Role
+    private Integer nhanVienId;
 }

@@ -51,6 +51,12 @@ const AdminProducts = () => {
   });
   const [productImageFile, setProductImageFile] = useState(null);
 
+  // State riêng cho các chỉ số cần tính trên toàn bộ dữ liệu
+  const [inventoryStats, setInventoryStats] = useState({
+    lowStockCount: "...",
+    inventoryValue: 0,
+  });
+
   // --- Data Fetching ---
   const fetchProducts = async () => {
     setLoading(true);
@@ -134,6 +140,54 @@ const AdminProducts = () => {
   useEffect(() => {
     fetchProducts();
   }, [currentPage, searchTerm, filterCategory, filterStock]);
+
+  // Effect riêng để tính toán các chỉ số trên toàn bộ sản phẩm (không theo trang)
+  useEffect(() => {
+    const fetchInventoryStats = async () => {
+      // Để tính toán chính xác các chỉ số như "Giá trị tồn kho" và "Sắp hết hàng",
+      // chúng ta cần lấy TOÀN BỘ danh sách sản phẩm khớp với bộ lọc hiện tại,
+      // không chỉ giới hạn ở trang đang xem.
+      // Lưu ý: Cách làm này có thể không hiệu quả nếu có hàng nghìn sản phẩm.
+      // Giải pháp tối ưu hơn là tạo một API endpoint riêng để trả về các chỉ số này.
+      try {
+        const term = searchTerm ? searchTerm.trim() : "";
+        let allProductsForStats = [];
+
+        if (term) {
+          // Khi tìm kiếm, API searchGlobal đã trả về tất cả kết quả
+          const data = await productService.searchGlobal(term);
+          allProductsForStats = data.sanPhams || [];
+        } else {
+          // Khi lọc, chúng ta gọi API với size lớn để lấy tất cả sản phẩm
+          const response = await productService.getAllProducts({
+            page: 0,
+            size: 100000, // Lấy tối đa 100,000 sản phẩm để tính toán
+            categoryId: filterCategory,
+            stockStatus: filterStock,
+          });
+          allProductsForStats = response?.content || [];
+        }
+
+        const lowStock = allProductsForStats.filter(
+          (p) => (p.soLuongTonKho || 0) < 10
+        ).length;
+        const totalValue = allProductsForStats.reduce(
+          (total, p) => total + (p.gia || 0) * (p.soLuongTonKho || 0),
+          0
+        );
+
+        setInventoryStats({
+          lowStockCount: lowStock,
+          inventoryValue: totalValue,
+        });
+      } catch (error) {
+        console.error("Lỗi tải dữ liệu thống kê tồn kho:", error);
+        setInventoryStats({ lowStockCount: "Lỗi", inventoryValue: 0 });
+      }
+    };
+
+    fetchInventoryStats();
+  }, [searchTerm, filterCategory, filterStock]); // Chạy lại khi bộ lọc thay đổi
 
   useEffect(() => {
     const handleEscKey = (event) => {
@@ -268,11 +322,6 @@ const AdminProducts = () => {
 
   // --- Derived Data ---
   const indexOfFirstItem = (currentPage - 1) * ITEMS_PER_PAGE;
-  const lowStockCount = products.filter((p) => p.soLuongTonKho < 10).length;
-  const inventoryValue = products.reduce(
-    (total, p) => total + p.gia * p.soLuongTonKho,
-    0
-  );
 
   const stats = [
     {
@@ -285,7 +334,7 @@ const AdminProducts = () => {
     },
     {
       title: "Sắp hết / Hết hàng",
-      value: lowStockCount,
+      value: inventoryStats.lowStockCount,
       icon: "production_quantity_limits",
       color: "text-orange-600",
       bg: "bg-orange-100",
@@ -293,7 +342,7 @@ const AdminProducts = () => {
     },
     {
       title: "Giá trị tồn kho",
-      value: formatCurrency(inventoryValue),
+      value: formatCurrency(inventoryStats.inventoryValue),
       icon: "monetization_on",
       color: "text-green-600",
       bg: "bg-green-100",

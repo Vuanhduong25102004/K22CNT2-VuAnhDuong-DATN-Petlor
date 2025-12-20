@@ -58,7 +58,6 @@ public class DichVuService {
         
         mapRequestToEntity(request, dichVu);
 
-        // Chỉ cập nhật danh mục nếu có ID được cung cấp
         if (request.getDanhMucDvId() != null) {
             DanhMucDichVu danhMuc = danhMucDichVuRepository.findById(request.getDanhMucDvId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục dịch vụ với ID: " + request.getDanhMucDvId()));
@@ -82,7 +81,7 @@ public class DichVuService {
         dichVu.setTenDichVu(request.getTenDichVu());
         dichVu.setMoTa(request.getMoTa());
         dichVu.setGiaDichVu(request.getGiaDichVu());
-        dichVu.setThoiLuongUocTinhPhut(request.getThoiLuongUocTinhPhut());
+        dichVu.setThoiLuongUocTinh(request.getThoiLuongUocTinh());
     }
 
     private DichVuResponse convertToResponse(DichVu dichVu) {
@@ -91,11 +90,10 @@ public class DichVuService {
                 dichVu.getTenDichVu(),
                 dichVu.getMoTa(),
                 dichVu.getGiaDichVu(),
-                dichVu.getThoiLuongUocTinhPhut(),
+                dichVu.getThoiLuongUocTinh(),
                 dichVu.getHinhAnh(),
                 dichVu.getDanhMucDichVu() != null ? dichVu.getDanhMucDichVu().getDanhMucDvId() : null,
-                dichVu.getDanhMucDichVu() != null ? dichVu.getDanhMucDichVu().getTenDanhMucDv() : null,
-                dichVu.getDanhMucDichVu() != null ? dichVu.getDanhMucDichVu().getRoleCanThucHien() : null
+                dichVu.getDanhMucDichVu() != null ? dichVu.getDanhMucDichVu().getTenDanhMucDv() : null
         );
     }
 }

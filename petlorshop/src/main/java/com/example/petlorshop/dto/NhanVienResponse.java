@@ -1,5 +1,6 @@
 package com.example.petlorshop.dto;
 
+import com.example.petlorshop.models.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ public class NhanVienResponse {
     private String email;
     private String chuyenKhoa;
     private String kinhNghiem;
-    private String anhDaiDien; // Thêm trường ảnh đại diện
+    private String anhDaiDien;
+    private Role role; // Đã đổi từ String sang Role
     private Integer userId;
 }

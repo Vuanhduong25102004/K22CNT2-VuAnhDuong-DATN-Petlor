@@ -1,12 +1,18 @@
 package com.example.petlorshop.dto;
 
-import lombok.Data;
+import com.example.petlorshop.models.DonHang;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 public class DonHangRequest {
     private Integer userId;
     private String diaChiGiaoHang;
+    private String soDienThoaiNhan;
+    private String maKhuyenMai;
+    private DonHang.PhuongThucThanhToan phuongThucThanhToan;
     private List<ChiTietDonHangRequest> chiTietDonHangs;
 }

@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "NguoiDung")
+@Table(name = "nguoi_dung")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -36,7 +36,7 @@ public class NguoiDung implements UserDetails {
     @Column(name = "mat_khau", nullable = false, length = 255)
     private String matKhau;
 
-    @Column(name = "so_dien_thoai", length = 20)
+    @Column(name = "so_dien_thoai", length = 20, unique = true)
     private String soDienThoai;
 
     @Column(name = "dia_chi", columnDefinition = "TEXT")
@@ -50,12 +50,15 @@ public class NguoiDung implements UserDetails {
     private LocalDateTime ngayTao;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "auth_provider", length = 50)
+    @Column(name = "auth_provider")
     private AuthProvider authProvider = AuthProvider.LOCAL;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    private Role role = Role.USER; // Default role
+    private Role role = Role.USER; // Mặc định là USER
+
+    @Column(name = "trang_thai")
+    private Boolean trangThai = true;
 
     // --- UserDetails Implementation ---
 
@@ -91,7 +94,7 @@ public class NguoiDung implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return this.trangThai;
     }
 
     // --- Relationships ---
@@ -107,8 +110,7 @@ public class NguoiDung implements UserDetails {
     @JsonIgnore
     @OneToMany(mappedBy = "nguoiDung")
     private List<LichHen> danhSachLichHen;
-
-    // Thêm mối quan hệ ngược với NhanVien
+    
     @JsonIgnore
     @OneToOne(mappedBy = "nguoiDung")
     private NhanVien nhanVien;

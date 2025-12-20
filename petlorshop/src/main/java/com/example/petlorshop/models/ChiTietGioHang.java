@@ -5,9 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "chi_tiet_gio_hang",
@@ -20,8 +17,8 @@ public class ChiTietGioHang {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "chi_tiet_gio_hang_id")
-    private Integer chiTietGioHangId;
+    @Column(name = "id")
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "gio_hang_id", nullable = false)
@@ -33,8 +30,4 @@ public class ChiTietGioHang {
 
     @Column(nullable = false)
     private int soLuong;
-
-    @CreationTimestamp
-    @Column(name = "ngay_them", updatable = false)
-    private LocalDateTime ngayThem;
 }

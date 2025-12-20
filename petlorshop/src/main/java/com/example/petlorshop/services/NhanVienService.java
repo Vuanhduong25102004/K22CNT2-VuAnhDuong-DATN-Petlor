@@ -19,6 +19,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -30,9 +32,10 @@ public class NhanVienService {
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private FileStorageService fileStorageService;
 
+    private static final List<String> INVALID_ROLES = Arrays.asList("USER", "ADMIN");
+
     @Transactional
     public NhanVienResponse createNhanVien(NhanVienRequest request, MultipartFile anhDaiDien) {
-        // Kiểm tra trùng lặp
         if (nguoiDungRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email đã được sử dụng.");
         }
@@ -42,17 +45,26 @@ public class NhanVienService {
         if (!StringUtils.hasText(request.getPassword())) {
             throw new IllegalArgumentException("Mật khẩu là bắt buộc khi tạo nhân viên mới.");
         }
-        Role role = request.getRole();
-        if (role == null || role == Role.USER || role == Role.ADMIN) {
-            throw new IllegalArgumentException("Vai trò không hợp lệ. Phải là DOCTOR, RECEPTIONIST, SPA hoặc STAFF.");
+        String roleStr = request.getRole();
+        if (roleStr == null || INVALID_ROLES.contains(roleStr.toUpperCase())) {
+            throw new IllegalArgumentException("Vai trò không hợp lệ. Phải là một vai trò nhân viên (ví dụ: STAFF, DOCTOR).");
         }
+
+        Role role;
+        try {
+            role = Role.valueOf(roleStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Vai trò không hợp lệ: " + roleStr);
+        }
+
+        // Tự động set chức vụ theo role
+        request.setChucVu(getChucVuByRole(role));
 
         String fileName = null;
         if (anhDaiDien != null && !anhDaiDien.isEmpty()) {
             fileName = fileStorageService.storeFile(anhDaiDien);
         }
 
-        // 1. Tạo NguoiDung
         NguoiDung newUser = new NguoiDung();
         newUser.setHoTen(request.getHoTen());
         newUser.setEmail(request.getEmail());
@@ -60,13 +72,12 @@ public class NhanVienService {
         newUser.setSoDienThoai(request.getSoDienThoai());
         newUser.setDiaChi(request.getDiaChi());
         newUser.setRole(role);
-        newUser.setAnhDaiDien(fileName); // Cập nhật ảnh cho NguoiDung
+        newUser.setAnhDaiDien(fileName);
         NguoiDung savedUser = nguoiDungRepository.save(newUser);
 
-        // 2. Tạo NhanVien
         NhanVien newNhanVien = new NhanVien();
         mapRequestToEntity(newNhanVien, request);
-        newNhanVien.setAnhDaiDien(fileName); // Cập nhật ảnh cho NhanVien
+        newNhanVien.setAnhDaiDien(fileName);
         newNhanVien.setNguoiDung(savedUser);
         NhanVien savedNhanVien = nhanVienRepository.save(newNhanVien);
 
@@ -77,48 +88,95 @@ public class NhanVienService {
     public NhanVienResponse updateNhanVien(Integer id, NhanVienRequest request, MultipartFile anhDaiDien) {
         NhanVien nhanVien = nhanVienRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Nhân viên không tồn tại với id: " + id));
+        
         NguoiDung nguoiDung = nhanVien.getNguoiDung();
+        boolean isNewUser = false;
+
         if (nguoiDung == null) {
-            throw new IllegalStateException("Nhân viên này không có tài khoản người dùng liên kết.");
+            nguoiDung = new NguoiDung();
+            isNewUser = true;
         }
 
-        // Kiểm tra trùng email
-        if (StringUtils.hasText(request.getEmail()) && !request.getEmail().equals(nguoiDung.getEmail())) {
-            nguoiDungRepository.findByEmail(request.getEmail()).ifPresent(u -> {
-                throw new RuntimeException("Email đã được sử dụng.");
-            });
+        // Check Email
+        if (StringUtils.hasText(request.getEmail())) {
+            if (!request.getEmail().equals(nhanVien.getEmail())) {
+                if (nhanVienRepository.findByEmail(request.getEmail()).isPresent()) {
+                    throw new RuntimeException("Email đã được sử dụng bởi nhân viên khác.");
+                }
+            }
+            
+            Optional<NguoiDung> existingUser = nguoiDungRepository.findByEmail(request.getEmail());
+            if (existingUser.isPresent()) {
+                if (isNewUser || !existingUser.get().getUserId().equals(nguoiDung.getUserId())) {
+                    throw new RuntimeException("Email đã được sử dụng bởi người dùng khác.");
+                }
+            }
             nguoiDung.setEmail(request.getEmail());
+        } else if (isNewUser) {
+            if (StringUtils.hasText(nhanVien.getEmail())) {
+                 if (nguoiDungRepository.findByEmail(nhanVien.getEmail()).isPresent()) {
+                      throw new RuntimeException("Email hiện tại của nhân viên đã được sử dụng bởi tài khoản khác.");
+                 }
+                 nguoiDung.setEmail(nhanVien.getEmail());
+            } else {
+                throw new IllegalArgumentException("Email là bắt buộc để tạo tài khoản người dùng.");
+            }
         }
 
-        // Kiểm tra trùng số điện thoại
-        if (StringUtils.hasText(request.getSoDienThoai()) && !request.getSoDienThoai().equals(nguoiDung.getSoDienThoai())) {
-            nguoiDungRepository.findBySoDienThoai(request.getSoDienThoai()).ifPresent(u -> {
-                throw new RuntimeException("Số điện thoại đã được sử dụng.");
-            });
+        // Check Phone
+        if (StringUtils.hasText(request.getSoDienThoai())) {
+            if (!request.getSoDienThoai().equals(nhanVien.getSoDienThoai()) || isNewUser) {
+                Optional<NguoiDung> existingUser = nguoiDungRepository.findBySoDienThoai(request.getSoDienThoai());
+                if (existingUser.isPresent()) {
+                    if (isNewUser || !existingUser.get().getUserId().equals(nguoiDung.getUserId())) {
+                        throw new RuntimeException("Số điện thoại đã được sử dụng.");
+                    }
+                }
+            }
             nguoiDung.setSoDienThoai(request.getSoDienThoai());
         }
 
-        String fileName = nhanVien.getAnhDaiDien(); // Giữ ảnh cũ nếu không có ảnh mới
+        String fileName = nhanVien.getAnhDaiDien();
         if (anhDaiDien != null && !anhDaiDien.isEmpty()) {
             fileName = fileStorageService.storeFile(anhDaiDien);
         }
 
-        // Cập nhật NguoiDung
         nguoiDung.setHoTen(request.getHoTen());
         nguoiDung.setDiaChi(request.getDiaChi());
-        nguoiDung.setAnhDaiDien(fileName); // Cập nhật ảnh
+        nguoiDung.setAnhDaiDien(fileName);
         
         if (StringUtils.hasText(request.getPassword())) {
             nguoiDung.setMatKhau(passwordEncoder.encode(request.getPassword()));
+        } else if (isNewUser) {
+            throw new IllegalArgumentException("Mật khẩu là bắt buộc để tạo tài khoản người dùng mới.");
         }
-        if (request.getRole() != null && request.getRole() != Role.USER && request.getRole() != Role.ADMIN) {
-            nguoiDung.setRole(request.getRole());
+        
+        // Update Role và Chức vụ
+        String roleStr = request.getRole();
+        if (roleStr != null && !INVALID_ROLES.contains(roleStr.toUpperCase())) {
+            try {
+                Role role = Role.valueOf(roleStr.toUpperCase());
+                nguoiDung.setRole(role);
+                // Tự động cập nhật chức vụ theo role mới
+                request.setChucVu(getChucVuByRole(role));
+            } catch (IllegalArgumentException e) {
+                // Ignore invalid role
+            }
+        } else if (isNewUser) {
+            nguoiDung.setRole(Role.STAFF);
+            request.setChucVu(getChucVuByRole(Role.STAFF));
         }
-        nguoiDungRepository.save(nguoiDung);
+        
+        NguoiDung savedUser = nguoiDungRepository.save(nguoiDung);
 
-        // Cập nhật NhanVien
         mapRequestToEntity(nhanVien, request);
-        nhanVien.setAnhDaiDien(fileName); // Cập nhật ảnh
+        nhanVien.setAnhDaiDien(fileName);
+        nhanVien.setNguoiDung(savedUser);
+        
+        if (nhanVien.getEmail() == null) {
+            nhanVien.setEmail(savedUser.getEmail());
+        }
+
         NhanVien updatedNhanVien = nhanVienRepository.save(nhanVien);
         
         return convertToResponse(updatedNhanVien);
@@ -135,7 +193,6 @@ public class NhanVienService {
     public void deleteNhanVien(Integer id) {
         NhanVien nhanVien = nhanVienRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Nhân viên không tồn tại với id: " + id));
-        // Cân nhắc: Có nên xóa cả NguoiDung liên kết? Hiện tại là không.
         nhanVienRepository.delete(nhanVien);
     }
 
@@ -165,7 +222,20 @@ public class NhanVienService {
                 nhanVien.getChuyenKhoa(),
                 nhanVien.getKinhNghiem(),
                 nhanVien.getAnhDaiDien(),
+                nhanVien.getNguoiDung() != null ? nhanVien.getNguoiDung().getRole() : null, // Đã sửa: truyền trực tiếp Enum Role
                 nhanVien.getNguoiDung() != null ? nhanVien.getNguoiDung().getUserId() : null
         );
+    }
+
+    private String getChucVuByRole(Role role) {
+        if (role == null) return "Nhân viên";
+        switch (role) {
+            case DOCTOR: return "Bác sĩ thú y";
+            case SPA: return "Nhân viên Spa";
+            case RECEPTIONIST: return "Lễ tân";
+            case ADMIN: return "Quản lý";
+            case STAFF: return "Nhân viên cửa hàng";
+            default: return "Nhân viên";
+        }
     }
 }

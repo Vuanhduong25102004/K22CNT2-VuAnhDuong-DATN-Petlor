@@ -2,18 +2,18 @@ import apiClient from './apiClient';
 
 const orderService = {
   // --- ĐƠN HÀNG ---
-  getAllOrders: () => apiClient.get('/don-hang'),
+  // SỬA: Thêm params để có thể truyền { page: 0, size: 1000 }
+  getAllOrders: (params) => apiClient.get('/don-hang', { params }),
   
   getOrderById: (id) => apiClient.get(`/don-hang/${id}`),
   
   createOrder: (data) => apiClient.post('/don-hang', data),
   
-  updateOrder: (id, data) => apiClient.put(`/don-hang/${id}`, data), // Thường dùng để cập nhật trạng thái đơn
+  updateOrder: (id, data) => apiClient.put(`/don-hang/${id}`, data),
   
   deleteOrder: (id) => apiClient.delete(`/don-hang/${id}`),
 
   // --- CHI TIẾT ĐƠN HÀNG ---
-  // API lấy chi tiết theo ID hóa đơn (tùy backend bạn viết, giả sử getById của order đã bao gồm chi tiết)
   getOrderDetail: (id) => apiClient.get(`/chi-tiet-don-hang/${id}`), 
 
   // --- GIỎ HÀNG ---

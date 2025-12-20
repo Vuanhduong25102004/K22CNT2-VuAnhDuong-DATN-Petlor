@@ -1,6 +1,6 @@
 package com.example.petlorshop.dto;
 
-import com.example.petlorshop.models.TrangThaiLichHen;
+import com.example.petlorshop.models.LichHen; // Sửa import
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,8 +17,8 @@ public class LichHenUpdateRequest {
     private LocalDateTime thoiGianBatDau;
     private LocalDateTime thoiGianKetThuc;
     
-    @JsonProperty("trangThaiLichHen") // Giữ tên JSON là "trangThaiLichHen" cho Frontend
-    private TrangThaiLichHen status;
+    @JsonProperty("trangThai")
+    private LichHen.TrangThai trangThai; // Sửa kiểu dữ liệu
     
-    private String ghiChuKhachHang;
+    private String ghiChu; // Sửa tên trường
 }

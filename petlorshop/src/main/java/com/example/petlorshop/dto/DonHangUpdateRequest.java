@@ -1,5 +1,6 @@
 package com.example.petlorshop.dto;
 
+import com.example.petlorshop.models.DonHang;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,5 +11,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DonHangUpdateRequest {
-    private String trangThaiDonHang;
+    private DonHang.TrangThaiDonHang trangThai;
+    private String diaChiGiaoHang;
 }

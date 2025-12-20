@@ -30,6 +30,12 @@ const userService = {
 
   getStaffById: (id) => apiClient.get(`/nhan-vien/${id}`),
 
+  createStaff: (data) => {
+    const headers =
+      data instanceof FormData ? { "Content-Type": "multipart/form-data" } : {};
+    return apiClient.post("/nhan-vien", data, { headers });
+  },
+
   updateStaff: (id, data) => {
     const headers =
       data instanceof FormData ? { "Content-Type": "multipart/form-data" } : {};

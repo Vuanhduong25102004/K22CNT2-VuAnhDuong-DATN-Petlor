@@ -1,21 +1,7 @@
 import React from "react";
-import { formatCurrency } from "../utils";
+import { formatCurrency } from "../utils"; // Đảm bảo đường dẫn import đúng
 
-const ServiceStats = ({ services, totalServices }) => {
-  // Tính giá trung bình
-  const avgPrice =
-    services.length > 0
-      ? services.reduce((sum, s) => sum + s.giaDichVu, 0) / services.length
-      : 0;
-
-  // Tìm dịch vụ có giá cao nhất
-  const expensiveService =
-    services.length > 0
-      ? services.reduce((prev, current) =>
-          prev.giaDichVu > current.giaDichVu ? prev : current
-        )
-      : { tenDichVu: "---" };
-
+const ServiceStats = ({ totalServices, maxPriceName, avgPrice }) => {
   const stats = [
     {
       title: "Tổng dịch vụ",
@@ -27,7 +13,7 @@ const ServiceStats = ({ services, totalServices }) => {
     },
     {
       title: "Dịch vụ giá cao nhất",
-      value: expensiveService.tenDichVu,
+      value: maxPriceName,
       icon: "star",
       color: "text-yellow-600",
       bg: "bg-yellow-100",

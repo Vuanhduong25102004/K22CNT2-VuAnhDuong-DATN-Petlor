@@ -43,8 +43,7 @@ public class ThuCungService {
 
     @Transactional
     public ThuCung createThuCung(ThuCungRequest request, MultipartFile hinhAnh) {
-        // Logic "Find or Create" NguoiDung
-        NguoiDung chuSoHuu = findOrCreateOwner(request);
+        NguoiDung chuSoHuu = findOrCreateOwner(request.getUserId(), request.getTenChuSoHuu(), request.getSoDienThoaiChuSoHuu());
 
         String fileName = null;
         if (hinhAnh != null && !hinhAnh.isEmpty()) {
@@ -64,31 +63,27 @@ public class ThuCungService {
         return thuCungRepository.save(thuCung);
     }
 
-    private NguoiDung findOrCreateOwner(ThuCungRequest request) {
-        // Ưu tiên 1: Tìm theo userId nếu có
-        if (request.getUserId() != null) {
-            return nguoiDungRepository.findById(request.getUserId())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + request.getUserId()));
+    // Refactor: Tách logic tìm/tạo chủ sở hữu ra để dùng chung
+    private NguoiDung findOrCreateOwner(Integer userId, String tenChuSoHuu, String soDienThoai) {
+        if (userId != null) {
+            return nguoiDungRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + userId));
         }
 
-        // Ưu tiên 2: Tìm theo số điện thoại
-        if (StringUtils.hasText(request.getSoDienThoaiChuSoHuu())) {
-            Optional<NguoiDung> existingUser = nguoiDungRepository.findBySoDienThoai(request.getSoDienThoaiChuSoHuu());
+        if (StringUtils.hasText(soDienThoai)) {
+            Optional<NguoiDung> existingUser = nguoiDungRepository.findBySoDienThoai(soDienThoai);
             if (existingUser.isPresent()) {
                 return existingUser.get();
             }
 
-            // Nếu không tìm thấy, tạo người dùng mới
-            if (!StringUtils.hasText(request.getTenChuSoHuu())) {
+            if (!StringUtils.hasText(tenChuSoHuu)) {
                 throw new IllegalArgumentException("Tên chủ sở hữu là bắt buộc khi tạo người dùng mới.");
             }
             NguoiDung newUser = new NguoiDung();
-            newUser.setHoTen(request.getTenChuSoHuu());
-            newUser.setSoDienThoai(request.getSoDienThoaiChuSoHuu());
-            // Email có thể để trống hoặc tạo email giả
-            newUser.setEmail(request.getSoDienThoaiChuSoHuu() + "@petshop.local");
-            // Mật khẩu mặc định là số điện thoại
-            newUser.setMatKhau(passwordEncoder.encode(request.getSoDienThoaiChuSoHuu()));
+            newUser.setHoTen(tenChuSoHuu);
+            newUser.setSoDienThoai(soDienThoai);
+            newUser.setEmail(soDienThoai + "@petshop.local");
+            newUser.setMatKhau(passwordEncoder.encode(soDienThoai));
             newUser.setRole(Role.USER);
             return nguoiDungRepository.save(newUser);
         }
@@ -112,6 +107,12 @@ public class ThuCungService {
         thuCung.setNgaySinh(request.getNgaySinh());
         thuCung.setGioiTinh(request.getGioiTinh());
         thuCung.setGhiChuSucKhoe(request.getGhiChuSucKhoe());
+
+        // Logic đổi chủ sở hữu: Kiểm tra xem có thông tin đổi chủ không
+        if (request.getUserId() != null || StringUtils.hasText(request.getSoDienThoaiChuSoHuu())) {
+            NguoiDung chuMoi = findOrCreateOwner(request.getUserId(), request.getTenChuSoHuu(), request.getSoDienThoaiChuSoHuu());
+            thuCung.setNguoiDung(chuMoi);
+        }
 
         return thuCungRepository.save(thuCung);
     }

@@ -130,12 +130,12 @@ const OrderDetailModal = ({ isOpen, onClose, order, orderItems }) => {
                             >
                               <td className="px-4 py-3 font-medium text-gray-900">
                                 <div className="flex items-center">
+                                  {/* Cập nhật logic hiển thị ảnh theo JSON mới */}
                                   <img
                                     src={
-                                      item.hinhAnhUrl ||
-                                      (item.sanPham &&
-                                        item.sanPham.hinhAnhUrl) ||
-                                      "https://via.placeholder.com/40?text=SP"
+                                      item.hinhAnhUrl
+                                        ? `/api/products/images/${item.hinhAnhUrl}` // Giả sử path ảnh cần prefix, hoặc nếu full url thì để nguyên
+                                        : "https://via.placeholder.com/40?text=SP"
                                     }
                                     alt="Product"
                                     className="w-10 h-10 object-cover rounded mr-3 border border-gray-200"
@@ -144,23 +144,23 @@ const OrderDetailModal = ({ isOpen, onClose, order, orderItems }) => {
                                         "https://via.placeholder.com/40?text=SP";
                                     }}
                                   />
+                                  {/* Cập nhật logic hiển thị tên theo JSON mới */}
                                   <span>
                                     {item.tenSanPham ||
-                                      (item.sanPham &&
-                                        item.sanPham.tenSanPham) ||
                                       "Sản phẩm không xác định"}
                                   </span>
                                 </div>
                               </td>
+                              {/* Cập nhật đơn giá (JSON mới là donGia) */}
                               <td className="px-4 py-3 text-right">
-                                {formatCurrency(item.donGiaLucMua || 0)}
+                                {formatCurrency(item.donGia || 0)}
                               </td>
                               <td className="px-4 py-3 text-center">
                                 {item.soLuong}
                               </td>
                               <td className="px-4 py-3 text-right font-medium">
                                 {formatCurrency(
-                                  (item.donGiaLucMua || 0) * item.soLuong
+                                  (item.donGia || 0) * item.soLuong
                                 )}
                               </td>
                             </tr>
@@ -185,7 +185,7 @@ const OrderDetailModal = ({ isOpen, onClose, order, orderItems }) => {
             {/* Footer */}
             <div className="px-10 py-6 bg-white border-t border-border-light/50 flex justify-between items-center sticky bottom-0 z-20">
               <div className="text-lg font-bold text-gray-900">
-                Tổng cộng:{" "}
+                Tổng cộng: {/* Sử dụng tongTien đã được map ở index.jsx */}
                 <span className="text-primary text-xl">
                   {formatCurrency(order.tongTien)}
                 </span>

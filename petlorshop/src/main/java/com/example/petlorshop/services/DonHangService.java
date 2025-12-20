@@ -3,11 +3,15 @@ package com.example.petlorshop.services;
 import com.example.petlorshop.dto.*;
 import com.example.petlorshop.models.*;
 import com.example.petlorshop.repositories.DonHangRepository;
+import com.example.petlorshop.repositories.KhuyenMaiRepository;
 import com.example.petlorshop.repositories.NguoiDungRepository;
 import com.example.petlorshop.repositories.SanPhamRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -25,11 +29,12 @@ public class DonHangService {
     private NguoiDungRepository nguoiDungRepository;
     @Autowired
     private SanPhamRepository sanPhamRepository;
+    @Autowired
+    private KhuyenMaiRepository khuyenMaiRepository;
 
-    public List<DonHangResponse> getAllDonHang() {
-        return donHangRepository.findAll().stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
+    public Page<DonHangResponse> getAllDonHang(Pageable pageable) {
+        return donHangRepository.findAll(pageable)
+                .map(this::convertToResponse);
     }
 
     public Optional<DonHangResponse> getDonHangById(Integer id) {
@@ -44,10 +49,11 @@ public class DonHangService {
         DonHang donHang = new DonHang();
         donHang.setNguoiDung(nguoiDung);
         donHang.setDiaChiGiaoHang(donHangRequest.getDiaChiGiaoHang());
-        donHang.setNgayDatHang(LocalDateTime.now());
-        donHang.setTrangThaiDonHang("ĐANG XỬ LÝ");
+        donHang.setSoDienThoaiNhan(donHangRequest.getSoDienThoaiNhan());
+        donHang.setPhuongThucThanhToan(donHangRequest.getPhuongThucThanhToan());
+        donHang.setTrangThai(DonHang.TrangThaiDonHang.CHO_XU_LY);
 
-        BigDecimal tongTien = BigDecimal.ZERO;
+        BigDecimal tongTienHang = BigDecimal.ZERO;
         List<ChiTietDonHang> chiTietItems = new ArrayList<>();
 
         for (ChiTietDonHangRequest itemRequest : donHangRequest.getChiTietDonHangs()) {
@@ -58,38 +64,63 @@ public class DonHangService {
                 throw new RuntimeException("Sản phẩm '" + sanPham.getTenSanPham() + "' không đủ số lượng tồn kho.");
             }
 
+            BigDecimal giaBan = Optional.ofNullable(sanPham.getGiaGiam()).orElse(sanPham.getGia());
+
             ChiTietDonHang chiTiet = new ChiTietDonHang();
             chiTiet.setDonHang(donHang);
             chiTiet.setSanPham(sanPham);
             chiTiet.setSoLuong(itemRequest.getSoLuong());
-            chiTiet.setDonGiaLucMua(sanPham.getGia());
+            chiTiet.setDonGia(giaBan);
             chiTietItems.add(chiTiet);
 
-            tongTien = tongTien.add(sanPham.getGia().multiply(BigDecimal.valueOf(itemRequest.getSoLuong())));
+            tongTienHang = tongTienHang.add(giaBan.multiply(BigDecimal.valueOf(itemRequest.getSoLuong())));
 
             sanPham.setSoLuongTonKho(sanPham.getSoLuongTonKho() - itemRequest.getSoLuong());
             sanPhamRepository.save(sanPham);
         }
-
-        donHang.setTongTien(tongTien);
+        
+        donHang.setTongTienHang(tongTienHang);
         donHang.setChiTietDonHangs(chiTietItems);
+
+        BigDecimal soTienGiam = BigDecimal.ZERO;
+        if (donHangRequest.getMaKhuyenMai() != null && !donHangRequest.getMaKhuyenMai().isEmpty()) {
+            KhuyenMai khuyenMai = khuyenMaiRepository.findByMaCode(donHangRequest.getMaKhuyenMai())
+                .orElseThrow(() -> new RuntimeException("Mã khuyến mãi không hợp lệ."));
+            
+            if (tongTienHang.compareTo(khuyenMai.getDonToiThieu()) >= 0) {
+                if (khuyenMai.getLoaiGiamGia() == KhuyenMai.LoaiGiamGia.PHAN_TRAM) {
+                    soTienGiam = tongTienHang.multiply(khuyenMai.getGiaTriGiam().divide(new BigDecimal(100)));
+                } else {
+                    soTienGiam = khuyenMai.getGiaTriGiam();
+                }
+            }
+            donHang.setKhuyenMai(khuyenMai);
+        }
+
+        donHang.setSoTienGiam(soTienGiam);
+        donHang.setTongThanhToan(tongTienHang.subtract(soTienGiam));
 
         return donHangRepository.save(donHang);
     }
 
-    public DonHang updateDonHangStatus(Integer id, DonHangUpdateRequest updateRequest) {
+    public DonHangResponse updateDonHangStatus(Integer id, DonHangUpdateRequest updateRequest) {
         DonHang donHang = donHangRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Đơn hàng không tồn tại với id: " + id));
 
-        donHang.setTrangThaiDonHang(updateRequest.getTrangThaiDonHang());
+        if (updateRequest.getTrangThai() != null) {
+            donHang.setTrangThai(updateRequest.getTrangThai());
+        }
 
-        return donHangRepository.save(donHang);
+        if (StringUtils.hasText(updateRequest.getDiaChiGiaoHang())) {
+            donHang.setDiaChiGiaoHang(updateRequest.getDiaChiGiaoHang());
+        }
+
+        DonHang savedDonHang = donHangRepository.save(donHang);
+        return convertToResponse(savedDonHang);
     }
 
     public void deleteDonHang(Integer id) {
-        DonHang donHang = donHangRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Đơn hàng không tồn tại với id: " + id));
-        donHangRepository.delete(donHang);
+        donHangRepository.deleteById(id);
     }
 
     private DonHangResponse convertToResponse(DonHang donHang) {
@@ -100,11 +131,16 @@ public class DonHangService {
         return new DonHangResponse(
                 donHang.getDonHangId(),
                 donHang.getNgayDatHang(),
-                donHang.getTongTien(),
-                donHang.getTrangThaiDonHang(),
+                donHang.getTongTienHang(),
+                donHang.getSoTienGiam(),
+                donHang.getTongThanhToan(),
+                donHang.getTrangThai() != null ? donHang.getTrangThai().getDisplayName() : null, // Sửa ở đây
+                donHang.getPhuongThucThanhToan(),
                 donHang.getDiaChiGiaoHang(),
+                donHang.getSoDienThoaiNhan(),
                 donHang.getNguoiDung() != null ? donHang.getNguoiDung().getUserId() : null,
                 donHang.getNguoiDung() != null ? donHang.getNguoiDung().getHoTen() : null,
+                donHang.getKhuyenMai() != null ? donHang.getKhuyenMai().getMaCode() : null,
                 chiTietResponses
         );
     }
@@ -112,9 +148,9 @@ public class DonHangService {
     private ChiTietDonHangResponse convertChiTietToResponse(ChiTietDonHang chiTiet) {
         SanPham sanPham = chiTiet.getSanPham();
         return new ChiTietDonHangResponse(
-                chiTiet.getChiTietId(),
+                chiTiet.getId(),
                 chiTiet.getSoLuong(),
-                chiTiet.getDonGiaLucMua(),
+                chiTiet.getDonGia(),
                 sanPham != null ? sanPham.getSanPhamId() : null,
                 sanPham != null ? sanPham.getTenSanPham() : null,
                 sanPham != null ? sanPham.getHinhAnh() : null

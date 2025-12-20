@@ -46,25 +46,18 @@ public class GioHangService {
         Optional<ChiTietGioHang> existingItemOpt = chiTietGioHangRepository.findByGioHang_GioHangIdAndSanPham_SanPhamId(gioHang.getGioHangId(), sanPham.getSanPhamId());
 
         if (existingItemOpt.isPresent()) {
-            // Nếu sản phẩm đã có, chỉ cập nhật số lượng
             ChiTietGioHang item = existingItemOpt.get();
             item.setSoLuong(item.getSoLuong() + request.getSoLuong());
             chiTietGioHangRepository.save(item);
         } else {
-            // Nếu sản phẩm chưa có, tạo mới và thêm vào giỏ hàng
             ChiTietGioHang newItem = new ChiTietGioHang();
             newItem.setGioHang(gioHang);
             newItem.setSanPham(sanPham);
             newItem.setSoLuong(request.getSoLuong());
-            
-            // **FIX: Thêm chi tiết mới vào danh sách của giỏ hàng trong bộ nhớ**
             gioHang.getChiTietGioHangList().add(newItem);
-            
-            // Lưu giỏ hàng sẽ tự động lưu các chi tiết mới nhờ CascadeType.ALL
             gioHangRepository.save(gioHang);
         }
         
-        // Không cần query lại, đối tượng gioHang đã được cập nhật
         return mapToGioHangResponse(gioHang);
     }
 
@@ -72,9 +65,7 @@ public class GioHangService {
         GioHang gioHang = gioHangRepository.findByNguoiDung_UserId(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy giỏ hàng cho người dùng."));
 
-        // **FIX: Xóa item khỏi list để orphanRemoval hoạt động**
         gioHang.getChiTietGioHangList().removeIf(item -> item.getSanPham().getSanPhamId().equals(sanPhamId));
-        
         gioHangRepository.save(gioHang);
 
         return mapToGioHangResponse(gioHang);
@@ -132,13 +123,15 @@ public class GioHangService {
 
     private CartItemResponse mapToCartItemResponse(ChiTietGioHang chiTiet) {
         SanPham sanPham = chiTiet.getSanPham();
-        BigDecimal thanhTien = sanPham.getGia().multiply(BigDecimal.valueOf(chiTiet.getSoLuong()));
+        BigDecimal giaBan = Optional.ofNullable(sanPham.getGiaGiam()).orElse(sanPham.getGia());
+        BigDecimal thanhTien = giaBan.multiply(BigDecimal.valueOf(chiTiet.getSoLuong()));
+        
         return new CartItemResponse(
-                chiTiet.getChiTietGioHangId(),
+                chiTiet.getId(), // Sửa ở đây
                 sanPham.getSanPhamId(),
                 sanPham.getTenSanPham(),
                 sanPham.getHinhAnh(),
-                sanPham.getGia(),
+                giaBan, // Sử dụng giá bán thực tế
                 chiTiet.getSoLuong(),
                 thanhTien
         );

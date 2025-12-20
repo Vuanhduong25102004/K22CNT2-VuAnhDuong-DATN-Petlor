@@ -40,7 +40,8 @@ public class ThuCungController {
                 thuCung.getGhiChuSucKhoe(),
                 thuCung.getHinhAnh(),
                 thuCung.getNguoiDung().getUserId(),
-                thuCung.getNguoiDung().getHoTen()
+                thuCung.getNguoiDung().getHoTen(),
+                thuCung.getNguoiDung().getSoDienThoai() // Thêm số điện thoại
         );
     }
 

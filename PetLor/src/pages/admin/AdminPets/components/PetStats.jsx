@@ -1,14 +1,6 @@
 import React from "react";
 
-const PetStats = ({ pets, totalPets }) => {
-  // Tính toán trên trang hiện tại (theo logic cũ) hoặc nếu backend trả về total count
-  const countDogs = pets.filter(
-    (p) => p.chungLoai && p.chungLoai.toLowerCase() === "chó"
-  ).length;
-  const countCats = pets.filter(
-    (p) => p.chungLoai && p.chungLoai.toLowerCase() === "mèo"
-  ).length;
-
+const PetStats = ({ totalPets = 0, countDogs = 0, countCats = 0 }) => {
   const stats = [
     {
       title: "Tổng thú cưng",

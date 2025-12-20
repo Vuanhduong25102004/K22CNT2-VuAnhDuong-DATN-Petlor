@@ -1,6 +1,5 @@
 package com.example.petlorshop.dto;
 
-import com.example.petlorshop.models.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +16,7 @@ public class UnifiedCreateUserRequest {
     private String password;
     private String soDienThoai;
     private String diaChi;
-    private Role role;
+    private String role; // Sửa thành String
 
     // Thông tin chỉ dành cho Nhân viên (Optional)
     private String chucVu;

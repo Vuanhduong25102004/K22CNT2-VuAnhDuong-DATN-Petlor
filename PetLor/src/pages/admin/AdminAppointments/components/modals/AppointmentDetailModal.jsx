@@ -89,9 +89,19 @@ const AppointmentDetailModal = ({ isOpen, onClose, appointment }) => {
                         Trạng thái
                       </label>
                       <div className="mt-1">
-                        {getStatusBadge(appointment.trangThaiLichHen)}
+                        {getStatusBadge(appointment.trangThai)}
                       </div>
                     </div>
+                    {appointment.ghiChuKhachHang && (
+                      <div className="input-group md:col-span-2">
+                        <label className="form-label block text-sm font-medium text-text-heading mb-2">
+                          Ghi chú của khách hàng
+                        </label>
+                        <div className="p-3 bg-gray-50 rounded-lg border border-border-light text-text-body">
+                          {appointment.ghiChuKhachHang}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

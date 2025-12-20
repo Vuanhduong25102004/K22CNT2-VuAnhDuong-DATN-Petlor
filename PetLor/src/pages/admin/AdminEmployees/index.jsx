@@ -1,10 +1,8 @@
 /**
  * @file index.jsx
- * @description Trang quản lý nhân viên (Container).
- * Đã tối ưu hóa: Gộp Create và Edit modal thành EmployeeFormModal.
+ * @description Trang quản lý nhân viên (Container) - Đã fix lỗi đếm Stats.
  */
 import React, { useEffect, useState } from "react";
-// Đảm bảo đường dẫn import đúng (thêm một cấp ../ nếu cần tùy cấu trúc)
 import userService from "../../../services/userService";
 import { toast } from "react-toastify";
 
@@ -14,8 +12,6 @@ import EmployeeFilters from "./components/EmployeeFilters";
 import EmployeeTable from "./components/EmployeeTable";
 import EmployeeDetailModal from "./components/modals/EmployeeDetailModal";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
-
-// Import Modal FORM GỘP (Thay thế cho CreateModal và EditModal cũ)
 import EmployeeFormModal from "./components/modals/EmployeeFormModal";
 
 const AdminEmployees = () => {
@@ -23,16 +19,23 @@ const AdminEmployees = () => {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // State Thống kê (Mới)
+  const [stats, setStats] = useState({
+    totalStaff: 0,
+    countVets: 0,
+    countSpa: 0,
+  });
+
   // Modals State
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isFormModalOpen, setIsFormModalOpen] = useState(false); // Modal dùng chung cho Thêm/Sửa
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] =
     useState(false);
 
   // Data State
-  const [selectedEmployee, setSelectedEmployee] = useState(null); // Cho Detail Modal
-  const [editingEmployee, setEditingEmployee] = useState(null); // Cho Form Modal (null = Thêm mới)
-  const [employeeToDeleteId, setEmployeeToDeleteId] = useState(null); // Cho Delete Modal
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [editingEmployee, setEditingEmployee] = useState(null);
+  const [employeeToDeleteId, setEmployeeToDeleteId] = useState(null);
 
   // Pagination & Filter State
   const [searchTerm, setSearchTerm] = useState("");
@@ -42,7 +45,54 @@ const AdminEmployees = () => {
   const [totalElements, setTotalElements] = useState(0);
   const ITEMS_PER_PAGE = 5;
 
-  // --- 2. Data Fetching ---
+  // --- 2. Logic Fetch Stats (MỚI) ---
+  const fetchStats = async () => {
+    try {
+      // Tải danh sách lớn (1000 item) để đếm
+      const response = await userService.getAllStaff({
+        page: 0,
+        size: 1000,
+      });
+      const allStaff = response?.content ?? [];
+
+      let vets = 0;
+      let spa = 0;
+
+      allStaff.forEach((e) => {
+        // Kiểm tra dựa trên Chức vụ (chucVu) hoặc Role
+        const title = e.chucVu ? e.chucVu.toLowerCase() : "";
+        const role = e.role ? e.role.toLowerCase() : "";
+
+        // Logic đếm Bác sĩ
+        if (
+          title.includes("bác sĩ") ||
+          title.includes("doctor") ||
+          role === "doctor"
+        ) {
+          vets++;
+        }
+
+        // Logic đếm Spa
+        if (
+          title.includes("spa") ||
+          title.includes("grooming") ||
+          role === "spa"
+        ) {
+          spa++;
+        }
+      });
+
+      setStats({
+        totalStaff: response?.totalElements || allStaff.length,
+        countVets: vets,
+        countSpa: spa,
+      });
+    } catch (error) {
+      console.error("Lỗi tính thống kê nhân viên:", error);
+    }
+  };
+
+  // --- 3. Data Fetching (Table) ---
   const fetchEmployees = async () => {
     setLoading(true);
     try {
@@ -59,7 +109,6 @@ const AdminEmployees = () => {
       const response = await userService.getAllStaff(params);
       const employeesData = response?.content ?? [];
 
-      // Map dữ liệu cho phù hợp với UI
       const formattedData = employeesData.map((emp) => ({
         ...emp,
         nhanVienId: emp.nhanVienId,
@@ -83,12 +132,16 @@ const AdminEmployees = () => {
     }
   };
 
-  // --- 3. Effects ---
+  // --- Effects ---
   useEffect(() => {
     fetchEmployees();
   }, [currentPage, searchTerm, filterPosition]);
 
-  // Xử lý phím ESC để đóng modal
+  // Load Stats 1 lần
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
   useEffect(() => {
     const handleEscKey = (event) => {
       if (event.key === "Escape") {
@@ -101,9 +154,8 @@ const AdminEmployees = () => {
     return () => document.removeEventListener("keydown", handleEscKey);
   }, []);
 
-  // --- 4. Handlers ---
+  // --- Handlers ---
 
-  // Xóa nhân viên
   const handleDeleteClick = (id) => {
     setEmployeeToDeleteId(id);
     setIsConfirmDeleteModalOpen(true);
@@ -115,7 +167,8 @@ const AdminEmployees = () => {
       await userService.deleteStaff(employeeToDeleteId);
       toast.success("Xóa thành công!");
 
-      // Logic lùi trang nếu xóa hết item ở trang cuối
+      fetchStats(); // Cập nhật lại thống kê sau khi xóa
+
       if (employees.length === 1 && currentPage > 1) {
         setCurrentPage(currentPage - 1);
       } else {
@@ -130,7 +183,6 @@ const AdminEmployees = () => {
     }
   };
 
-  // Xem chi tiết
   const handleViewDetail = async (id) => {
     try {
       const data = await userService.getStaffById(id);
@@ -142,27 +194,22 @@ const AdminEmployees = () => {
     }
   };
 
-  // --- OPEN FORM HANDLERS ---
-
-  // Mở form Thêm mới
   const handleOpenCreateModal = () => {
-    setEditingEmployee(null); // Quan trọng: null báo hiệu là chế độ Thêm mới
+    setEditingEmployee(null);
     setIsFormModalOpen(true);
   };
 
-  // Mở form Chỉnh sửa
   const handleOpenEditModal = (emp) => {
-    setEditingEmployee(emp); // Quan trọng: có dữ liệu báo hiệu là chế độ Chỉnh sửa
+    setEditingEmployee(emp);
     setIsFormModalOpen(true);
   };
 
-  // --- SUBMIT FORM HANDLER (Dùng chung cho cả Thêm và Sửa) ---
   const handleFormSubmit = async (formData, avatarFile) => {
     const dataPayload = new FormData();
 
     try {
       if (editingEmployee) {
-        // === LOGIC CẬP NHẬT (UPDATE) ===
+        // UPDATE
         const updateData = {
           hoTen: formData.hoTen,
           chucVu: formData.chucVu,
@@ -170,20 +217,17 @@ const AdminEmployees = () => {
           email: formData.email,
           chuyenKhoa: formData.chuyenKhoa,
           kinhNghiem: formData.kinhNghiem,
-          userId: editingEmployee.userId, // Cần ID user để map bên backend
+          role: formData.role,
+          userId: editingEmployee.userId,
         };
-
-        // Nếu có nhập mật khẩu mới thì gửi lên, không thì thôi
         if (formData.password) {
           updateData.password = formData.password;
         }
 
-        // Backend thường yêu cầu object JSON trong FormData với key cụ thể (ví dụ 'nhanVien')
         dataPayload.append(
           "nhanVien",
           new Blob([JSON.stringify(updateData)], { type: "application/json" })
         );
-
         if (avatarFile) {
           dataPayload.append("anhDaiDien", avatarFile);
         }
@@ -191,31 +235,26 @@ const AdminEmployees = () => {
         await userService.updateStaff(editingEmployee.nhanVienId, dataPayload);
         toast.success("Cập nhật nhân viên thành công!");
       } else {
-        // === LOGIC THÊM MỚI (CREATE) ===
-
-        // Validate mật khẩu bắt buộc khi tạo mới
+        // CREATE
         if (!formData.password) {
           toast.warning("Vui lòng nhập mật khẩu cho nhân viên mới.");
           return;
         }
-
-        // Backend thường yêu cầu object JSON trong FormData với key cụ thể (ví dụ 'nguoiDung')
         dataPayload.append(
-          "nguoiDung",
+          "nhanVien",
           new Blob([JSON.stringify(formData)], { type: "application/json" })
         );
-
         if (avatarFile) {
           dataPayload.append("anhDaiDien", avatarFile);
         }
 
-        await userService.createUnifiedUser(dataPayload);
+        await userService.createStaff(dataPayload);
         toast.success("Tạo mới nhân viên thành công!");
       }
 
-      // Các bước chung sau khi thành công
       setIsFormModalOpen(false);
       fetchEmployees();
+      fetchStats(); // Cập nhật lại thống kê sau khi thêm/sửa
     } catch (error) {
       console.error("Lỗi submit form:", error);
       const msg =
@@ -224,59 +263,14 @@ const AdminEmployees = () => {
     }
   };
 
-  // Phân trang
   const handlePageChange = (pageNumber) => {
     if (pageNumber > 0 && pageNumber <= totalPages) {
       setCurrentPage(pageNumber);
     }
   };
 
-  // --- 5. Derived Data (Thống kê) ---
   const indexOfFirstItem = (currentPage - 1) * ITEMS_PER_PAGE;
 
-  // Tính thống kê (đơn giản trên trang hiện tại, hoặc lấy từ API thống kê riêng)
-  const countVets = employees.filter(
-    (e) =>
-      e.chucVu &&
-      (e.chucVu.toLowerCase().includes("bác sĩ") ||
-        e.chucVu.toLowerCase().includes("doctor"))
-  ).length;
-
-  const countGroomers = employees.filter(
-    (e) =>
-      e.chucVu &&
-      (e.chucVu.toLowerCase().includes("spa") ||
-        e.chucVu.toLowerCase().includes("grooming"))
-  ).length;
-
-  const stats = [
-    {
-      title: "Tổng nhân viên",
-      value: totalElements,
-      icon: "badge",
-      color: "text-blue-600",
-      bg: "bg-blue-100",
-      border: "border-blue-600",
-    },
-    {
-      title: "Bác sĩ thú y",
-      value: countVets,
-      icon: "medical_services",
-      color: "text-green-600",
-      bg: "bg-green-100",
-      border: "border-green-500",
-    },
-    {
-      title: "Bộ phận Spa/Grooming",
-      value: countGroomers,
-      icon: "content_cut",
-      color: "text-pink-600",
-      bg: "bg-pink-100",
-      border: "border-pink-500",
-    },
-  ];
-
-  // --- 6. Render ---
   return (
     <>
       <div className="flex flex-wrap justify-between gap-3">
@@ -285,7 +279,12 @@ const AdminEmployees = () => {
         </p>
       </div>
 
-      <EmployeeStats stats={stats} />
+      {/* Truyền Props xuống component con */}
+      <EmployeeStats
+        totalStaff={stats.totalStaff}
+        countVets={stats.countVets}
+        countSpa={stats.countSpa}
+      />
 
       <EmployeeFilters
         searchTerm={searchTerm}
@@ -310,22 +309,20 @@ const AdminEmployees = () => {
         onDelete={handleDeleteClick}
       />
 
-      {/* Modal Xem chi tiết */}
+      {/* Modals giữ nguyên */}
       <EmployeeDetailModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         employee={selectedEmployee}
       />
 
-      {/* Modal Form GỘP (Create & Edit) */}
       <EmployeeFormModal
         isOpen={isFormModalOpen}
         onClose={() => setIsFormModalOpen(false)}
-        initialData={editingEmployee} // Truyền null nếu tạo mới, object nếu sửa
-        onSubmit={handleFormSubmit} // Hàm xử lý chung
+        initialData={editingEmployee}
+        onSubmit={handleFormSubmit}
       />
 
-      {/* Modal Xác nhận xóa */}
       <ConfirmDeleteModal
         isOpen={isConfirmDeleteModalOpen}
         onClose={() => setIsConfirmDeleteModalOpen(false)}

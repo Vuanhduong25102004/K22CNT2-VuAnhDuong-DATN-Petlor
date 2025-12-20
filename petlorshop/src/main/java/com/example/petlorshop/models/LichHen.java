@@ -10,7 +10,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "LichHen")
+@Table(name = "lich_hen")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,11 +29,11 @@ public class LichHen {
     private LocalDateTime thoiGianKetThuc;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "trang_thai_lich_hen", length = 50)
-    private TrangThaiLichHen status; // Đổi tên biến để ép Hibernate refresh
+    @Column(name = "trang_thai")
+    private TrangThai trangThai;
 
-    @Column(name = "ghi_chu_khach_hang", columnDefinition = "TEXT")
-    private String ghiChuKhachHang;
+    @Column(name = "ghi_chu", columnDefinition = "TEXT")
+    private String ghiChu;
 
     // --- Relationships ---
 
@@ -42,9 +42,8 @@ public class LichHen {
     @JsonIgnore
     private NguoiDung nguoiDung;
 
-    // Cho phép null
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "thu_cung_id") 
+    @JoinColumn(name = "thu_cung_id")
     @JsonIgnore
     private ThuCung thuCung;
 
@@ -57,4 +56,9 @@ public class LichHen {
     @JoinColumn(name = "nhan_vien_id")
     @JsonIgnore
     private NhanVien nhanVien;
+
+    // --- Enum for TrangThai ---
+    public enum TrangThai {
+        CHO_XAC_NHAN, DA_XAC_NHAN, DA_HOAN_THANH, DA_HUY
+    }
 }

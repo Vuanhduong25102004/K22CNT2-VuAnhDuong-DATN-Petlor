@@ -29,7 +29,6 @@ public class LichHenService {
     @Autowired private NhanVienRepository nhanVienRepository;
     @Autowired private PasswordEncoder passwordEncoder;
 
-    // Cấu hình giờ làm việc
     private static final LocalTime OPENING_TIME = LocalTime.of(8, 0);
     private static final LocalTime CLOSING_TIME = LocalTime.of(18, 0);
 
@@ -43,41 +42,31 @@ public class LichHenService {
 
     @Transactional
     public LichHenResponse createLichHen(LichHenRequest request) {
-        // Kiểm tra giờ hành chính
         validateBusinessHours(request.getThoiGianBatDau());
 
-        // 1. Tìm hoặc tạo NguoiDung
         NguoiDung nguoiDung = findOrCreateUser(request);
-
-        // 2. Tìm hoặc tạo ThuCung
         ThuCung thuCung = findOrCreatePet(request, nguoiDung);
-
-        // 3. Tìm DichVu
         DichVu dichVu = dichVuRepository.findById(request.getDichVuId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy dịch vụ với ID: " + request.getDichVuId()));
 
-        // --- TỰ ĐỘNG TÍNH THỜI GIAN KẾT THÚC ---
-        int thoiLuongPhut = dichVu.getThoiLuongUocTinhPhut() != null ? dichVu.getThoiLuongUocTinhPhut() : 60;
+        int thoiLuongPhut = dichVu.getThoiLuongUocTinh() != null ? dichVu.getThoiLuongUocTinh() : 60;
         LocalDateTime thoiGianKetThuc = request.getThoiGianBatDau().plusMinutes(thoiLuongPhut);
         
         if (thoiGianKetThuc.toLocalTime().isAfter(CLOSING_TIME)) {
             throw new RuntimeException("Dịch vụ dự kiến kết thúc lúc " + thoiGianKetThuc.toLocalTime() + ", vượt quá giờ đóng cửa (" + CLOSING_TIME + "). Vui lòng chọn giờ sớm hơn.");
         }
-        // ---------------------------------------
 
-        // 4. Logic tự động tìm nhân viên
         NhanVien assignedNhanVien = findAvailableStaff(request, dichVu, request.getThoiGianBatDau(), thoiGianKetThuc);
 
-        // 5. Tạo và lưu LichHen
         LichHen lichHen = new LichHen();
         lichHen.setThoiGianBatDau(request.getThoiGianBatDau());
         lichHen.setThoiGianKetThuc(thoiGianKetThuc);
-        lichHen.setGhiChuKhachHang(request.getGhiChuKhachHang());
+        lichHen.setGhiChu(request.getGhiChuKhachHang());
         lichHen.setNguoiDung(nguoiDung);
         lichHen.setDichVu(dichVu);
         lichHen.setThuCung(thuCung);
         lichHen.setNhanVien(assignedNhanVien);
-        lichHen.setStatus(TrangThaiLichHen.PENDING); // Sử dụng tên biến mới
+        lichHen.setTrangThai(LichHen.TrangThai.CHO_XAC_NHAN);
 
         LichHen savedLichHen = lichHenRepository.save(lichHen);
         return convertToResponse(savedLichHen);
@@ -140,12 +129,9 @@ public class LichHenService {
             }
             return nhanVien;
         } else {
-            if (dichVu.getDanhMucDichVu() == null) throw new RuntimeException("Dịch vụ chưa được phân loại.");
-            Role requiredRole = dichVu.getDanhMucDichVu().getRoleCanThucHien();
-            if (requiredRole == null) throw new RuntimeException("Danh mục dịch vụ chưa có vai trò thực hiện.");
-            
-            List<NhanVien> potentialStaff = nhanVienRepository.findByRole(requiredRole);
-            if (potentialStaff.isEmpty()) throw new RuntimeException("Không có nhân viên cho vai trò: " + requiredRole);
+            // TODO: Sửa lại logic tìm nhân viên dựa trên 'chuc_vu' hoặc 'chuyen_khoa'
+            List<NhanVien> potentialStaff = nhanVienRepository.findAll();
+            if (potentialStaff.isEmpty()) throw new RuntimeException("Không có nhân viên nào trong hệ thống.");
 
             return potentialStaff.stream()
                 .filter(staff -> isTimeSlotAvailable(staff.getNhanVienId(), start, end))
@@ -165,7 +151,7 @@ public class LichHenService {
             validateBusinessHours(request.getThoiGianBatDau());
             lichHen.setThoiGianBatDau(request.getThoiGianBatDau());
             
-            int thoiLuongPhut = lichHen.getDichVu().getThoiLuongUocTinhPhut() != null ? lichHen.getDichVu().getThoiLuongUocTinhPhut() : 60;
+            int thoiLuongPhut = lichHen.getDichVu().getThoiLuongUocTinh() != null ? lichHen.getDichVu().getThoiLuongUocTinh() : 60;
             LocalDateTime thoiGianKetThuc = request.getThoiGianBatDau().plusMinutes(thoiLuongPhut);
             
             if (thoiGianKetThuc.toLocalTime().isAfter(CLOSING_TIME)) {
@@ -181,11 +167,11 @@ public class LichHenService {
             lichHen.setThoiGianKetThuc(request.getThoiGianKetThuc());
         }
 
-        if (request.getStatus() != null) {
-            lichHen.setStatus(request.getStatus()); // Sử dụng tên biến mới
+        if (request.getTrangThai() != null) {
+            lichHen.setTrangThai(request.getTrangThai());
         }
-        if (request.getGhiChuKhachHang() != null) {
-            lichHen.setGhiChuKhachHang(request.getGhiChuKhachHang());
+        if (request.getGhiChu() != null) {
+            lichHen.setGhiChu(request.getGhiChu());
         }
         return lichHenRepository.save(lichHen);
     }
@@ -201,8 +187,8 @@ public class LichHenService {
         NhanVien nhanVien = lichHen.getNhanVien();
         return new LichHenResponse(
                 lichHen.getLichHenId(), lichHen.getThoiGianBatDau(), lichHen.getThoiGianKetThuc(),
-                lichHen.getStatus().getDisplayName(), // Sử dụng tên biến mới
-                lichHen.getGhiChuKhachHang(),
+                lichHen.getTrangThai().name(),
+                lichHen.getGhiChu(),
                 nguoiDung != null ? nguoiDung.getUserId() : null, nguoiDung != null ? nguoiDung.getHoTen() : null,
                 nguoiDung != null ? nguoiDung.getSoDienThoai() : null,
                 thuCung != null ? thuCung.getThuCungId() : null, thuCung != null ? thuCung.getTenThuCung() : null,

@@ -1,6 +1,33 @@
 import React from "react";
 
-const EmployeeStats = ({ stats }) => {
+const EmployeeStats = ({ totalStaff, countVets, countSpa }) => {
+  const stats = [
+    {
+      title: "Tổng nhân viên",
+      value: totalStaff,
+      icon: "badge",
+      color: "text-blue-600",
+      bg: "bg-blue-100",
+      border: "border-blue-600",
+    },
+    {
+      title: "Bác sĩ thú y",
+      value: countVets,
+      icon: "medical_services",
+      color: "text-green-600",
+      bg: "bg-green-100",
+      border: "border-green-500",
+    },
+    {
+      title: "Bộ phận Spa/Grooming",
+      value: countSpa,
+      icon: "content_cut",
+      color: "text-pink-600",
+      bg: "bg-pink-100",
+      border: "border-pink-500",
+    },
+  ];
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
       {stats.map((stat, index) => (

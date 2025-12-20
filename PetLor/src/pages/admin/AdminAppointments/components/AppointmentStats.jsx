@@ -1,10 +1,10 @@
 import React from "react";
 
-const AppointmentStats = ({ statsData }) => {
+const AppointmentStats = ({ today, pending, confirmed, completedMonth }) => {
   const stats = [
     {
       title: "Lịch hẹn hôm nay",
-      value: statsData.today,
+      value: today,
       icon: "today",
       color: "text-blue-600",
       bg: "bg-blue-100",
@@ -12,7 +12,7 @@ const AppointmentStats = ({ statsData }) => {
     },
     {
       title: "Đang chờ xác nhận",
-      value: statsData.pending,
+      value: pending,
       icon: "pending_actions",
       color: "text-yellow-600",
       bg: "bg-yellow-100",
@@ -20,15 +20,15 @@ const AppointmentStats = ({ statsData }) => {
     },
     {
       title: "Đã xác nhận",
-      value: statsData.confirmed,
+      value: confirmed,
       icon: "check_circle",
       color: "text-indigo-600",
       bg: "bg-indigo-100",
       border: "border-indigo-500",
     },
     {
-      title: "Đã hoàn thành (Tháng)",
-      value: statsData.completedMonth,
+      title: "Hoàn thành (Tháng này)",
+      value: completedMonth,
       icon: "event_available",
       color: "text-green-600",
       bg: "bg-green-100",

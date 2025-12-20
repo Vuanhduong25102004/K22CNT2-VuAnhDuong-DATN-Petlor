@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -34,9 +36,10 @@ public class NguoiDungService {
     @Autowired
     private FileStorageService fileStorageService;
 
+    private static final List<Role> STAFF_ROLES = Arrays.asList(Role.DOCTOR, Role.SPA, Role.STAFF, Role.RECEPTIONIST);
+
     @Transactional
     public NguoiDungResponse createUnifiedUser(UnifiedCreateUserRequest request, MultipartFile anhDaiDien) {
-        // Kiểm tra trùng lặp
         if (nguoiDungRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email đã được sử dụng.");
         }
@@ -44,10 +47,14 @@ public class NguoiDungService {
             throw new RuntimeException("Số điện thoại đã được sử dụng.");
         }
 
-        // Mặc định role là USER nếu không được cung cấp
-        Role role = request.getRole();
-        if (role == null) {
-            role = Role.USER;
+        Role role = Role.USER;
+        if (StringUtils.hasText(request.getRole())) {
+            try {
+                role = Role.valueOf(request.getRole().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // Nếu role không hợp lệ, giữ mặc định là USER hoặc ném lỗi tùy logic
+                role = Role.USER;
+            }
         }
 
         String fileName = null;
@@ -55,7 +62,6 @@ public class NguoiDungService {
             fileName = fileStorageService.storeFile(anhDaiDien);
         }
 
-        // 1. Tạo NguoiDung
         NguoiDung newUser = new NguoiDung();
         newUser.setHoTen(request.getHoTen());
         newUser.setEmail(request.getEmail());
@@ -63,17 +69,15 @@ public class NguoiDungService {
         newUser.setSoDienThoai(request.getSoDienThoai());
         newUser.setDiaChi(request.getDiaChi());
         newUser.setRole(role);
-        newUser.setAnhDaiDien(fileName); // Lưu ảnh
+        newUser.setAnhDaiDien(fileName);
         NguoiDung savedUser = nguoiDungRepository.save(newUser);
 
-        // 2. Nếu là vai trò nhân viên, tạo thêm NhanVien
-        if (role == Role.DOCTOR || role == Role.SPA || role == Role.STAFF || role == Role.RECEPTIONIST) {
+        if (STAFF_ROLES.contains(role)) {
             NhanVien newNhanVien = new NhanVien();
             newNhanVien.setHoTen(savedUser.getHoTen());
             newNhanVien.setEmail(savedUser.getEmail());
             newNhanVien.setSoDienThoai(savedUser.getSoDienThoai());
             
-            // Tự động chọn chức vụ nếu không được cung cấp
             if (StringUtils.hasText(request.getChucVu())) {
                 newNhanVien.setChucVu(request.getChucVu());
             } else {
@@ -82,12 +86,11 @@ public class NguoiDungService {
 
             newNhanVien.setChuyenKhoa(request.getChuyenKhoa());
             newNhanVien.setKinhNghiem(request.getKinhNghiem());
-            newNhanVien.setAnhDaiDien(fileName); // Lưu ảnh cho nhân viên luôn
+            newNhanVien.setAnhDaiDien(fileName);
             newNhanVien.setNguoiDung(savedUser);
             nhanVienRepository.save(newNhanVien);
         }
 
-        // 3. Trả về response
         Integer nhanVienId = (savedUser.getNhanVien() != null) ? savedUser.getNhanVien().getNhanVienId() : null;
         return new NguoiDungResponse(
                 savedUser.getUserId(),
@@ -97,7 +100,7 @@ public class NguoiDungService {
                 savedUser.getDiaChi(),
                 savedUser.getAnhDaiDien(),
                 savedUser.getNgayTao(),
-                savedUser.getRole(),
+                savedUser.getRole(), // Đã sửa: truyền trực tiếp Enum Role
                 nhanVienId
         );
     }
@@ -126,7 +129,6 @@ public class NguoiDungService {
         NguoiDung nguoiDung = nguoiDungRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("NguoiDung not found with id: " + id));
 
-        // Kiểm tra trùng email
         if (StringUtils.hasText(request.getEmail()) && !request.getEmail().equals(nguoiDung.getEmail())) {
             nguoiDungRepository.findByEmail(request.getEmail()).ifPresent(existingUser -> {
                 throw new RuntimeException("Email đã được sử dụng bởi người dùng khác.");
@@ -134,7 +136,6 @@ public class NguoiDungService {
             nguoiDung.setEmail(request.getEmail());
         }
 
-        // Kiểm tra trùng số điện thoại
         if (StringUtils.hasText(request.getSoDienThoai()) && !request.getSoDienThoai().equals(nguoiDung.getSoDienThoai())) {
             nguoiDungRepository.findBySoDienThoai(request.getSoDienThoai()).ifPresent(existingUser -> {
                 throw new RuntimeException("Số điện thoại đã được sử dụng bởi người dùng khác.");
@@ -150,9 +151,16 @@ public class NguoiDungService {
         }
 
         boolean roleChanged = false;
-        if (request.getRole() != null && request.getRole() != nguoiDung.getRole()) {
-            nguoiDung.setRole(request.getRole());
-            roleChanged = true;
+        if (request.getRole() != null) {
+            try {
+                Role newRole = Role.valueOf(request.getRole().toUpperCase());
+                if (newRole != nguoiDung.getRole()) {
+                    nguoiDung.setRole(newRole);
+                    roleChanged = true;
+                }
+            } catch (IllegalArgumentException e) {
+                // Ignore invalid role update
+            }
         }
 
         if (anhDaiDien != null && !anhDaiDien.isEmpty()) {
@@ -162,15 +170,13 @@ public class NguoiDungService {
 
         NguoiDung savedUser = nguoiDungRepository.save(nguoiDung);
 
-        // Đồng bộ thông tin với NhanVien nếu có
         if (savedUser.getNhanVien() != null) {
             NhanVien nhanVien = savedUser.getNhanVien();
             nhanVien.setHoTen(savedUser.getHoTen());
             nhanVien.setSoDienThoai(savedUser.getSoDienThoai());
             nhanVien.setEmail(savedUser.getEmail());
-            nhanVien.setAnhDaiDien(savedUser.getAnhDaiDien()); // Đồng bộ ảnh
+            nhanVien.setAnhDaiDien(savedUser.getAnhDaiDien());
             
-            // Nếu role thay đổi, tự động cập nhật chức vụ
             if (roleChanged) {
                 nhanVien.setChucVu(getDefaultTitleForRole(savedUser.getRole()));
             }
@@ -189,7 +195,6 @@ public class NguoiDungService {
         String fileName = fileStorageService.storeFile(avatarFile);
         nguoiDung.setAnhDaiDien(fileName);
 
-        // Nếu người dùng này cũng là nhân viên, cập nhật ảnh cho nhân viên
         if (nguoiDung.getNhanVien() != null) {
             NhanVien nhanVien = nguoiDung.getNhanVien();
             nhanVien.setAnhDaiDien(fileName);

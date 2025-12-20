@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { APPOINTMENT_STATUSES } from "../../utils";
+import { APPOINTMENT_STATUSES, API_STATUS_MAP } from "../../utils";
 
 const AppointmentFormModal = ({
   isOpen,
@@ -26,7 +26,7 @@ const AppointmentFormModal = ({
     ghiChu: "",
     date: "", // Tách ngày từ thoiGianBatDau
     time: "", // Tách giờ từ thoiGianBatDau
-    trangThaiLichHen: "CHỜ XÁC NHẬN",
+    trangThai: "CHO_XAC_NHAN",
   });
 
   useEffect(() => {
@@ -55,7 +55,7 @@ const AppointmentFormModal = ({
           ghiChu: initialData.ghiChuKhachHang || initialData.ghiChu || "",
           date: datePart || "",
           time: timePart ? timePart.slice(0, 5) : "", // HH:mm
-          trangThaiLichHen: initialData.trangThaiLichHen || "CHỜ XÁC NHẬN",
+          trangThai: initialData.trangThai || "CHỜ XÁC NHẬN",
         });
       } else {
         // --- CHẾ ĐỘ CREATE: Reset form ---
@@ -73,7 +73,7 @@ const AppointmentFormModal = ({
           ghiChu: "",
           date: today,
           time: "08:00",
-          trangThaiLichHen: "CHỜ XÁC NHẬN",
+          trangThai: "CHO_XAC_NHAN",
         });
       }
     }
@@ -229,14 +229,14 @@ const AppointmentFormModal = ({
                       <div className="input-group md:col-span-2">
                         <label className="form-label">Trạng thái</label>
                         <select
-                          name="trangThaiLichHen"
+                          name="trangThai"
                           className="form-control"
-                          value={formData.trangThaiLichHen}
+                          value={formData.trangThai}
                           onChange={handleChange}
                         >
-                          {APPOINTMENT_STATUSES.map((st) => (
-                            <option key={st} value={st}>
-                              {st.replace(/_/g, " ")}
+                          {APPOINTMENT_STATUSES.map((statusKey) => (
+                            <option key={statusKey} value={statusKey}>
+                              {API_STATUS_MAP[statusKey]}
                             </option>
                           ))}
                         </select>

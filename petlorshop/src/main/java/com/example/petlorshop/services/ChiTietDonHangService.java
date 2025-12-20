@@ -31,7 +31,7 @@ public class ChiTietDonHangService {
                 .orElseThrow(() -> new RuntimeException("Chi tiết đơn hàng không tồn tại với id: " + id));
 
         chiTietDonHang.setSoLuong(chiTietDonHangDetails.getSoLuong());
-        chiTietDonHang.setDonGiaLucMua(chiTietDonHangDetails.getDonGiaLucMua());
+        chiTietDonHang.setDonGia(chiTietDonHangDetails.getDonGia()); // Sửa thành setDonGia
 
         return chiTietDonHangRepository.save(chiTietDonHang);
     }

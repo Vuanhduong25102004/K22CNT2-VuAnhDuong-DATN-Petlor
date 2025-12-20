@@ -1,6 +1,5 @@
 package com.example.petlorshop.dto;
 
-import com.example.petlorshop.models.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,11 +16,10 @@ public class DichVuResponse {
     private String tenDichVu;
     private String moTa;
     private BigDecimal giaDichVu;
-    private Integer thoiLuongUocTinhPhut;
-    private String hinhAnh; // Thêm trường hình ảnh
+    private Integer thoiLuongUocTinh;
+    private String hinhAnh;
 
     // Thông tin danh mục
     private Integer danhMucDvId;
     private String tenDanhMucDv;
-    private Role roleCanThucHien;
 }

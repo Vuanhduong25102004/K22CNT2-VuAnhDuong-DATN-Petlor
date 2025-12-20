@@ -48,7 +48,7 @@ public class NguoiDungController {
                 user.getDiaChi(),
                 user.getAnhDaiDien(),
                 user.getNgayTao(),
-                user.getRole(),
+                user.getRole(), // Đã sửa: truyền trực tiếp Enum Role
                 nhanVienId
         );
     }

@@ -1,9 +1,4 @@
-export const ORDER_STATUSES = [
-  "Chờ xử lý",
-  "Đang giao",
-  "Hoàn thành",
-  "Đã hủy",
-];
+export const ORDER_STATUSES = ["Chờ xử lý", "Đang giao", "Đã giao", "Đã hủy"];
 
 export const formatCurrency = (amount) => {
   return new Intl.NumberFormat("vi-VN", {
@@ -26,7 +21,9 @@ export const getStatusBadge = (status) => {
 
   if (
     normalizedStatus.includes("hoàn thành") ||
-    normalizedStatus.includes("completed")
+    normalizedStatus.includes("completed") ||
+    normalizedStatus.includes("đã giao") ||
+    normalizedStatus.includes("da_giao")
   ) {
     return "bg-green-100 text-green-800 border-green-200";
   }

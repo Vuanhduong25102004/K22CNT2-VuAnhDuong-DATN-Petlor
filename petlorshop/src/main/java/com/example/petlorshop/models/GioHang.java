@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -28,10 +27,6 @@ public class GioHang {
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private NguoiDung nguoiDung;
-
-    @CreationTimestamp
-    @Column(name = "ngay_tao", updatable = false)
-    private LocalDateTime ngayTao;
 
     @UpdateTimestamp
     @Column(name = "ngay_cap_nhat")

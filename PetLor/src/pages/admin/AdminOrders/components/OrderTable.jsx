@@ -101,7 +101,7 @@ const OrderTable = ({
                   key={order.donHangId || index}
                   className="hover:bg-gray-50 transition-colors"
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     #{order.donHangId}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

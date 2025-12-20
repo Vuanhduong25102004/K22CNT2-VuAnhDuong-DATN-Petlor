@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
-@Table(name = "DichVu")
+@Table(name = "dich_vu")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,8 +32,8 @@ public class DichVu {
     @Column(name = "gia_dich_vu", nullable = false, precision = 10, scale = 2)
     private BigDecimal giaDichVu;
 
-    @Column(name = "thoi_luong_uoc_tinh_phut")
-    private Integer thoiLuongUocTinhPhut;
+    @Column(name = "thoi_luong_uoc_tinh")
+    private Integer thoiLuongUocTinh;
 
     @Column(name = "hinh_anh", columnDefinition = "TEXT")
     private String hinhAnh;

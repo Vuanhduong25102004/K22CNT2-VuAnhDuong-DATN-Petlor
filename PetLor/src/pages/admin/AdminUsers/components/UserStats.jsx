@@ -1,27 +1,31 @@
 import React from "react";
 
-const UserStats = ({ totalElements }) => {
-  // Demo stats, trong thực tế nên lấy từ API thống kê riêng
+// Component này chỉ nhận dữ liệu để hiển thị (Dumb Component)
+// Logic tính toán đã nằm ở file cha (index.jsx)
+const UserStats = ({ totalUsers = 0, totalStaff = 0 }) => {
+  // Tính tổng toàn hệ thống = Khách hàng + Nhân viên
+  const totalSystem = totalUsers + totalStaff;
+
   const stats = [
     {
       title: "Tổng người dùng (Hệ thống)",
-      value: totalElements,
+      value: totalSystem,
       icon: "group",
       color: "text-blue-600",
       bg: "bg-blue-100",
       border: "border-blue-600",
     },
     {
-      title: "Khách hàng mới (Tháng)",
-      value: "+12", // Placeholder
-      icon: "person_add",
+      title: "Tổng khách hàng",
+      value: totalUsers,
+      icon: "person",
       color: "text-green-600",
       bg: "bg-green-100",
       border: "border-green-500",
     },
     {
-      title: "Nhân viên & Admin",
-      value: "---", // Cần API riêng để đếm chính xác
+      title: "Nhân viên & Chuyên gia",
+      value: totalStaff,
       icon: "manage_accounts",
       color: "text-purple-600",
       bg: "bg-purple-100",

@@ -21,6 +21,6 @@ public interface LichHenRepository extends JpaRepository<LichHen, Integer> {
     List<LichHen> findByNhanVienIdAndDate(@Param("nhanVienId") Integer nhanVienId,
                                         @Param("date") java.time.LocalDate date);
 
-    @Query("SELECT l FROM LichHen l WHERE LOWER(l.ghiChuKhachHang) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    @Query("SELECT l FROM LichHen l WHERE LOWER(l.ghiChu) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<LichHen> searchByKeyword(@Param("keyword") String keyword);
 }

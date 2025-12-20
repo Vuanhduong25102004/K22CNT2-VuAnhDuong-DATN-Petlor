@@ -37,7 +37,7 @@ public class AuthenticationService {
         user.setMatKhau(passwordEncoder.encode(request.getMatkhau()));
         user.setSoDienThoai(request.getSoDienThoai());
         user.setDiaChi(request.getDiaChi());
-        user.setRole(Role.USER); // Explicitly set the role for new users
+        user.setRole(Role.USER); // Sửa lại thành Enum
         
         NguoiDung savedUser = nguoiDungRepository.save(user);
 
@@ -47,10 +47,10 @@ public class AuthenticationService {
             savedUser.getEmail(),
             savedUser.getSoDienThoai(),
             savedUser.getDiaChi(),
-            savedUser.getAnhDaiDien(), // Thêm trường ảnh đại diện (sẽ là null)
+            savedUser.getAnhDaiDien(),
             savedUser.getNgayTao(),
             savedUser.getRole(),
-            null // nhanVienId is null for new users
+            null
         );
     }
 

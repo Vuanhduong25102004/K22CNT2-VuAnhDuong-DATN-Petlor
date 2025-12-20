@@ -1,6 +1,5 @@
 package com.example.petlorshop.dto;
 
-import com.example.petlorshop.models.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,5 +15,5 @@ public class NguoiDungUpdateRequest {
     private String password; // Optional: chỉ cập nhật nếu có giá trị
     private String soDienThoai;
     private String diaChi;
-    private Role role;
+    private String role; // Sửa thành String
 }
