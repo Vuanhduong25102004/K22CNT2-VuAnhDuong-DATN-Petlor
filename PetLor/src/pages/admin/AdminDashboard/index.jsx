@@ -3,6 +3,7 @@
  * @description Tổng quan Dashboard - Đã fix lỗi hiển thị Đơn hàng & Lịch hẹn.
  */
 import React, { useEffect, useState } from "react";
+import useEscapeKey from "../../../hooks/useEscapeKey";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -12,7 +13,7 @@ import petService from "../../../services/petService";
 import orderService from "../../../services/orderService";
 
 // Utils
-import { formatCurrency } from "../../../utils/format";
+import { formatCurrency } from "../../../utils/formatters";
 
 // Components
 import DashboardStats from "./components/DashboardStats";

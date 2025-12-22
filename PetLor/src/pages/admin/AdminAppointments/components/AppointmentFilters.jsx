@@ -1,4 +1,5 @@
 import React from "react";
+import useEscapeKey from "../../../../hooks/useEscapeKey";
 import { APPOINTMENT_STATUSES } from "../utils";
 
 const AppointmentFilters = ({

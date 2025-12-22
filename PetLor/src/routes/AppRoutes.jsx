@@ -23,6 +23,12 @@ import AdminEmployees from "../pages/admin/AdminEmployees";
 import AdminServices from "../pages/admin/AdminServices";
 import AdminCategories from "../pages/admin/AdminCategories";
 import AdminAppointments from "../pages/admin/AdminAppointments";
+import AdminImports from "../pages/admin/AdminImports";
+import AdminSuppliers from "../pages/admin/AdminSuppliers";
+import AdminPromotions from "../pages/admin/AdminPromotions";
+import AdminVaccinations from "../pages/admin/AdminVaccinations";
+import AdminReviews from "../pages/admin/AdminReviews";
+import AdminPosts from "../pages/admin/AdminPosts";
 
 const AppRoutes = () => {
   return (
@@ -55,6 +61,12 @@ const AppRoutes = () => {
           <Route path="appointments" element={<AdminAppointments />} />
           <Route path="services" element={<AdminServices />} />
           <Route path="categories" element={<AdminCategories />} />
+          <Route path="imports" element={<AdminImports />} />
+          <Route path="suppliers" element={<AdminSuppliers />} />
+          <Route path="promotions" element={<AdminPromotions />} />
+          <Route path="vaccinations" element={<AdminVaccinations />} />
+          <Route path="reviews" element={<AdminReviews />} />
+          <Route path="posts" element={<AdminPosts />} />
         </Route>
       </Route>
     </Routes>

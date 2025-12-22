@@ -3,6 +3,7 @@
  * @description Trang quản lý Dịch vụ (Container) - Đã cập nhật Stats Logic.
  */
 import React, { useEffect, useState } from "react";
+import useEscapeKey from "../../../hooks/useEscapeKey";
 import productService from "../../../services/productService";
 import { toast } from "react-toastify";
 
@@ -176,18 +177,16 @@ const AdminServices = () => {
     fetchServices();
   }, [currentPage, searchTerm]);
 
-  // Handle ESC
-  useEffect(() => {
-    const handleEscKey = (event) => {
-      if (event.key === "Escape") {
-        setIsDetailModalOpen(false);
-        setIsFormModalOpen(false);
-        setIsConfirmDeleteModalOpen(false);
-      }
-    };
-    document.addEventListener("keydown", handleEscKey);
-    return () => document.removeEventListener("keydown", handleEscKey);
-  }, []);
+  const handleCloseModals = () => {
+    setIsDetailModalOpen(false);
+    setIsFormModalOpen(false);
+    setIsConfirmDeleteModalOpen(false);
+  };
+
+  useEscapeKey(
+    handleCloseModals,
+    isDetailModalOpen || isFormModalOpen || isConfirmDeleteModalOpen
+  );
 
   // --- Handlers ---
 
@@ -322,13 +321,13 @@ const AdminServices = () => {
       {/* Modals giữ nguyên */}
       <ServiceDetailModal
         isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
+        onClose={handleCloseModals}
         service={selectedService}
       />
 
       <ServiceFormModal
         isOpen={isFormModalOpen}
-        onClose={() => setIsFormModalOpen(false)}
+        onClose={handleCloseModals}
         initialData={editingService}
         serviceCategories={serviceCategories}
         onSubmit={handleFormSubmit}
@@ -336,7 +335,7 @@ const AdminServices = () => {
 
       <ConfirmDeleteModal
         isOpen={isConfirmDeleteModalOpen}
-        onClose={() => setIsConfirmDeleteModalOpen(false)}
+        onClose={handleCloseModals}
         onConfirm={confirmDelete}
       />
     </>

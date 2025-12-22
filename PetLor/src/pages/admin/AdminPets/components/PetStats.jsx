@@ -1,4 +1,5 @@
 import React from "react";
+import useEscapeKey from "../../../../hooks/useEscapeKey";
 
 const PetStats = ({ totalPets = 0, countDogs = 0, countCats = 0 }) => {
   const stats = [

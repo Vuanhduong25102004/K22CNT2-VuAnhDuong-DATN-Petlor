@@ -3,6 +3,7 @@
  * @description Trang quản lý thú cưng (Container) - Đã fix lỗi Stats.
  */
 import React, { useEffect, useState } from "react";
+import useEscapeKey from "../../../hooks/useEscapeKey";
 import petService from "../../../services/petService";
 import { toast } from "react-toastify";
 
@@ -158,18 +159,16 @@ const AdminPets = () => {
     fetchPets();
   }, [currentPage, searchTerm, filterSpecies, filterGender]);
 
-  // Handle ESC
-  useEffect(() => {
-    const handleEscKey = (event) => {
-      if (event.key === "Escape") {
-        setIsDetailModalOpen(false);
-        setIsFormModalOpen(false);
-        setIsConfirmDeleteModalOpen(false);
-      }
-    };
-    document.addEventListener("keydown", handleEscKey);
-    return () => document.removeEventListener("keydown", handleEscKey);
-  }, []);
+  const handleCloseModals = () => {
+    setIsDetailModalOpen(false);
+    setIsFormModalOpen(false);
+    setIsConfirmDeleteModalOpen(false);
+  };
+
+  useEscapeKey(
+    handleCloseModals,
+    isDetailModalOpen || isFormModalOpen || isConfirmDeleteModalOpen
+  );
 
   // --- Handlers ---
   const handleDeleteClick = (id) => {
@@ -310,20 +309,20 @@ const AdminPets = () => {
       {/* Modals giữ nguyên */}
       <PetDetailModal
         isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
+        onClose={handleCloseModals}
         pet={selectedPet}
       />
 
       <PetFormModal
         isOpen={isFormModalOpen}
-        onClose={() => setIsFormModalOpen(false)}
+        onClose={handleCloseModals}
         initialData={editingPet}
         onSubmit={handleFormSubmit}
       />
 
       <ConfirmDeleteModal
         isOpen={isConfirmDeleteModalOpen}
-        onClose={() => setIsConfirmDeleteModalOpen(false)}
+        onClose={handleCloseModals}
         onConfirm={confirmDelete}
       />
     </>

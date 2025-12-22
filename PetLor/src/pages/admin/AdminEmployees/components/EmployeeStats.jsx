@@ -1,4 +1,5 @@
 import React from "react";
+import useEscapeKey from "../../../../hooks/useEscapeKey";
 
 const EmployeeStats = ({ totalStaff, countVets, countSpa }) => {
   const stats = [

@@ -3,6 +3,7 @@
  * @description Trang quản lý danh mục (Container).
  */
 import React, { useEffect, useState, useLayoutEffect } from "react";
+import useEscapeKey from "../../../hooks/useEscapeKey";
 // Đảm bảo đường dẫn này đúng với dự án của bạn (thêm một cấp ../ so với file gốc)
 import productService from "../../../services/productService";
 import { toast } from "react-toastify";
@@ -59,16 +60,6 @@ const AdminCategories = () => {
   // 3. Effects
   useEffect(() => {
     fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    const handleEscKey = (event) => {
-      if (event.key === "Escape") {
-        handleCloseModals();
-      }
-    };
-    document.addEventListener("keydown", handleEscKey);
-    return () => document.removeEventListener("keydown", handleEscKey);
   }, []);
 
   useLayoutEffect(() => {
@@ -166,6 +157,10 @@ const AdminCategories = () => {
     setCategoryToDeleteId(null);
   };
 
+  useEscapeKey(
+    handleCloseModals,
+    isModalOpen || isDetailModalOpen || isConfirmDeleteModalOpen
+  );
   // 5. Render
   return (
     <>

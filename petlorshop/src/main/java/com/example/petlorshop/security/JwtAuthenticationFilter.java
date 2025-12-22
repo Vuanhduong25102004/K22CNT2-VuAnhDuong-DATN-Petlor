@@ -1,5 +1,7 @@
 package com.example.petlorshop.security;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,19 +40,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         final String jwt = authHeader.substring(7);
-        final String userEmail = jwtService.extractUserName(jwt);
+        String userEmail = null;
+
+        try {
+            userEmail = jwtService.extractUserName(jwt);
+        } catch (ExpiredJwtException e) {
+            // Token hết hạn: Bỏ qua và để request đi tiếp như là Anonymous (chưa đăng nhập)
+            // Nếu endpoint yêu cầu xác thực, Spring Security sẽ chặn sau đó (trả về 401/403)
+            logger.warn("JWT Token expired: " + e.getMessage());
+        } catch (JwtException | IllegalArgumentException e) {
+            // Token lỗi định dạng hoặc không hợp lệ
+            logger.warn("Invalid JWT Token: " + e.getMessage());
+        }
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-            if (jwtService.isTokenValid(jwt, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            try {
+                if (jwtService.isTokenValid(jwt, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            } catch (JwtException e) {
+                // Token không hợp lệ khi validate
+                logger.warn("Token validation failed: " + e.getMessage());
             }
         }
         filterChain.doFilter(request, response);

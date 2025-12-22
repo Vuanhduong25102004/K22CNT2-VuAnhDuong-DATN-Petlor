@@ -3,6 +3,7 @@
  * @description Trang quản lý các sản phẩm của cửa hàng (Container).
  */
 import React, { useEffect, useState } from "react";
+import useEscapeKey from "../../../hooks/useEscapeKey";
 // Đảm bảo đường dẫn đúng (thêm một cấp ../)
 import productService from "../../../services/productService";
 import { toast } from "react-toastify";
@@ -189,17 +190,16 @@ const AdminProducts = () => {
     fetchInventoryStats();
   }, [searchTerm, filterCategory, filterStock]); // Chạy lại khi bộ lọc thay đổi
 
-  useEffect(() => {
-    const handleEscKey = (event) => {
-      if (event.key === "Escape") {
-        setIsModalOpen(false);
-        setIsDetailModalOpen(false);
-        setIsConfirmDeleteModalOpen(false);
-      }
-    };
-    document.addEventListener("keydown", handleEscKey);
-    return () => document.removeEventListener("keydown", handleEscKey);
-  }, []);
+  const handleCloseModals = () => {
+    setIsModalOpen(false);
+    setIsDetailModalOpen(false);
+    setIsConfirmDeleteModalOpen(false);
+  };
+
+  useEscapeKey(
+    handleCloseModals,
+    isModalOpen || isDetailModalOpen || isConfirmDeleteModalOpen
+  );
 
   // --- Handlers ---
   const handleOpenAddModal = () => {
@@ -389,13 +389,13 @@ const AdminProducts = () => {
 
       <ProductDetailModal
         isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
+        onClose={handleCloseModals}
         product={selectedProduct}
       />
 
       <ProductFormModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModals}
         isEditing={!!editingId}
         formData={formData}
         setFormData={setFormData}
@@ -407,7 +407,7 @@ const AdminProducts = () => {
 
       <ConfirmDeleteModal
         isOpen={isConfirmDeleteModalOpen}
-        onClose={() => setIsConfirmDeleteModalOpen(false)}
+        onClose={handleCloseModals}
         onConfirm={confirmDelete}
       />
     </>

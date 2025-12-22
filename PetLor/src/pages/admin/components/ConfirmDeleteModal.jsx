@@ -1,5 +1,5 @@
-import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import useEscapeKey from "../../../hooks/useEscapeKey";
 
 /**
  * Modal xác nhận xóa dùng chung.
@@ -20,6 +20,9 @@ const ConfirmDeleteModal = ({
   confirmText = "Xóa",
   cancelText = "Hủy",
 }) => {
+  // Sử dụng custom hook để đóng modal khi nhấn phím Escape
+  useEscapeKey(onClose, isOpen);
+
   return (
     <AnimatePresence>
       {isOpen && (

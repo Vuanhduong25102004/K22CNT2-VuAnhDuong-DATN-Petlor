@@ -3,6 +3,7 @@
  * @description Trang quản lý nhân viên (Container) - Đã fix lỗi đếm Stats.
  */
 import React, { useEffect, useState } from "react";
+import useEscapeKey from "../../../hooks/useEscapeKey";
 import userService from "../../../services/userService";
 import { toast } from "react-toastify";
 
@@ -142,17 +143,16 @@ const AdminEmployees = () => {
     fetchStats();
   }, []);
 
-  useEffect(() => {
-    const handleEscKey = (event) => {
-      if (event.key === "Escape") {
-        setIsDetailModalOpen(false);
-        setIsFormModalOpen(false);
-        setIsConfirmDeleteModalOpen(false);
-      }
-    };
-    document.addEventListener("keydown", handleEscKey);
-    return () => document.removeEventListener("keydown", handleEscKey);
-  }, []);
+  const handleCloseModals = () => {
+    setIsDetailModalOpen(false);
+    setIsFormModalOpen(false);
+    setIsConfirmDeleteModalOpen(false);
+  };
+
+  useEscapeKey(
+    handleCloseModals,
+    isDetailModalOpen || isFormModalOpen || isConfirmDeleteModalOpen
+  );
 
   // --- Handlers ---
 
@@ -312,20 +312,20 @@ const AdminEmployees = () => {
       {/* Modals giữ nguyên */}
       <EmployeeDetailModal
         isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
+        onClose={handleCloseModals}
         employee={selectedEmployee}
       />
 
       <EmployeeFormModal
         isOpen={isFormModalOpen}
-        onClose={() => setIsFormModalOpen(false)}
+        onClose={handleCloseModals}
         initialData={editingEmployee}
         onSubmit={handleFormSubmit}
       />
 
       <ConfirmDeleteModal
         isOpen={isConfirmDeleteModalOpen}
-        onClose={() => setIsConfirmDeleteModalOpen(false)}
+        onClose={handleCloseModals}
         onConfirm={confirmDelete}
       />
     </>

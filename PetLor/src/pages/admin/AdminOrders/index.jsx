@@ -3,6 +3,7 @@
  * @description Trang quản lý đơn hàng (Container).
  */
 import React, { useEffect, useState } from "react";
+import useEscapeKey from "../../../hooks/useEscapeKey";
 import orderService from "../../../services/orderService"; // Đảm bảo đường dẫn đúng
 import { toast } from "react-toastify";
 import { formatCurrency } from "./utils";
@@ -180,18 +181,16 @@ const AdminOrders = () => {
     fetchStats();
   }, [searchTerm, statusFilter, dateFilter]);
 
-  // Handle ESC key and scroll lock (Giữ nguyên logic cũ)
-  useEffect(() => {
-    const handleEscKey = (event) => {
-      if (event.key === "Escape") {
-        setIsModalOpen(false);
-        setIsDetailModalOpen(false);
-        setIsConfirmDeleteModalOpen(false);
-      }
-    };
-    document.addEventListener("keydown", handleEscKey);
-    return () => document.removeEventListener("keydown", handleEscKey);
-  }, []);
+  const handleCloseModals = () => {
+    setIsModalOpen(false);
+    setIsDetailModalOpen(false);
+    setIsConfirmDeleteModalOpen(false);
+  };
+
+  useEscapeKey(
+    handleCloseModals,
+    isModalOpen || isDetailModalOpen || isConfirmDeleteModalOpen
+  );
 
   // --- Handlers ---
   const handleDeleteClick = (id) => {
@@ -356,14 +355,14 @@ const AdminOrders = () => {
 
       <OrderDetailModal
         isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
+        onClose={handleCloseModals}
         order={selectedOrder}
         orderItems={orderItems}
       />
 
       <OrderEditModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModals}
         editingOrder={editingOrder}
         formData={formData}
         setFormData={setFormData}
@@ -372,7 +371,7 @@ const AdminOrders = () => {
 
       <ConfirmDeleteModal
         isOpen={isConfirmDeleteModalOpen}
-        onClose={() => setIsConfirmDeleteModalOpen(false)}
+        onClose={handleCloseModals}
         onConfirm={confirmDelete}
       />
     </>

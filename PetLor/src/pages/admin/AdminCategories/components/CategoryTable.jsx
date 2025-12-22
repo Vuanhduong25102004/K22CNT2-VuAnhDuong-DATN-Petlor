@@ -1,4 +1,5 @@
 import React from "react";
+import useEscapeKey from "../../../../hooks/useEscapeKey";
 
 const SkeletonRow = () => (
   <tr className="animate-pulse border-b border-gray-100 last:border-0">

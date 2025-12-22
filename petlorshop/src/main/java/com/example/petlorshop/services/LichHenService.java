@@ -27,6 +27,7 @@ public class LichHenService {
     @Autowired private ThuCungRepository thuCungRepository;
     @Autowired private DichVuRepository dichVuRepository;
     @Autowired private NhanVienRepository nhanVienRepository;
+    @Autowired private SoTiemChungRepository soTiemChungRepository;
     @Autowired private PasswordEncoder passwordEncoder;
 
     private static final LocalTime OPENING_TIME = LocalTime.of(8, 0);
@@ -129,7 +130,6 @@ public class LichHenService {
             }
             return nhanVien;
         } else {
-            // TODO: Sửa lại logic tìm nhân viên dựa trên 'chuc_vu' hoặc 'chuyen_khoa'
             List<NhanVien> potentialStaff = nhanVienRepository.findAll();
             if (potentialStaff.isEmpty()) throw new RuntimeException("Không có nhân viên nào trong hệ thống.");
 
@@ -144,6 +144,7 @@ public class LichHenService {
         return lichHenRepository.findOverlappingAppointments(nhanVienId, start, end).isEmpty();
     }
 
+    @Transactional
     public LichHen updateLichHen(Integer id, LichHenUpdateRequest request) {
         LichHen lichHen = lichHenRepository.findById(id).orElseThrow(() -> new RuntimeException("Lịch hẹn không tồn tại: " + id));
         
@@ -167,12 +168,29 @@ public class LichHenService {
             lichHen.setThoiGianKetThuc(request.getThoiGianKetThuc());
         }
 
-        if (request.getTrangThai() != null) {
-            lichHen.setTrangThai(request.getTrangThai());
-        }
+        // Cập nhật ghi chú trước khi xử lý trạng thái
         if (request.getGhiChu() != null) {
             lichHen.setGhiChu(request.getGhiChu());
         }
+
+        if (request.getTrangThai() != null) {
+            // Logic tự động tạo sổ tiêm chủng khi hoàn thành lịch hẹn
+            if (request.getTrangThai() == LichHen.TrangThai.DA_HOAN_THANH && lichHen.getTrangThai() != LichHen.TrangThai.DA_HOAN_THANH) {
+                if (lichHen.getThuCung() != null) {
+                    SoTiemChung stc = new SoTiemChung();
+                    stc.setThuCung(lichHen.getThuCung());
+                    stc.setTenVacXin("Chưa cập nhật"); // Để placeholder để nhắc nhở cập nhật
+                    stc.setNgayTiem(LocalDateTime.now().toLocalDate());
+                    stc.setNhanVien(lichHen.getNhanVien());
+                    stc.setLichHen(lichHen);
+                    stc.setGhiChu(lichHen.getGhiChu()); // Lấy ghi chú từ lịch hẹn
+                    
+                    soTiemChungRepository.save(stc);
+                }
+            }
+            lichHen.setTrangThai(request.getTrangThai());
+        }
+        
         return lichHenRepository.save(lichHen);
     }
 

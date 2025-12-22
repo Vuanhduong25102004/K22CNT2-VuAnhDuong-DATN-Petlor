@@ -3,6 +3,7 @@
  * @description Trang quản lý người dùng (Container) - Đã fix lỗi đếm Stats.
  */
 import React, { useEffect, useState } from "react";
+import useEscapeKey from "../../../hooks/useEscapeKey";
 import userService from "../../../services/userService";
 import { toast } from "react-toastify";
 
@@ -129,18 +130,16 @@ const AdminUsers = () => {
     fetchStats();
   }, []);
 
-  // Handle ESC key
-  useEffect(() => {
-    const handleEscKey = (event) => {
-      if (event.key === "Escape") {
-        setIsDetailModalOpen(false);
-        setIsFormModalOpen(false);
-        setIsConfirmDeleteModalOpen(false);
-      }
-    };
-    document.addEventListener("keydown", handleEscKey);
-    return () => document.removeEventListener("keydown", handleEscKey);
-  }, []);
+  const handleCloseModals = () => {
+    setIsDetailModalOpen(false);
+    setIsFormModalOpen(false);
+    setIsConfirmDeleteModalOpen(false);
+  };
+
+  useEscapeKey(
+    handleCloseModals,
+    isDetailModalOpen || isFormModalOpen || isConfirmDeleteModalOpen
+  );
 
   // --- Handlers ---
   const handleDeleteClick = (id) => {
@@ -300,14 +299,14 @@ const AdminUsers = () => {
       {/* Modal Detail */}
       <UserDetailModal
         isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
+        onClose={handleCloseModals}
         user={selectedUser}
       />
 
       {/* Modal Form Gộp */}
       <UserFormModal
         isOpen={isFormModalOpen}
-        onClose={() => setIsFormModalOpen(false)}
+        onClose={handleCloseModals}
         initialData={editingUser}
         onSubmit={handleFormSubmit}
       />
@@ -315,7 +314,7 @@ const AdminUsers = () => {
       {/* Modal Confirm Delete */}
       <ConfirmDeleteModal
         isOpen={isConfirmDeleteModalOpen}
-        onClose={() => setIsConfirmDeleteModalOpen(false)}
+        onClose={handleCloseModals}
         onConfirm={confirmDelete}
       />
     </>

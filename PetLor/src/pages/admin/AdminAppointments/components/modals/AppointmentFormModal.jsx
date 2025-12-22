@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { APPOINTMENT_STATUSES, API_STATUS_MAP } from "../../utils";
+import useEscapeKey from "../../../../../hooks/useEscapeKey";
 
 const AppointmentFormModal = ({
   isOpen,
@@ -78,6 +79,9 @@ const AppointmentFormModal = ({
       }
     }
   }, [isOpen, initialData]);
+
+  // Sử dụng custom hook để đóng modal khi nhấn phím Escape
+  useEscapeKey(onClose, isOpen);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

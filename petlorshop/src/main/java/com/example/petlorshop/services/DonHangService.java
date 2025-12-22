@@ -134,7 +134,7 @@ public class DonHangService {
                 donHang.getTongTienHang(),
                 donHang.getSoTienGiam(),
                 donHang.getTongThanhToan(),
-                donHang.getTrangThai() != null ? donHang.getTrangThai().getDisplayName() : null, // Sửa ở đây
+                donHang.getTrangThai() != null ? donHang.getTrangThai().getDisplayName() : null,
                 donHang.getPhuongThucThanhToan(),
                 donHang.getDiaChiGiaoHang(),
                 donHang.getSoDienThoaiNhan(),

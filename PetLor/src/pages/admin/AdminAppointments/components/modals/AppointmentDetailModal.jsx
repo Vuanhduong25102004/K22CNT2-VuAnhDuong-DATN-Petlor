@@ -1,8 +1,12 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDate, getStatusBadge } from "../../utils";
+import useEscapeKey from "../../../../../hooks/useEscapeKey";
 
 const AppointmentDetailModal = ({ isOpen, onClose, appointment }) => {
+  // Sử dụng custom hook để đóng modal khi nhấn phím Escape
+  useEscapeKey(onClose, isOpen);
+
   return (
     <AnimatePresence>
       {isOpen && appointment && (

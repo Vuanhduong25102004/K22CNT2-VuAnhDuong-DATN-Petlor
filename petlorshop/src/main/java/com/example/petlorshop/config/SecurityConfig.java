@@ -12,6 +12,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -78,14 +79,22 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/don-hang/**").hasAuthority(admin)
                         .requestMatchers(HttpMethod.GET, "/api/lich-hen/**").hasAuthority(admin)
                         .requestMatchers(HttpMethod.PUT, "/api/lich-hen/**").hasAuthority(admin)
+                        .requestMatchers("/api/nha-cung-cap/**").hasAuthority(admin) // Nhà cung cấp chỉ admin được quản lý
 
                         // == ANY AUTHENTICATED USER ==
-                        .requestMatchers(HttpMethod.PUT, "/api/nguoi-dung/me/avatar").authenticated() // Cho phép tự cập nhật avatar
-                        .requestMatchers(HttpMethod.GET, "/api/nhan-vien/**").authenticated() // Xem thông tin nhân viên
+                        .requestMatchers(HttpMethod.PUT, "/api/nguoi-dung/me/avatar").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/nhan-vien/**").authenticated()
                         .requestMatchers("/api/thu-cung/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/don-hang").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/lich-hen").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/don-hang/user/**").authenticated()
+
+                        // Authenticated: Các tính năng mới
+                        .requestMatchers("/api/so-tiem-chung/**").authenticated()
+                        .requestMatchers("/api/chat/**").authenticated()
+                        .requestMatchers("/api/thong-bao/**").authenticated()
+                        .requestMatchers("/api/giao-dich/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/danh-gia").authenticated()
 
                         // Deny all other requests by default
                         .anyRequest().authenticated()

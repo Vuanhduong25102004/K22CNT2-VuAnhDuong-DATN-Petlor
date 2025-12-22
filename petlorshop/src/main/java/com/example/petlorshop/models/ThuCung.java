@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -37,6 +38,9 @@ public class ThuCung {
 
     @Column(name = "gioi_tinh", length = 10)
     private String gioiTinh;
+
+    @Column(name = "can_nang", precision = 5, scale = 2)
+    private BigDecimal canNang;
 
     @Column(name = "ghi_chu_suc_khoe", columnDefinition = "TEXT")
     private String ghiChuSucKhoe;
