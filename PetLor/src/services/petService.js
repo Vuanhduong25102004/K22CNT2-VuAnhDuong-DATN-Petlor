@@ -14,9 +14,18 @@ const petService = {
   createMyPet: (data) => {
     const config = {};
     if (data instanceof FormData) {
-      config.headers = {'Content-Type': undefined };
+      config.headers = {'Content-Type': undefined};
     }
     return apiClient.post('/thu-cung/me', data, config);
+  },
+  
+  updateMyPet: (id, data) => {
+    const config = {};
+    // Cấu hình để gửi multipart/form-data
+    if (data instanceof FormData) {
+      config.headers = { 'Content-Type': undefined };
+    }
+    return apiClient.put(`/thu-cung/me/${id}`, data, config);
   },
   
   getPetById: (id) => apiClient.get(`/thu-cung/${id}`),

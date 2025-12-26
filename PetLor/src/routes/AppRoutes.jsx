@@ -33,6 +33,7 @@ import AdminPosts from "../pages/admin/AdminPosts";
 
 //user pages
 import UserProfile from "../pages/user/UserProfile";
+import MyPets from "../pages/user/MyPets";
 
 const AppRoutes = () => {
   return (
@@ -46,8 +47,7 @@ const AppRoutes = () => {
         <Route path="/products" element={<ProductsPage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/profile" element={<UserProfile />} />
-          {/* Sau này thêm các trang user khác vào đây */}
-          {/* <Route path="/my-pets" element={<MyPetsPage />} /> */}
+          <Route path="/my-pets" element={<MyPets />} />
           {/* <Route path="/change-password" element={<ChangePasswordPage />} /> */}
         </Route>
       </Route>

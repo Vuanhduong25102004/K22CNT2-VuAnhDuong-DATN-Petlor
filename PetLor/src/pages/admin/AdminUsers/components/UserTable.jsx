@@ -1,31 +1,46 @@
 import React from "react";
-import useEscapeKey from "../../../../hooks/useEscapeKey";
-import { formatDate, RoleBadge } from "../../components/utils";
+// Đừng quên import GenderBadge mới thêm
+import { formatDate, RoleBadge, GenderBadge } from "../../components/utils";
 
 const SkeletonRow = () => (
   <tr className="animate-pulse border-b border-gray-100 last:border-0">
+    {/* 1. ID */}
     <td className="px-6 py-4">
       <div className="h-4 bg-gray-200 rounded w-8"></div>
     </td>
+    {/* 2. Họ tên */}
     <td className="px-6 py-4 flex items-center gap-3">
       <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
       <div className="space-y-2">
         <div className="h-4 bg-gray-200 rounded w-32"></div>
       </div>
     </td>
+    {/* 3. Liên hệ */}
     <td className="px-6 py-4">
       <div className="h-4 bg-gray-200 rounded w-40 mb-2"></div>
       <div className="h-3 bg-gray-100 rounded w-24"></div>
     </td>
+    {/* 4. Giới tính (MỚI) */}
+    <td className="px-6 py-4">
+      <div className="h-6 bg-gray-200 rounded-full w-16"></div>
+    </td>
+    {/* 5. Ngày sinh (MỚI) */}
     <td className="px-6 py-4">
       <div className="h-4 bg-gray-200 rounded w-24"></div>
     </td>
+    {/* 6. Địa chỉ */}
+    <td className="px-6 py-4">
+      <div className="h-4 bg-gray-200 rounded w-24"></div>
+    </td>
+    {/* 7. Vai trò */}
     <td className="px-6 py-4">
       <div className="h-6 bg-gray-200 rounded w-20"></div>
     </td>
+    {/* 8. Ngày tạo */}
     <td className="px-6 py-4">
       <div className="h-4 bg-gray-200 rounded w-24"></div>
     </td>
+    {/* 9. Actions */}
     <td className="px-6 py-4">
       <div className="h-8 bg-gray-200 rounded w-20 ml-auto"></div>
     </td>
@@ -59,6 +74,14 @@ const UserTable = ({
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Liên hệ
+              </th>
+              {/* Cột Mới */}
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Giới tính
+              </th>
+              {/* Cột Mới */}
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Ngày sinh
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Địa chỉ
@@ -94,12 +117,14 @@ const UserTable = ({
                         {user.anhDaiDien ? (
                           <img
                             className="h-10 w-10 rounded-full object-cover"
-                            src={`http://localhost:8080/uploads/${user.anhDaiDien}`}
+                            src={
+                              user.anhDaiDien.startsWith("http")
+                                ? user.anhDaiDien
+                                : `http://localhost:8080/uploads/${user.anhDaiDien}`
+                            }
                             onError={(e) => {
                               e.target.onerror = null;
-                              e.target.src = `https://placehold.co/40x40?text=${user.hoTen.charAt(
-                                0
-                              )}`;
+                              e.target.src = `https://ui-avatars.com/api/?name=${user.hoTen}&background=random`;
                             }}
                             alt=""
                           />
@@ -122,14 +147,25 @@ const UserTable = ({
                       {user.soDienThoai}
                     </div>
                   </td>
+
+                  {/* --- CỘT GIỚI TÍNH MỚI --- */}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {GenderBadge(user.gioiTinh)}
+                  </td>
+
+                  {/* --- CỘT NGÀY SINH MỚI --- */}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    {formatDate(user.ngaySinh)}
+                  </td>
+
                   <td
                     className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-[150px] truncate"
                     title={user.diaChi}
                   >
-                    {user.diaChi}
+                    {user.diaChi || "-"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {RoleBadge(user.role)}
+                    <RoleBadge role={user.role} />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatDate(user.ngayTao)}
@@ -138,26 +174,29 @@ const UserTable = ({
                     <div className="flex items-center justify-end space-x-2">
                       <button
                         onClick={() => onViewDetail(user)}
-                        className="text-gray-400 hover:text-green-600"
+                        className="text-gray-400 hover:text-green-600 p-1 rounded-full hover:bg-green-50 transition-colors"
+                        title="Xem chi tiết"
                       >
-                        <span className="material-symbols-outlined text-base">
+                        <span className="material-symbols-outlined text-xl">
                           visibility
                         </span>
                       </button>
                       <button
                         onClick={() => onEdit(user)}
-                        className="text-gray-400 hover:text-blue-500"
+                        className="text-gray-400 hover:text-blue-500 p-1 rounded-full hover:bg-blue-50 transition-colors"
+                        title="Chỉnh sửa"
                       >
-                        <span className="material-symbols-outlined text-base">
+                        <span className="material-symbols-outlined text-xl">
                           edit_note
                         </span>
                       </button>
                       <button
                         onClick={() => onDelete(user.userId)}
-                        className="text-gray-400 hover:text-red-500"
+                        className="text-gray-400 hover:text-red-500 p-1 rounded-full hover:bg-red-50 transition-colors"
+                        title="Xóa"
                       >
-                        <span className="material-symbols-outlined text-base">
-                          cancel
+                        <span className="material-symbols-outlined text-xl">
+                          delete
                         </span>
                       </button>
                     </div>
@@ -166,8 +205,16 @@ const UserTable = ({
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
-                  Không tìm thấy người dùng nào.
+                <td
+                  colSpan="9" // Tăng colspan lên 9 vì thêm 2 cột
+                  className="px-6 py-10 text-center text-gray-500"
+                >
+                  <div className="flex flex-col items-center justify-center">
+                    <span className="material-symbols-outlined text-4xl text-gray-300 mb-2">
+                      search_off
+                    </span>
+                    <p>Không tìm thấy người dùng nào phù hợp.</p>
+                  </div>
                 </td>
               </tr>
             )}
@@ -175,7 +222,7 @@ const UserTable = ({
         </table>
       </div>
 
-      {/* Pagination */}
+      {/* Pagination giữ nguyên */}
       <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
         <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
@@ -186,7 +233,7 @@ const UserTable = ({
               </span>{" "}
               đến{" "}
               <span className="font-medium">
-                {indexOfFirstItem + users.length}
+                {Math.min(indexOfFirstItem + ITEMS_PER_PAGE, totalElements)}
               </span>{" "}
               trong số <span className="font-medium">{totalElements}</span> kết
               quả
@@ -200,7 +247,7 @@ const UserTable = ({
               <button
                 onClick={() => onPageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="sr-only">Previous</span>
                 <span className="material-symbols-outlined text-base">
@@ -208,24 +255,45 @@ const UserTable = ({
                 </span>
               </button>
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (number) => (
-                  <button
-                    key={number}
-                    onClick={() => onPageChange(number)}
-                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                      currentPage === number
-                        ? "z-10 bg-primary border-primary text-white"
-                        : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
-                    }`}
-                  >
-                    {number}
-                  </button>
-                )
+                (number) => {
+                  // Logic rút gọn trang nếu quá nhiều trang (Optional)
+                  if (
+                    totalPages > 7 &&
+                    Math.abs(currentPage - number) > 2 &&
+                    number !== 1 &&
+                    number !== totalPages
+                  ) {
+                    if (Math.abs(currentPage - number) === 3)
+                      return (
+                        <span
+                          key={number}
+                          className="px-2 py-2 border border-gray-300 bg-white text-gray-500"
+                        >
+                          ...
+                        </span>
+                      );
+                    return null;
+                  }
+
+                  return (
+                    <button
+                      key={number}
+                      onClick={() => onPageChange(number)}
+                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium transition-colors ${
+                        currentPage === number
+                          ? "z-10 bg-primary border-primary text-[#0d1b0d] font-bold" // Active style
+                          : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
+                      }`}
+                    >
+                      {number}
+                    </button>
+                  );
+                }
               )}
               <button
                 onClick={() => onPageChange(currentPage + 1)}
                 disabled={currentPage === totalPages || totalPages === 0}
-                className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="sr-only">Next</span>
                 <span className="material-symbols-outlined text-base">
