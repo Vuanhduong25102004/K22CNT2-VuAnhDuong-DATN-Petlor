@@ -106,11 +106,9 @@ const ServicesPage = () => {
                 data-aos="fade-up"
                 data-aos-delay="100"
               >
-                <div className="flex h-9 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full bg-primary/20 px-4">
-                  <p className="text-primary text-sm font-bold leading-normal">
-                    Tất cả
-                  </p>
-                </div>
+                <button className="flex h-9 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full bg-primary text-white px-5 text-sm font-bold shadow-sm transition-all hover:scale-105 hover:opacity-90 outline-none">
+                  Tất cả
+                </button>
                 {["Chăm sóc lông", "Trông giữ", "Huấn luyện"].map((filter) => (
                   <div
                     key={filter}
@@ -152,10 +150,12 @@ const ServicesPage = () => {
                           <p className="text-gray-700 text-sm font-semibold leading-normal mt-auto">
                             {formatCurrency(service.giaDichVu)}
                           </p>
-                          <button className="relative group mt-2 w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-[#111813] text-sm font-bold shadow-sm transition-all duration-300 ease-out hover:scale-105">
-                            <span className="absolute left-0 top-0 h-full w-0 bg-[#0dbd47] transition-all duration-300 ease-out group-hover:w-full"></span>
-                            <span className="relative z-10 truncate">
-                              Xem Chi Tiết
+                          <button
+                            className="relative group/btn mt-2 w-full flex items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-surface text-text-main text-sm font-bold shadow-sm transition-all duration-300 ease-out hover:scale-105
+  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-primary before:transition-all before:duration-300 before:ease-out hover:before:w-full"
+                          >
+                            <span className="relative z-10 transition-colors duration-300 group-hover/btn:text-white">
+                              Xem chi tiết
                             </span>
                           </button>
                         </div>
@@ -341,13 +341,20 @@ const ServicesPage = () => {
                     ))}
                   </ul>
                   <button
-                    className={`mt-8 w-full py-3 px-4 rounded-lg font-bold text-sm transition-colors ${
-                      plan.highlight
-                        ? "bg-primary text-[#111813] hover:bg-[#0dbd47]"
-                        : "bg-gray-100 text-gray-900 hover:bg-gray-200"
-                    }`}
+                    className={`relative group/btn mt-8 w-full py-3 px-4 rounded-lg font-bold text-sm overflow-hidden transition-all duration-300 hover:scale-105 shadow-sm
+    before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-[#10B981] before:transition-all before:duration-300 before:ease-out hover:before:w-full
+    ${
+      plan.highlight
+        ? "bg-primary" // Gói nổi bật: Nền xanh lá (màu cũ của bạn)
+        : "bg-gray-100" // Gói thường: Nền xám nhạt
+    }`}
                   >
-                    Chọn Gói Này
+                    {/* - text-[#111827]: Màu đen lúc chưa hover
+      - group-hover/btn:text-white: Chuyển sang trắng khi di chuột vào 
+  */}
+                    <span className="relative z-10 text-[#111827] transition-colors duration-300 group-hover/btn:text-white">
+                      Chọn Gói Này
+                    </span>
                   </button>
                 </div>
               ))}
@@ -373,9 +380,13 @@ const ServicesPage = () => {
                 nhất từ đội ngũ chuyên gia của chúng tôi. Thú cưng của bạn xứng
                 đáng được yêu thương và chăm sóc đặc biệt!
               </p>
-              <button className="relative group flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-[#111813] text-base font-bold shadow-sm transition-all duration-300 ease-out hover:scale-105">
-                <span className="absolute left-0 top-0 h-full w-0 bg-[#0dbd47] transition-all duration-300 ease-out group-hover:w-full"></span>
-                <span className="relative z-10 truncate">Đặt Lịch Ngay</span>
+              <button
+                className="relative group/btn flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-[#111813] text-base font-bold shadow-sm transition-all duration-300 ease-out hover:scale-105
+  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-[#10B981] before:transition-all before:duration-300 before:ease-out hover:before:w-full"
+              >
+                <span className="relative z-10 truncate transition-colors duration-300 group-hover/btn:text-white">
+                  Đặt Lịch Ngay
+                </span>
               </button>
             </div>
           </div>

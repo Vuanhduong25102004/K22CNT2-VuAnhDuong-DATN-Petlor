@@ -41,11 +41,12 @@ public class ThuCungController {
                 thuCung.getGiongLoai(),
                 thuCung.getNgaySinh(),
                 thuCung.getGioiTinh(),
+                thuCung.getCanNang(), // Thêm canNang
                 thuCung.getGhiChuSucKhoe(),
                 thuCung.getHinhAnh(),
                 thuCung.getNguoiDung().getUserId(),
                 thuCung.getNguoiDung().getHoTen(),
-                thuCung.getNguoiDung().getSoDienThoai() // Thêm số điện thoại
+                thuCung.getNguoiDung().getSoDienThoai()
         );
     }
 
@@ -89,6 +90,18 @@ public class ThuCungController {
         ThuCungRequest request = objectMapper.readValue(thuCungJson, ThuCungRequest.class);
         ThuCung createdThuCung = thuCungService.addMyPet(userEmail, request, hinhAnh);
         return new ResponseEntity<>(toThuCungResponse(createdThuCung), HttpStatus.CREATED);
+    }
+
+    @PutMapping(value = "/me/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<ThuCungResponse> updateMyPet(@PathVariable Integer id,
+                                                       @RequestPart("thuCung") String thuCungUpdateJson,
+                                                       @RequestPart(name = "hinhAnh", required = false) MultipartFile hinhAnh) throws JsonProcessingException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+
+        ThuCungUpdateRequest request = objectMapper.readValue(thuCungUpdateJson, ThuCungUpdateRequest.class);
+        ThuCung updatedThuCung = thuCungService.updateMyPet(userEmail, id, request, hinhAnh);
+        return ResponseEntity.ok(toThuCungResponse(updatedThuCung));
     }
 
     @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })

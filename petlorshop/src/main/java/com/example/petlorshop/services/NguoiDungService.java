@@ -163,8 +163,12 @@ public class NguoiDungService {
             nguoiDung.setSoDienThoai(request.getSoDienThoai());
         }
 
-        nguoiDung.setHoTen(request.getHoTen());
-        nguoiDung.setDiaChi(request.getDiaChi());
+        if (StringUtils.hasText(request.getHoTen())) {
+            nguoiDung.setHoTen(request.getHoTen());
+        }
+        if (StringUtils.hasText(request.getDiaChi())) {
+            nguoiDung.setDiaChi(request.getDiaChi());
+        }
 
         if (StringUtils.hasText(request.getPassword())) {
             nguoiDung.setMatKhau(passwordEncoder.encode(request.getPassword()));

@@ -24,6 +24,10 @@ const SkeletonRow = () => (
     <td className="px-6 py-4">
       <div className="h-4 bg-gray-200 rounded w-20"></div>
     </td>
+    {/* 1. Thêm Skeleton cho Cân nặng */}
+    <td className="px-6 py-4">
+      <div className="h-4 bg-gray-200 rounded w-16"></div>
+    </td>
     <td className="px-6 py-4">
       <div className="h-4 bg-gray-200 rounded w-24"></div>
     </td>
@@ -69,6 +73,10 @@ const PetTable = ({
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Tuổi / Ngày sinh
+              </th>
+              {/* 2. Thêm Header Cân nặng */}
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Cân nặng
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Ghi chú sức khỏe
@@ -149,11 +157,17 @@ const PetTable = ({
                         {formatDate(pet.ngaySinh)}
                       </div>
                     </td>
+
+                    {/* 3. Hiển thị dữ liệu Cân nặng */}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {pet.canNang ? `${pet.canNang} kg` : "---"}
+                    </td>
+
                     <td
                       className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-[200px] truncate"
                       title={pet.ghiChuSucKhoe}
                     >
-                      {pet.ghiChuSucKhoe}
+                      {pet.ghiChuSucKhoe || "Không có"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-2">
@@ -190,8 +204,9 @@ const PetTable = ({
                 ))
               : !loading && (
                   <tr>
+                    {/* 4. Tăng ColSpan lên 9 */}
                     <td
-                      colSpan="8"
+                      colSpan="9"
                       className="px-6 py-4 text-center text-gray-500"
                     >
                       Không tìm thấy thú cưng nào.

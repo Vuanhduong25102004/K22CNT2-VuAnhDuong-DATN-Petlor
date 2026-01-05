@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
@@ -17,6 +18,7 @@ public class ThuCungUpdateRequest {
     private String giongLoai;
     private LocalDate ngaySinh;
     private String gioiTinh;
+    private BigDecimal canNang; // Đã thêm trường canNang
     private String ghiChuSucKhoe;
     
     // Thông tin đổi chủ

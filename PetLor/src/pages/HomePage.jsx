@@ -45,9 +45,10 @@ const Homepage = () => {
                 </h2>
               </div>
               <div className="mt-4" data-aos="fade-up" data-aos-delay="300">
-                <button className="relative group flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-primary text-[#111813] text-sm font-bold shadow-sm transition-all duration-300 ease-out hover:scale-105">
-                  <span className="absolute left-0 top-0 h-full w-0 bg-[#0dbd47] transition-all duration-300 ease-out group-hover:w-full"></span>
-                  <span className="relative z-10 truncate">Đặt lịch hẹn</span>
+                <button className="relative group inline-flex items-center justify-center overflow-hidden rounded-lg bg-primary px-8 py-3 text-sm font-bold text-[#111813] shadow-lg transition-all duration-300 ease-out hover:scale-105 before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-[#10B981] before:transition-all before:duration-300 before:ease-out hover:before:w-full">
+                  <span className="relative z-10 truncate transition-colors duration-300 group-hover:text-white">
+                    Đặt lịch hẹn
+                  </span>
                 </button>
               </div>
             </div>
@@ -160,9 +161,10 @@ const Homepage = () => {
                   nhất cho thú cưng của bạn.
                 </p>
               </div>
-              <button className="relative group flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-primary text-[#111813] text-sm font-bold shadow-sm transition-all duration-300 ease-out hover:scale-105">
-                <span className="absolute left-0 top-0 h-full w-0 bg-[#0dbd47] transition-all duration-300 ease-out group-hover:w-full"></span>
-                <span className="relative z-10 truncate">Tìm hiểu thêm</span>
+              <button className="relative group inline-flex items-center justify-center overflow-hidden rounded-lg bg-primary px-8 py-3 text-sm font-bold text-[#111813] shadow-lg transition-all duration-300 ease-out hover:scale-105 before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-[#10B981] before:transition-all before:duration-300 before:ease-out hover:before:w-full">
+                <span className="relative z-10 truncate transition-colors duration-300 group-hover:text-white">
+                  Tìm hiểu thêm
+                </span>
               </button>
             </div>
 
@@ -564,8 +566,10 @@ const Homepage = () => {
                 placeholder="Nhập email của bạn..."
                 className="flex-1 px-5 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm"
               />
-              <button className="px-8 py-3 bg-primary text-[#111813] font-bold rounded-lg hover:bg-[#0dbd47] transition-colors shadow-sm">
-                Đăng ký ngay
+              <button className="relative group/btn inline-flex items-center justify-center overflow-hidden rounded-lg bg-primary px-8 py-3 text-sm font-bold text-[#111813] shadow-lg transition-all duration-300 ease-out hover:scale-105 before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-[#10B981] before:transition-all before:duration-300 before:ease-out hover:before:w-full">
+                <span className="relative z-10 transition-colors duration-300 group-hover/btn:text-white">
+                  Đăng ký ngay
+                </span>
               </button>
             </form>
           </div>

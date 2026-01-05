@@ -11,8 +11,7 @@ const UserFormModal = ({
   const isEdit = !!initialData;
   const [creationType, setCreationType] = useState("USER"); // 'USER' | 'EMPLOYEE'
 
-  // State form
-  const [formData, setFormData] = useState({
+  const defaultFormState = {
     hoTen: "",
     email: "",
     password: "", // Bắt buộc khi tạo mới
@@ -22,7 +21,10 @@ const UserFormModal = ({
     chucVu: "",
     chuyenKhoa: "",
     kinhNghiem: "",
-  });
+  };
+
+  // State form
+  const [formData, setFormData] = useState(defaultFormState);
 
   const [avatarFile, setAvatarFile] = useState(null);
   const [previewAvatar, setPreviewAvatar] = useState("");
@@ -30,43 +32,22 @@ const UserFormModal = ({
   // Reset form khi mở modal
   useEffect(() => {
     if (isOpen) {
-      if (initialData) {
-        // Edit mode
-        setFormData({
-          hoTen: initialData.hoTen || "",
-          email: initialData.email || "",
-          password: "", // Không điền mật khẩu cũ
-          soDienThoai: initialData.soDienThoai || "",
-          diaChi: initialData.diaChi || "",
-          role: initialData.role || "USER",
-          chucVu: initialData.chucVu || "",
-          chuyenKhoa: initialData.chuyenKhoa || "",
-          kinhNghiem: initialData.kinhNghiem || "",
-        });
-        setPreviewAvatar(
-          initialData.anhDaiDien
-            ? `http://localhost:8080/uploads/${initialData.anhDaiDien}`
-            : ""
-        );
-        // Xác định loại để hiển thị đúng tab
-        if (initialData.role !== "USER") setCreationType("EMPLOYEE");
-        else setCreationType("USER");
-      } else {
-        // Create mode
-        setFormData({
-          hoTen: "",
-          email: "",
-          password: "",
-          soDienThoai: "",
-          diaChi: "",
-          role: "USER", // Mặc định
-          chucVu: "",
-          chuyenKhoa: "",
-          kinhNghiem: "",
-        });
-        setPreviewAvatar("");
-        setCreationType("USER"); // Mặc định tab User
-      }
+      // Hợp nhất dữ liệu mặc định với dữ liệu ban đầu (nếu có)
+      const newFormData = { ...defaultFormState, ...(initialData || {}) };
+      newFormData.password = ""; // Luôn xóa mật khẩu khi mở modal
+      setFormData(newFormData);
+
+      // Cập nhật ảnh đại diện và loại tài khoản
+      setPreviewAvatar(
+        initialData?.anhDaiDien
+          ? `http://localhost:8080/uploads/${initialData.anhDaiDien}`
+          : ""
+      );
+      setCreationType(
+        initialData?.role && initialData.role !== "USER" ? "EMPLOYEE" : "USER"
+      );
+
+      // Reset file đã chọn
       setAvatarFile(null);
     }
   }, [isOpen, initialData]);
@@ -94,12 +75,17 @@ const UserFormModal = ({
   };
 
   const handleSubmit = () => {
-    // Logic lọc dữ liệu trước khi gửi nếu cần
-    // Ví dụ: Nếu là USER thì không gửi chucVu, chuyenKhoa...
-    // Tuy nhiên, để đơn giản, ta cứ gửi hết, backend sẽ xử lý hoặc bỏ qua.
-
-    // Nếu là Create USER, force role = USER
+    // 1. Chuẩn bị dữ liệu thô
     let submitData = { ...formData };
+
+    // Logic xóa mật khẩu nếu để trống khi chỉnh sửa
+    if (isEdit) {
+      if (!submitData.password || submitData.password.trim() === "") {
+        delete submitData.password;
+      }
+    }
+
+    // Logic xóa các trường chuyên môn nếu là USER (Create mode)
     if (!isEdit && creationType === "USER") {
       submitData.role = "USER";
       delete submitData.chucVu;
@@ -107,6 +93,8 @@ const UserFormModal = ({
       delete submitData.kinhNghiem;
     }
 
+    // 2. CHỈ GỬI DỮ LIỆU THÔ lên cho file cha xử lý
+    // Không tạo FormData ở đây nữa
     onSubmit(submitData, avatarFile);
   };
 

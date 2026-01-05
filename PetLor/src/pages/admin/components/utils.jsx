@@ -407,3 +407,39 @@ export const UserAvatar = ({ user, className = "h-8 w-8" }) => {
     />
   );
 };
+
+export const GenderBadge = (gender) => {
+  if (!gender) return <span className="text-gray-400 text-sm">-</span>;
+
+  const lowerGender = gender.toLowerCase();
+  let styles = "";
+  let icon = "";
+  let label = gender;
+
+  if (lowerGender === "nam" || lowerGender === "male") {
+    styles = "bg-blue-50 text-blue-700 border-blue-200";
+    icon = "male";
+    label = "Nam";
+  } else if (
+    lowerGender === "nữ" ||
+    lowerGender === "nu" ||
+    lowerGender === "female"
+  ) {
+    styles = "bg-pink-50 text-pink-700 border-pink-200";
+    icon = "female";
+    label = "Nữ";
+  } else {
+    styles = "bg-purple-50 text-purple-700 border-purple-200";
+    icon = "transgender";
+    label = "Khác";
+  }
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border ${styles}`}
+    >
+      <span className="material-symbols-outlined text-[14px]">{icon}</span>
+      {label}
+    </span>
+  );
+};

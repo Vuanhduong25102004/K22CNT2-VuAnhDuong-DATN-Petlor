@@ -10,8 +10,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -33,6 +36,14 @@ public class LichHenController {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch hẹn với ID: " + id));
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<List<LichHenResponse>> getMyLichHen() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        List<LichHenResponse> myLichHen = lichHenService.getMyLichHen(userEmail);
+        return ResponseEntity.ok(myLichHen);
+    }
+
     @PostMapping
     public ResponseEntity<LichHenResponse> createLichHen(@RequestBody LichHenRequest request) {
         LichHenResponse createdLichHen = lichHenService.createLichHen(request);
@@ -43,6 +54,22 @@ public class LichHenController {
     public ResponseEntity<LichHen> updateLichHen(@PathVariable Integer id, @RequestBody LichHenUpdateRequest request) {
         LichHen updatedLichHen = lichHenService.updateLichHen(id, request);
         return ResponseEntity.ok(updatedLichHen);
+    }
+
+    @PutMapping("/me/{id}")
+    public ResponseEntity<LichHenResponse> updateMyLichHen(@PathVariable Integer id, @RequestBody LichHenUpdateRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        LichHenResponse updatedLichHen = lichHenService.updateMyLichHen(userEmail, id, request);
+        return ResponseEntity.ok(updatedLichHen);
+    }
+
+    @PutMapping("/me/{id}/cancel")
+    public ResponseEntity<LichHenResponse> cancelMyLichHen(@PathVariable Integer id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        LichHenResponse cancelledLichHen = lichHenService.cancelMyLichHen(userEmail, id);
+        return ResponseEntity.ok(cancelledLichHen);
     }
 
     @DeleteMapping("/{id}")

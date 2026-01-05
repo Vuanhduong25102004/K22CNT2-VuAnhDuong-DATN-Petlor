@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -16,6 +17,7 @@ public class ThuCungResponse {
     private String giongLoai;
     private LocalDate ngaySinh;
     private String gioiTinh;
+    private BigDecimal canNang;
     private String ghiChuSucKhoe;
     private String hinhAnh;
     private Integer userId;

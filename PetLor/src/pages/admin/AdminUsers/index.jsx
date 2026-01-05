@@ -189,66 +189,34 @@ const AdminUsers = () => {
   const handleFormSubmit = async (formData, avatarFile) => {
     const dataPayload = new FormData();
 
-    // Validate cơ bản cho create
-    if (
-      !editingUser &&
-      (!formData.hoTen || !formData.email || !formData.password)
-    ) {
-      toast.warning("Vui lòng điền đầy đủ thông tin bắt buộc!");
-      return;
-    }
-
     try {
       if (editingUser) {
-        // --- UPDATE ---
-        const userData = {
-          hoTen: formData.hoTen,
-          email: formData.email,
-          soDienThoai: formData.soDienThoai,
-          diaChi: formData.diaChi,
-          role: formData.role,
-          chucVu: formData.chucVu,
-          chuyenKhoa: formData.chuyenKhoa,
-          kinhNghiem: formData.kinhNghiem,
-        };
-        if (formData.password) userData.password = formData.password;
-
-        dataPayload.append(
-          "nguoiDung",
-          new Blob([JSON.stringify(userData)], { type: "application/json" })
-        );
+        // --- TRƯỜNG HỢP CẬP NHẬT (UPDATE) ---
+        // Gửi string trực tiếp như EditProfileModal
+        dataPayload.append("nguoiDung", JSON.stringify(formData));
         if (avatarFile) dataPayload.append("anhDaiDien", avatarFile);
 
         await userService.updateUser(editingUser.userId, dataPayload);
         toast.success("Cập nhật thành công!");
       } else {
-        // --- CREATE ---
+        // --- TRƯỜNG HỢP TẠO MỚI (CREATE) ---
         if (formData.role === "USER") {
-          dataPayload.append(
-            "nguoiDung",
-            new Blob([JSON.stringify(formData)], { type: "application/json" })
-          );
-          if (avatarFile) {
-            dataPayload.append("anhDaiDien", avatarFile);
-          }
+          // Khách hàng dùng key 'nguoiDung'
+          dataPayload.append("nguoiDung", JSON.stringify(formData));
+          if (avatarFile) dataPayload.append("anhDaiDien", avatarFile);
           await userService.createUnifiedUser(dataPayload);
-          toast.success("Tạo mới khách hàng thành công!");
         } else {
-          dataPayload.append(
-            "nhanVien",
-            new Blob([JSON.stringify(formData)], { type: "application/json" })
-          );
-          if (avatarFile) {
-            dataPayload.append("anhDaiDien", avatarFile);
-          }
+          // Nhân viên dùng key 'nhanVien' (phải khớp với @RequestPart Backend)
+          dataPayload.append("nhanVien", JSON.stringify(formData));
+          if (avatarFile) dataPayload.append("anhDaiDien", avatarFile);
           await userService.createStaff(dataPayload);
-          toast.success("Tạo mới nhân viên thành công!");
         }
+        toast.success("Tạo mới thành công!");
       }
 
       setIsFormModalOpen(false);
       fetchUsers(); // Tải lại bảng
-      fetchStats(); // Tải lại số liệu thống kê
+      fetchStats(); // Tải lại số liệu
     } catch (error) {
       console.error("Lỗi thao tác:", error);
       const msg = error.response?.data?.message || "Thao tác thất bại.";

@@ -11,18 +11,23 @@ const userService = {
 
   // This is a unified endpoint for creating both users and employees
   // The backend expects multipart/form-data with a JSON part 'nguoiDung' and an optional file part 'anhDaiDien'
-  createUnifiedUser: (data) => {
-    return apiClient.post("/nguoi-dung/register", data);
+  createUnifiedUser: (formData) => {
+    return apiClient.post("/nguoi-dung/register", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   },
 
-  updateUser: (id, data) => {
-    // Axios tự động xử lý header 'multipart/form-data' khi dữ liệu là FormData
-    return apiClient.put(`/nguoi-dung/${id}`, data);
+  updateUser: (id, formData) => {
+    return apiClient.put(`/nguoi-dung/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   },
 
   updateMe: (data) => apiClient.put("/nguoi-dung/me", data, {
-    // Thêm config headers để ghi đè Content-Type mặc định.
-    // Axios sẽ tự động thêm 'boundary' cần thiết cho multipart/form-data.
     headers: {
       "Content-Type": "multipart/form-data",
     },

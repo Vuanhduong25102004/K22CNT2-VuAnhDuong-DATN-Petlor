@@ -23,4 +23,6 @@ public interface LichHenRepository extends JpaRepository<LichHen, Integer> {
 
     @Query("SELECT l FROM LichHen l WHERE LOWER(l.ghiChu) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<LichHen> searchByKeyword(@Param("keyword") String keyword);
+
+    List<LichHen> findByNguoiDung_Email(String email);
 }

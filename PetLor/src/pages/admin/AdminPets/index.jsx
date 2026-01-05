@@ -213,50 +213,21 @@ const AdminPets = () => {
     setIsFormModalOpen(true);
   };
 
-  const handleFormSubmit = async (formData, imageFile) => {
-    if (
-      !formData.tenThuCung ||
-      !formData.tenChuSoHuu ||
-      !formData.soDienThoaiChuSoHuu
-    ) {
-      toast.warning("Vui lòng nhập đầy đủ thông tin bắt buộc (*)");
-      return;
-    }
-
-    const payload = new FormData();
-    const petData = {
-      tenThuCung: formData.tenThuCung,
-      chungLoai: formData.chungLoai,
-      giongLoai: formData.giongLoai,
-      ngaySinh: formData.ngaySinh,
-      gioiTinh: formData.gioiTinh,
-      ghiChuSucKhoe: formData.ghiChuSucKhoe,
-      tenChuSoHuu: formData.tenChuSoHuu,
-      soDienThoaiChuSoHuu: formData.soDienThoaiChuSoHuu,
-    };
-
-    payload.append(
-      "thuCung",
-      new Blob([JSON.stringify(petData)], { type: "application/json" })
-    );
-    if (imageFile) {
-      payload.append("hinhAnh", imageFile);
-    }
-
+  const handleFormSubmit = async (submissionData) => {
     try {
       if (editingPet) {
-        await petService.updatePet(editingPet.thuCungId, payload);
+        await petService.updatePet(editingPet.thuCungId, submissionData);
         toast.success("Cập nhật thành công!");
       } else {
-        await petService.createPet(payload);
+        await petService.createPet(submissionData);
         toast.success("Thêm mới thành công!");
       }
       setIsFormModalOpen(false);
-      fetchPets(); // Reload Table
-      fetchStats(); // Reload Stats
+      fetchPets();
+      fetchStats();
     } catch (error) {
       console.error("Lỗi thao tác:", error);
-      toast.error("Thao tác thất bại.");
+      toast.error("Thao tác thất bại. Vui lòng kiểm tra lại server.");
     }
   };
 

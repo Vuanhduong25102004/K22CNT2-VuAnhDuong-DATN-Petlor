@@ -293,11 +293,13 @@ const AboutUsPage = () => {
             cho thú cưng của bạn. Liên hệ ngay để được tư vấn dịch vụ phù hợp
             nhất.
           </p>
-
-          {/* Button */}
-          <button className="relative group flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary px-8 py-3 font-bold text-[#111813] shadow-sm transition-all duration-300 ease-out hover:scale-105 mt-4">
-            <span className="absolute left-0 top-0 h-full w-0 bg-[#0dbd47] transition-all duration-300 ease-out group-hover:w-full"></span>
-            <span className="relative z-10">Liên Hệ Tư Vấn</span>
+          <button
+            className="relative group/btn mt-4 flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary px-8 py-3 font-bold text-[#111813] shadow-sm transition-all duration-300 ease-out hover:scale-105
+  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-[#10B981] before:transition-all before:duration-300 before:ease-out hover:before:w-full"
+          >
+            <span className="relative z-10 transition-colors duration-300 group-hover/btn:text-white">
+              Liên Hệ Tư Vấn
+            </span>
           </button>
         </div>
       </section>

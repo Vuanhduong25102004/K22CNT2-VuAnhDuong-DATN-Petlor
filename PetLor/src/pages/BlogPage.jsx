@@ -130,12 +130,13 @@ const BlogPage = () => {
                         Bởi Dr. Thú Y | 1 giờ trước
                       </p>
 
-                      {/* NÚT ĐỌC THÊM: Animation Swipe Right + Scale */}
-                      <button className="relative group flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-primary text-[#111813] text-sm font-bold shadow-sm transition-all duration-300 ease-out hover:scale-105">
-                        {/* Lớp nền chạy */}
-                        <span className="absolute left-0 top-0 h-full w-0 bg-[#0dbd47] transition-all duration-300 ease-out group-hover:w-full"></span>
-                        {/* Chữ */}
-                        <span className="relative z-10 truncate">Đọc thêm</span>
+                      <button
+                        className="relative group/btn flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-primary text-[#111813] text-sm font-bold shadow-sm transition-all duration-300 ease-out hover:scale-105
+  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-[#10B981] before:transition-all before:duration-300 before:ease-out hover:before:w-full"
+                      >
+                        <span className="relative z-10 truncate transition-colors duration-300 group-hover/btn:text-white">
+                          Đọc thêm
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -307,12 +308,13 @@ const BlogPage = () => {
                     type="email"
                   />
 
-                  {/* NÚT ĐĂNG KÝ: Animation Swipe Right + Scale */}
-                  <button className="relative group flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-[#111813] text-sm font-bold shadow-sm transition-all duration-300 ease-out hover:scale-105">
-                    {/* Lớp nền chạy */}
-                    <span className="absolute left-0 top-0 h-full w-0 bg-[#0dbd47] transition-all duration-300 ease-out group-hover:w-full"></span>
-                    {/* Chữ */}
-                    <span className="relative z-10">Đăng ký</span>
+                  <button
+                    className="relative group/btn flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-[#111813] text-sm font-bold shadow-sm transition-all duration-300 ease-out hover:scale-105
+  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-[#10B981] before:transition-all before:duration-300 before:ease-out hover:before:w-full"
+                  >
+                    <span className="relative z-10 transition-colors duration-300 group-hover/btn:text-white">
+                      Đăng ký
+                    </span>
                   </button>
                 </div>
               </div>

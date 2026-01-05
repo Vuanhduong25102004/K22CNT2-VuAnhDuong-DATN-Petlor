@@ -41,6 +41,12 @@ public class LichHenService {
         return lichHenRepository.findById(id).map(this::convertToResponse);
     }
 
+    public List<LichHenResponse> getMyLichHen(String email) {
+        return lichHenRepository.findByNguoiDung_Email(email).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public LichHenResponse createLichHen(LichHenRequest request) {
         validateBusinessHours(request.getThoiGianBatDau());
@@ -192,6 +198,80 @@ public class LichHenService {
         }
         
         return lichHenRepository.save(lichHen);
+    }
+
+    @Transactional
+    public LichHenResponse cancelMyLichHen(String email, Integer id) {
+        LichHen lichHen = lichHenRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Lịch hẹn không tồn tại: " + id));
+
+        if (!lichHen.getNguoiDung().getEmail().equals(email)) {
+            throw new RuntimeException("Bạn không có quyền hủy lịch hẹn này.");
+        }
+
+        if (lichHen.getTrangThai() == LichHen.TrangThai.DA_HOAN_THANH) {
+            throw new RuntimeException("Không thể hủy lịch hẹn đã hoàn thành.");
+        }
+        
+        if (lichHen.getTrangThai() == LichHen.TrangThai.DA_HUY) {
+            throw new RuntimeException("Lịch hẹn này đã bị hủy trước đó.");
+        }
+
+        lichHen.setTrangThai(LichHen.TrangThai.DA_HUY);
+        LichHen savedLichHen = lichHenRepository.save(lichHen);
+        return convertToResponse(savedLichHen);
+    }
+
+    @Transactional
+    public LichHenResponse updateMyLichHen(String email, Integer id, LichHenUpdateRequest request) {
+        LichHen lichHen = lichHenRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Lịch hẹn không tồn tại: " + id));
+
+        if (!lichHen.getNguoiDung().getEmail().equals(email)) {
+            throw new RuntimeException("Bạn không có quyền chỉnh sửa lịch hẹn này.");
+        }
+
+        if (lichHen.getTrangThai() != LichHen.TrangThai.CHO_XAC_NHAN) {
+            throw new RuntimeException("Chỉ có thể chỉnh sửa lịch hẹn khi đang ở trạng thái Chờ xác nhận. Vui lòng liên hệ cửa hàng để được hỗ trợ.");
+        }
+
+        if (request.getThoiGianBatDau() != null) {
+            validateBusinessHours(request.getThoiGianBatDau());
+            
+            int thoiLuongPhut = lichHen.getDichVu().getThoiLuongUocTinh() != null ? lichHen.getDichVu().getThoiLuongUocTinh() : 60;
+            LocalDateTime thoiGianKetThuc = request.getThoiGianBatDau().plusMinutes(thoiLuongPhut);
+            
+            if (thoiGianKetThuc.toLocalTime().isAfter(CLOSING_TIME)) {
+                throw new RuntimeException("Dịch vụ dự kiến kết thúc lúc " + thoiGianKetThuc.toLocalTime() + ", vượt quá giờ đóng cửa (" + CLOSING_TIME + ").");
+            }
+
+            // Kiểm tra xem nhân viên hiện tại có rảnh vào giờ mới không
+            // Lưu ý: Cần loại trừ chính lịch hẹn này ra khỏi phép kiểm tra trùng lặp (nếu cần thiết, nhưng ở đây ta check đơn giản trước)
+            // Tuy nhiên, hàm findOverlappingAppointments hiện tại sẽ tìm thấy chính lịch hẹn này nếu thời gian trùng.
+            // Để đơn giản, ta giả định nhân viên vẫn là người cũ. Nếu muốn đổi nhân viên thì phức tạp hơn.
+            
+            // Tạm thời cho phép đổi giờ, nếu trùng thì nhân viên sẽ phải xử lý thủ công hoặc ta phải viết thêm query check trùng loại trừ ID hiện tại.
+            // Ở đây tôi sẽ dùng lại logic check trùng đơn giản:
+            List<LichHen> conflicts = lichHenRepository.findOverlappingAppointments(lichHen.getNhanVien().getNhanVienId(), request.getThoiGianBatDau(), thoiGianKetThuc);
+            // Loại bỏ chính lịch hẹn đang sửa khỏi danh sách conflict
+            conflicts.removeIf(lh -> lh.getLichHenId().equals(id));
+            
+            if (!conflicts.isEmpty()) {
+                throw new RuntimeException("Nhân viên phụ trách đã bận vào khung giờ mới này. Vui lòng chọn giờ khác.");
+            }
+
+            lichHen.setThoiGianBatDau(request.getThoiGianBatDau());
+            lichHen.setThoiGianKetThuc(thoiGianKetThuc);
+        }
+
+        if (request.getGhiChu() != null) {
+            lichHen.setGhiChu(request.getGhiChu());
+        }
+
+        // Không cho phép khách hàng tự đổi trạng thái qua API này (trừ khi hủy - đã có API riêng)
+        
+        LichHen savedLichHen = lichHenRepository.save(lichHen);
+        return convertToResponse(savedLichHen);
     }
 
     public void deleteLichHen(Integer id) {

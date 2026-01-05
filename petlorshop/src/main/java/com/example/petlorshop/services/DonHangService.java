@@ -41,6 +41,12 @@ public class DonHangService {
         return donHangRepository.findById(id).map(this::convertToResponse);
     }
 
+    public List<DonHangResponse> getMyDonHang(String email) {
+        return donHangRepository.findByNguoiDung_Email(email).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public DonHang createDonHang(DonHangRequest donHangRequest) {
         NguoiDung nguoiDung = nguoiDungRepository.findById(donHangRequest.getUserId())

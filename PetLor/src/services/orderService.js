@@ -2,7 +2,8 @@ import apiClient from './apiClient';
 
 const orderService = {
   // --- ĐƠN HÀNG ---
-  // SỬA: Thêm params để có thể truyền { page: 0, size: 1000 }
+  getMyOrders: () => apiClient.get('/don-hang/me'),
+
   getAllOrders: (params) => apiClient.get('/don-hang', { params }),
   
   getOrderById: (id) => apiClient.get(`/don-hang/${id}`),

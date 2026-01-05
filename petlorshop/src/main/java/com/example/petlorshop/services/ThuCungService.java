@@ -86,6 +86,10 @@ public class ThuCungService {
         thuCung.setGhiChuSucKhoe(request.getGhiChuSucKhoe());
         thuCung.setHinhAnh(fileName);
         thuCung.setNguoiDung(chuSoHuu);
+        
+        if (request.getCanNang() != null) {
+            thuCung.setCanNang(request.getCanNang());
+        }
 
         return thuCungRepository.save(thuCung);
     }
@@ -118,6 +122,33 @@ public class ThuCungService {
         throw new IllegalArgumentException("Cần cung cấp userId hoặc Số điện thoại của chủ sở hữu.");
     }
 
+    @Transactional
+    public ThuCung updateMyPet(String email, Integer id, ThuCungUpdateRequest request, MultipartFile hinhAnh) {
+        ThuCung thuCung = thuCungRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thú cưng với ID: " + id));
+
+        if (!thuCung.getNguoiDung().getEmail().equals(email)) {
+            throw new RuntimeException("Bạn không có quyền sửa thông tin thú cưng này.");
+        }
+
+        if (hinhAnh != null && !hinhAnh.isEmpty()) {
+            String fileName = fileStorageService.storeFile(hinhAnh);
+            thuCung.setHinhAnh(fileName);
+        }
+
+        thuCung.setTenThuCung(request.getTenThuCung());
+        thuCung.setChungLoai(request.getChungLoai());
+        thuCung.setGiongLoai(request.getGiongLoai());
+        thuCung.setNgaySinh(request.getNgaySinh());
+        thuCung.setGioiTinh(request.getGioiTinh());
+        thuCung.setGhiChuSucKhoe(request.getGhiChuSucKhoe());
+        
+        if (request.getCanNang() != null) {
+            thuCung.setCanNang(request.getCanNang());
+        }
+
+        return thuCungRepository.save(thuCung);
+    }
 
     public ThuCung updateThuCung(Integer id, ThuCungUpdateRequest request, MultipartFile hinhAnh) {
         ThuCung thuCung = thuCungRepository.findById(id)
@@ -134,6 +165,10 @@ public class ThuCungService {
         thuCung.setNgaySinh(request.getNgaySinh());
         thuCung.setGioiTinh(request.getGioiTinh());
         thuCung.setGhiChuSucKhoe(request.getGhiChuSucKhoe());
+        
+        if (request.getCanNang() != null) {
+            thuCung.setCanNang(request.getCanNang());
+        }
 
         // Logic đổi chủ sở hữu: Kiểm tra xem có thông tin đổi chủ không
         if (request.getUserId() != null || StringUtils.hasText(request.getSoDienThoaiChuSoHuu())) {

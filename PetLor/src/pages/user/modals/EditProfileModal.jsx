@@ -13,6 +13,7 @@ const EditProfileModal = ({
     email: "",
     soDienThoai: "",
     ngaySinh: "",
+    gioiTinh: "Nam",
     diaChi: "",
   });
 
@@ -20,10 +21,9 @@ const EditProfileModal = ({
   const [previewUrl, setPreviewUrl] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // URL API
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
-  // Khi modal mở (isOpen thay đổi thành true), điền dữ liệu
+  // Khi modal mở, điền dữ liệu
   useEffect(() => {
     if (isOpen && currentUser) {
       setFormData({
@@ -33,10 +33,10 @@ const EditProfileModal = ({
         ngaySinh: currentUser.ngaySinh
           ? currentUser.ngaySinh.split("T")[0]
           : "",
+        gioiTinh: currentUser.gioiTinh || "Nam",
         diaChi: currentUser.diaChi || "",
       });
 
-      // Xử lý hiển thị ảnh
       if (currentUser.anhDaiDien) {
         setPreviewUrl(
           currentUser.anhDaiDien.startsWith("http")
@@ -69,11 +69,22 @@ const EditProfileModal = ({
     setLoading(true);
     try {
       const dataToSend = new FormData();
+
+      // --- LOGIC GIỮ NGUYÊN NGÀY SINH CŨ ---
+      // Nếu formData.ngaySinh rỗng (người dùng xóa hoặc không chọn),
+      // thì lấy lại currentUser.ngaySinh (cắt bỏ phần giờ T...)
+      const finalNgaySinh = formData.ngaySinh
+        ? formData.ngaySinh
+        : currentUser.ngaySinh
+        ? currentUser.ngaySinh.split("T")[0]
+        : "";
+
       const nguoiDung = {
         hoTen: formData.hoTen,
         email: formData.email,
         soDienThoai: formData.soDienThoai,
-        ngaySinh: formData.ngaySinh,
+        ngaySinh: finalNgaySinh, // Sử dụng giá trị đã xử lý
+        gioiTinh: formData.gioiTinh,
         diaChi: formData.diaChi,
       };
 
@@ -94,10 +105,6 @@ const EditProfileModal = ({
     }
   };
 
-  // --- THAY ĐỔI QUAN TRỌNG VỀ GIAO DIỆN ---
-  // Không dùng "if (!isOpen) return null" để giữ animation khi đóng
-  // Thay vào đó dùng class invisible/opacity-0
-
   return (
     <div
       className={`fixed inset-0 z-[100] overflow-hidden transition-visibility duration-300 ${
@@ -107,7 +114,6 @@ const EditProfileModal = ({
       role="dialog"
       aria-modal="true"
     >
-      {/* Backdrop (Màn hình đen mờ) */}
       <div
         className={`absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity duration-300 ease-in-out ${
           isOpen ? "opacity-100" : "opacity-0"
@@ -115,20 +121,16 @@ const EditProfileModal = ({
         onClick={onClose}
       ></div>
 
-      {/* Slide-over Panel (Ngăn kéo trượt từ phải) */}
       <div className="fixed inset-y-0 right-0 flex max-w-full pl-0 sm:pl-10 pointer-events-none">
         <div
-          className={`pointer-events-auto w-screen max-w-md transform transition-transform duration-300 ease-in-out sm:duration-500 bg-white shadow-2xl flex flex-col h-full ${
+          className={`pointer-events-auto w-screen max-w-md transform transition-transform duration-300 ease-in-out bg-white shadow-2xl flex flex-col h-full ${
             isOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
           {/* Header */}
           <div className="flex h-16 shrink-0 items-center justify-between px-6 border-b border-gray-100 bg-white">
             <div>
-              <h2
-                className="text-lg font-bold text-gray-900"
-                id="slide-over-title"
-              >
+              <h2 className="text-lg font-bold text-gray-900">
                 Chỉnh sửa hồ sơ
               </h2>
               <p className="text-xs text-gray-500">
@@ -137,15 +139,15 @@ const EditProfileModal = ({
             </div>
             <button
               type="button"
-              className="rounded-full p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-all focus:outline-none"
+              className="rounded-full p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-all focus:outline-none cursor-pointer"
               onClick={onClose}
             >
               <span className="material-symbols-outlined">close</span>
             </button>
           </div>
 
-          {/* Body (Có cuộn dọc) */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white custom-scrollbar">
             {/* Avatar Section */}
             <div className="flex flex-col items-center gap-4 py-2">
               <div className="relative group">
@@ -165,20 +167,6 @@ const EditProfileModal = ({
                   />
                 </label>
               </div>
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAvatarFile(null);
-                    setPreviewUrl(
-                      `https://ui-avatars.com/api/?name=${formData.hoTen}&background=random`
-                    );
-                  }}
-                  className="text-xs font-semibold text-red-500 hover:text-red-600 hover:bg-red-50 px-3 py-1 rounded-full transition-colors"
-                >
-                  Xóa ảnh hiện tại
-                </button>
-              </div>
             </div>
 
             {/* Form Fields */}
@@ -192,8 +180,7 @@ const EditProfileModal = ({
                   name="hoTen"
                   value={formData.hoTen}
                   onChange={handleChange}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-gray-400 font-medium text-sm"
-                  placeholder="Nhập họ tên của bạn"
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-sm"
                 />
               </div>
 
@@ -237,6 +224,83 @@ const EditProfileModal = ({
                 </div>
               </div>
 
+              {/* Giới tính */}
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-gray-700">
+                  Giới tính
+                </label>
+                <div className="flex gap-4">
+                  <label className="flex-1 cursor-pointer group">
+                    <input
+                      type="radio"
+                      name="gioiTinh"
+                      value="Nam"
+                      className="sr-only"
+                      checked={formData.gioiTinh === "Nam"}
+                      onChange={handleChange}
+                    />
+                    <div
+                      className={`rounded-xl border p-2.5 flex items-center justify-center gap-2 text-sm font-medium transition-all hover:shadow-sm ${
+                        formData.gioiTinh === "Nam"
+                          ? "bg-blue-50 border-blue-500 text-blue-600"
+                          : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-white"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">
+                        male
+                      </span>
+                      Nam
+                    </div>
+                  </label>
+
+                  <label className="flex-1 cursor-pointer group">
+                    <input
+                      type="radio"
+                      name="gioiTinh"
+                      value="Nữ"
+                      className="sr-only"
+                      checked={formData.gioiTinh === "Nữ"}
+                      onChange={handleChange}
+                    />
+                    <div
+                      className={`rounded-xl border p-2.5 flex items-center justify-center gap-2 text-sm font-medium transition-all hover:shadow-sm ${
+                        formData.gioiTinh === "Nữ"
+                          ? "bg-pink-50 border-pink-500 text-pink-600"
+                          : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-white"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">
+                        female
+                      </span>
+                      Nữ
+                    </div>
+                  </label>
+
+                  <label className="flex-1 cursor-pointer group">
+                    <input
+                      type="radio"
+                      name="gioiTinh"
+                      value="Khác"
+                      className="sr-only"
+                      checked={formData.gioiTinh === "Khác"}
+                      onChange={handleChange}
+                    />
+                    <div
+                      className={`rounded-xl border p-2.5 flex items-center justify-center gap-2 text-sm font-medium transition-all hover:shadow-sm ${
+                        formData.gioiTinh === "Khác"
+                          ? "bg-purple-50 border-purple-500 text-purple-600"
+                          : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-white"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">
+                        transgender
+                      </span>
+                      Khác
+                    </div>
+                  </label>
+                </div>
+              </div>
+
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-gray-700">
                   Địa chỉ
@@ -247,24 +311,22 @@ const EditProfileModal = ({
                   value={formData.diaChi}
                   onChange={handleChange}
                   className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none text-sm font-medium"
-                  placeholder="Nhập địa chỉ hiện tại"
                 ></textarea>
               </div>
             </div>
           </div>
 
-          {/* Footer (Cố định ở dưới) */}
           <div className="shrink-0 border-t border-gray-100 px-6 py-5 bg-gray-50/50 flex items-center justify-end gap-3">
             <button
               onClick={onClose}
-              className="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-200 hover:text-gray-800 transition-all"
+              className="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-200 hover:text-gray-800 transition-all cursor-pointer"
             >
               Hủy bỏ
             </button>
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="px-6 py-2.5 rounded-xl text-sm font-bold text-[#0d1b0d] bg-primary hover:bg-[#0fd60f] shadow-lg shadow-green-500/20 hover:shadow-green-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-6 py-2.5 rounded-xl text-sm font-bold text-[#0d1b0d] bg-primary hover:bg-[#0fd60f] shadow-lg shadow-green-500/20 hover:shadow-green-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
             >
               {loading && (
                 <span className="material-symbols-outlined animate-spin text-sm">

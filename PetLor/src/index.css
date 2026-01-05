@@ -6,7 +6,7 @@
 
 @theme {
   /* --- MÀU SẮC (Cập nhật theo thiết kế UserProfile) --- */
-  --color-primary: #13ec13; /* Màu xanh lá chuẩn của PetCare */
+  --color-primary: #10B981; /* Màu xanh lá chuẩn của PetCare */
   --color-primary-hover: #0ec94d;
   
   --color-background-light: #f6f8f6;
@@ -103,4 +103,42 @@ html, body {
   font-family: var(--font-display);
   background-color: var(--color-background-light);
   color: var(--color-text-main);
+}
+/* 1. Bỏ viền mặc định của trình duyệt khi click vào Link hoặc Button */
+aside nav a, 
+aside nav button {
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent; /* Bỏ lớp phủ màu trên điện thoại */
+}
+
+/* 2. Nếu cái border-gray-100 trong code làm xấu, ta có thể ẩn nó đi bằng CSS */
+.border-gray-100 {
+    border-color: transparent !important;
+}
+
+/* 3. Tùy chỉnh riêng cho các item trong Sidebar để mượt hơn */
+aside nav a.bg-white {
+    border: none !important; /* Xóa hẳn border khi item đang active */
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08) !important; /* Thay border bằng shadow nhẹ */
+}
+
+/* Custom scrollbar cho các thành phần có class .custom-scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 6px; /* Độ cao của thanh cuộn ngang */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Màu nền của đường ray */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #10B981; /* Màu của thanh trượt (theo màu chủ đạo của bạn) */
+  border-radius: 10px;
+  transition: all 0.3s;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #059669; /* Màu khi di chuột qua */
 }

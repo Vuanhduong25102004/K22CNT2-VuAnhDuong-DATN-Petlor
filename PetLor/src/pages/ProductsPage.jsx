@@ -104,12 +104,11 @@ const ProductsPage = () => {
                   Dành tặng những điều tốt đẹp nhất cho thú cưng của bạn. Thức
                   ăn, đồ chơi và phụ kiện chính hãng.
                 </p>
-
-                {/* Nút Mua Ngay - Thêm delay 300 để xuất hiện sau chữ */}
                 <div className="mt-4" data-aos="fade-up" data-aos-delay="300">
-                  <button className="relative group inline-flex items-center justify-center overflow-hidden rounded-lg bg-primary px-8 py-3 text-sm font-bold text-[#111813] shadow-lg transition-all duration-300 ease-out hover:scale-105 ">
-                    <span className="absolute left-0 top-0 h-full w-0 bg-[#0dbd47] transition-all duration-300 ease-out group-hover:w-full"></span>
-                    <span className="relative z-10">Mua Ngay Hôm Nay</span>
+                  <button className="relative group inline-flex items-center justify-center overflow-hidden rounded-lg bg-primary px-8 py-3 text-sm font-bold text-[#111813] shadow-lg transition-all duration-300 ease-out hover:scale-105 before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-[#10B981] before:transition-all before:duration-300 before:ease-out hover:before:w-full">
+                    <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
+                      Mua Ngay Hôm Nay
+                    </span>
                   </button>
                 </div>
               </div>
@@ -161,16 +160,17 @@ const ProductsPage = () => {
               data-aos="fade-up"
               data-aos-delay="200"
             >
-              <button className="flex h-9 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full bg-primary text-text-main px-5 text-sm font-bold shadow-sm transition-all hover:scale-105 hover:opacity-90">
+              <button className="flex h-9 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full bg-primary text-white px-5 text-sm font-bold shadow-sm transition-all hover:scale-105 hover:opacity-90 outline-none">
                 Tất cả
               </button>
+
               {["Thức ăn", "Đồ chơi", "Phụ kiện", "Vệ sinh & Chăm sóc"].map(
                 (item) => (
                   <button
                     key={item}
-                    className="flex h-9 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full bg-white border border-border-gray-200 px-5 hover:border-primary hover:text-primary transition-all shadow-sm hover:scale-105"
+                    className="group/item flex h-9 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full bg-white border border-gray-200 px-5 transition-all shadow-sm hover:scale-105 hover:bg-primary hover:border-primary outline-none"
                   >
-                    <span className="text-text-main text-sm font-medium hover:text-primary">
+                    <span className="text-text-main text-sm font-medium transition-colors duration-300 group-hover/item:text-white">
                       {item}
                     </span>
                   </button>
@@ -240,15 +240,15 @@ const ProductsPage = () => {
                           </span>
                         )}
                       </div>
-
-                      {/* Nút Thêm vào giỏ - Animation Swipe Right */}
-                      <button className="relative group mt-3 w-full flex items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-surface text-text-main text-sm font-bold shadow-sm transition-all duration-300 ease-out hover:scale-105">
-                        <span className="absolute left-0 top-0 h-full w-0 bg-primary transition-all duration-300 ease-out group-hover:w-full"></span>
-                        <span className="relative z-10 flex items-center gap-2">
-                          <span className="material-symbols-outlined text-[18px]">
+                      <button
+                        className="relative group/btn mt-3 w-full flex items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-surface text-text-main text-sm font-bold shadow-sm transition-all duration-300 ease-out hover:scale-105
+  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-primary before:transition-all before:duration-300 before:ease-out hover:before:w-full"
+                      >
+                        <span className="relative z-10 flex items-center gap-2 transition-colors duration-300 group-hover/btn:text-white">
+                          <span className="material-symbols-outlined text-[20px] leading-none">
                             add_shopping_cart
                           </span>
-                          <span>Thêm vào giỏ</span>
+                          <span className="leading-none">Thêm vào giỏ</span>
                         </span>
                       </button>
                     </div>

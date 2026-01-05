@@ -32,7 +32,12 @@ import AdminReviews from "../pages/admin/AdminReviews";
 import AdminPosts from "../pages/admin/AdminPosts";
 
 //user pages
+import UserLayout from "../pages/user/components/UserLayout";
 import UserProfile from "../pages/user/UserProfile";
+import MyPets from "../pages/user/MyPets";
+import MyAppointments from "../pages/user/MyAppointments";
+import MyOrders from "../pages/user/MyOrders";
+import UserSettings from "../pages/user/UserSettings";
 
 const AppRoutes = () => {
   return (
@@ -45,10 +50,13 @@ const AppRoutes = () => {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/products" element={<ProductsPage />} />
         <Route element={<ProtectedRoute />}>
-          <Route path="/profile" element={<UserProfile />} />
-          {/* Sau này thêm các trang user khác vào đây */}
-          {/* <Route path="/my-pets" element={<MyPetsPage />} /> */}
-          {/* <Route path="/change-password" element={<ChangePasswordPage />} /> */}
+          <Route element={<UserLayout />}>
+            <Route path="/profile" element={<UserProfile />} />
+            <Route path="/my-pets" element={<MyPets />} />
+            <Route path="/my-appointments" element={<MyAppointments />} />
+            <Route path="/my-orders" element={<MyOrders />} />
+            <Route path="/settings" element={<UserSettings />} />
+          </Route>
         </Route>
       </Route>
 

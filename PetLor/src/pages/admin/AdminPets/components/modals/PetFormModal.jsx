@@ -17,6 +17,7 @@ const PetFormModal = ({
     giongLoai: "",
     ngaySinh: "",
     gioiTinh: "",
+    canNang: "", // 1. Thêm trường cân nặng vào state
     ghiChuSucKhoe: "",
     tenChuSoHuu: "",
     soDienThoaiChuSoHuu: "",
@@ -28,7 +29,7 @@ const PetFormModal = ({
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
-        // Edit mode: Convert date from ISO to YYYY-MM-DD for input[type=date]
+        // Edit mode: Convert date from ISO to YYYY-MM-DD
         let formattedDate = "";
         if (initialData.ngaySinh) {
           const d = new Date(initialData.ngaySinh);
@@ -46,6 +47,7 @@ const PetFormModal = ({
           giongLoai: initialData.giongLoai || "",
           ngaySinh: formattedDate,
           gioiTinh: initialData.gioiTinh || "",
+          canNang: initialData.canNang || "", // 2. Map dữ liệu khi Edit
           ghiChuSucKhoe: initialData.ghiChuSucKhoe || "",
           tenChuSoHuu: initialData.tenChu || "",
           soDienThoaiChuSoHuu: initialData.soDienThoaiChuSoHuu || "",
@@ -59,6 +61,7 @@ const PetFormModal = ({
           giongLoai: "",
           ngaySinh: "",
           gioiTinh: "",
+          canNang: "", // Reset cân nặng
           ghiChuSucKhoe: "",
           tenChuSoHuu: "",
           soDienThoaiChuSoHuu: "",
@@ -83,7 +86,33 @@ const PetFormModal = ({
   };
 
   const handleSubmit = () => {
-    onSubmit(formData, imageFile);
+    if (
+      !formData.tenThuCung ||
+      !formData.tenChuSoHuu ||
+      !formData.soDienThoaiChuSoHuu
+    ) {
+      alert("Vui lòng nhập đầy đủ tên thú cưng, tên chủ và số điện thoại!");
+      return;
+    }
+
+    const submissionData = new FormData();
+
+    const petData = {
+      ...formData,
+      canNang: formData.canNang ? parseFloat(formData.canNang) : null,
+    };
+
+    const jsonBlob = new Blob([JSON.stringify(petData)], {
+      type: "application/json",
+    });
+
+    submissionData.append("thuCung", jsonBlob);
+
+    if (imageFile) {
+      submissionData.append("hinhAnh", imageFile);
+    }
+
+    onSubmit(submissionData);
   };
 
   return (
@@ -136,6 +165,7 @@ const PetFormModal = ({
             {/* Body */}
             <div className="flex-1 p-8 md:p-10 bg-white overflow-y-auto">
               <div className="space-y-8">
+                {/* Tên thú cưng */}
                 <div className="input-group">
                   <label className="form-label">
                     Tên thú cưng <span className="text-primary">*</span>
@@ -146,9 +176,11 @@ const PetFormModal = ({
                     className="form-control"
                     value={formData.tenThuCung}
                     onChange={handleChange}
+                    placeholder="VD: Miu, Lu..."
                   />
                 </div>
 
+                {/* Hình ảnh */}
                 <div className="input-group">
                   <label className="form-label">Hình ảnh</label>
                   <div className="mt-2 flex items-center space-x-4">
@@ -157,16 +189,18 @@ const PetFormModal = ({
                         previewImage || "https://placehold.co/100x100?text=Pet"
                       }
                       alt="Pet Preview"
-                      className="h-16 w-16 rounded-full object-cover"
+                      className="h-16 w-16 rounded-full object-cover border border-gray-200"
                     />
                     <input
                       type="file"
-                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
                       onChange={handleFileChange}
+                      accept="image/*"
                     />
                   </div>
                 </div>
 
+                {/* Grid: Chủng loại & Giới tính */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="input-group">
                     <label className="form-label">Chủng loại</label>
@@ -202,6 +236,7 @@ const PetFormModal = ({
                   </div>
                 </div>
 
+                {/* Giống loài */}
                 <div className="input-group">
                   <label className="form-label">Giống loài</label>
                   <input
@@ -210,23 +245,40 @@ const PetFormModal = ({
                     className="form-control"
                     value={formData.giongLoai}
                     onChange={handleChange}
+                    placeholder="VD: Corgi, Anh lông ngắn..."
                   />
                 </div>
 
-                <div className="input-group">
-                  <label className="form-label">Ngày sinh</label>
-                  <input
-                    type="date"
-                    name="ngaySinh"
-                    className="form-control"
-                    value={formData.ngaySinh}
-                    onChange={handleChange}
-                  />
+                {/* 3. UI: Gộp Ngày sinh và Cân nặng vào Grid 2 cột */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="input-group">
+                    <label className="form-label">Ngày sinh</label>
+                    <input
+                      type="date"
+                      name="ngaySinh"
+                      className="form-control"
+                      value={formData.ngaySinh}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  {/* INPUT CÂN NẶNG MỚI */}
+                  <div className="input-group">
+                    <label className="form-label">Cân nặng (kg)</label>
+                    <input
+                      type="number"
+                      name="canNang"
+                      className="form-control"
+                      value={formData.canNang}
+                      onChange={handleChange}
+                      placeholder="VD: 5.5"
+                      step="0.1" // Cho phép nhập số thập phân
+                      min="0"
+                    />
+                  </div>
                 </div>
 
-                {/* Phần thông tin chủ sở hữu - Chỉ hiển thị khi tạo mới nếu cần, hoặc khi edit cũng cho sửa */}
-                {/* Dựa trên code cũ, Create mới yêu cầu, Edit thì thường không sửa chủ? 
-                    Nhưng để đơn giản, ta cho phép sửa cả nếu API hỗ trợ */}
+                {/* Thông tin chủ sở hữu */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="input-group">
                     <label className="form-label">
@@ -254,6 +306,7 @@ const PetFormModal = ({
                   </div>
                 </div>
 
+                {/* Ghi chú */}
                 <div className="input-group">
                   <label className="form-label">Ghi chú sức khỏe</label>
                   <textarea
@@ -262,6 +315,7 @@ const PetFormModal = ({
                     className="form-control"
                     value={formData.ghiChuSucKhoe}
                     onChange={handleChange}
+                    placeholder="Ghi chú về tiền sử bệnh, dị ứng..."
                   />
                 </div>
               </div>
