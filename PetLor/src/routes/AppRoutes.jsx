@@ -35,9 +35,12 @@ import AdminPosts from "../pages/admin/AdminPosts";
 import UserLayout from "../pages/user/components/UserLayout";
 import UserProfile from "../pages/user/UserProfile";
 import MyPets from "../pages/user/MyPets";
+<<<<<<< HEAD
 import MyAppointments from "../pages/user/MyAppointments";
 import MyOrders from "../pages/user/MyOrders";
 import UserSettings from "../pages/user/UserSettings";
+=======
+>>>>>>> fb28d851564a6753a782d5ccb9a31d6e44cd4328
 
 const AppRoutes = () => {
   return (
@@ -50,6 +53,7 @@ const AppRoutes = () => {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/products" element={<ProductsPage />} />
         <Route element={<ProtectedRoute />}>
+<<<<<<< HEAD
           <Route element={<UserLayout />}>
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/my-pets" element={<MyPets />} />
@@ -57,6 +61,11 @@ const AppRoutes = () => {
             <Route path="/my-orders" element={<MyOrders />} />
             <Route path="/settings" element={<UserSettings />} />
           </Route>
+=======
+          <Route path="/profile" element={<UserProfile />} />
+          <Route path="/my-pets" element={<MyPets />} />
+          {/* <Route path="/change-password" element={<ChangePasswordPage />} /> */}
+>>>>>>> fb28d851564a6753a782d5ccb9a31d6e44cd4328
         </Route>
       </Route>
 
