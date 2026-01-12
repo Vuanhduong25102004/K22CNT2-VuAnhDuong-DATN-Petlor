@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -20,6 +21,7 @@ public class LichHenResponse {
     private String status;
     
     private String ghiChuKhachHang;
+    private String lyDoHuy;
     
     // Thông tin khách hàng
     private Integer userId;
@@ -33,17 +35,19 @@ public class LichHenResponse {
     // Thông tin dịch vụ
     private Integer dichVuId;
     private String tenDichVu;
+    private BigDecimal giaDichVu; // Thêm giá dịch vụ
 
     // Thông tin nhân viên (có thể null nếu chưa phân công)
     private Integer nhanVienId;
     private String tenNhanVien;
 
-    public LichHenResponse(Integer lichHenId, LocalDateTime thoiGianBatDau, LocalDateTime thoiGianKetThuc, String status, String ghiChuKhachHang, Integer userId, String tenKhachHang, String soDienThoaiKhachHang, Integer thuCungId, String tenThuCung, Integer dichVuId, String tenDichVu, Integer nhanVienId, String tenNhanVien) {
+    public LichHenResponse(Integer lichHenId, LocalDateTime thoiGianBatDau, LocalDateTime thoiGianKetThuc, String status, String ghiChuKhachHang, String lyDoHuy, Integer userId, String tenKhachHang, String soDienThoaiKhachHang, Integer thuCungId, String tenThuCung, Integer dichVuId, String tenDichVu, BigDecimal giaDichVu, Integer nhanVienId, String tenNhanVien) {
         this.lichHenId = lichHenId;
         this.thoiGianBatDau = thoiGianBatDau;
         this.thoiGianKetThuc = thoiGianKetThuc;
         this.status = status;
         this.ghiChuKhachHang = ghiChuKhachHang;
+        this.lyDoHuy = lyDoHuy;
         this.userId = userId;
         this.tenKhachHang = tenKhachHang;
         this.soDienThoaiKhachHang = soDienThoaiKhachHang;
@@ -51,6 +55,7 @@ public class LichHenResponse {
         this.tenThuCung = tenThuCung;
         this.dichVuId = dichVuId;
         this.tenDichVu = tenDichVu;
+        this.giaDichVu = giaDichVu;
         this.nhanVienId = nhanVienId;
         this.tenNhanVien = tenNhanVien;
     }

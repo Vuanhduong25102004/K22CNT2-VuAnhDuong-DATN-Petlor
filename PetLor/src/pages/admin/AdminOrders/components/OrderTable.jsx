@@ -1,37 +1,17 @@
 import React from "react";
-// import useEscapeKey from "../../../../hooks/useEscapeKey"; // (Giữ lại nếu bạn có dùng hook này)
 import {
   formatCurrency,
-  OrderStatusBadge, // <--- SỬA: Import đúng Badge cho đơn hàng
+  OrderStatusBadge,
   formatDate,
-} from "../../components/utils"; // <-- Kiểm tra lại đường dẫn import này cho đúng file utils của bạn
+} from "../../components/utils";
 
 const SkeletonRow = () => (
   <tr className="animate-pulse border-b border-gray-100 last:border-0">
-    <td className="px-6 py-4">
-      <div className="h-4 bg-gray-200 rounded w-8"></div>
-    </td>
-    <td className="px-6 py-4 flex items-center gap-3">
-      <div className="space-y-2">
-        <div className="h-4 bg-gray-200 rounded w-32"></div>
-        <div className="h-3 bg-gray-100 rounded w-20"></div>
-      </div>
-    </td>
-    <td className="px-6 py-4">
-      <div className="h-4 bg-gray-200 rounded w-32"></div>
-    </td>
-    <td className="px-6 py-4">
-      <div className="h-4 bg-gray-200 rounded w-40"></div>
-    </td>
-    <td className="px-6 py-4">
-      <div className="h-4 bg-gray-200 rounded w-24"></div>
-    </td>
-    <td className="px-6 py-4">
-      <div className="h-6 bg-gray-200 rounded w-24"></div>
-    </td>
-    <td className="px-6 py-4">
-      <div className="h-8 bg-gray-200 rounded w-20 ml-auto"></div>
-    </td>
+    {Array.from({ length: 10 }).map((_, i) => (
+      <td key={i} className="px-6 py-4">
+        <div className="h-4 bg-gray-200 rounded w-full"></div>
+      </td>
+    ))}
   </tr>
 );
 
@@ -54,41 +34,32 @@ const OrderTable = ({
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Mã Đơn
               </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Khách Hàng
               </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                SĐT
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Ngày Đặt
               </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Địa Chỉ
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Số Lượng
               </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Thanh Toán
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Tổng Tiền
               </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Trạng Thái
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Lý Do Hủy
               </th>
               <th scope="col" className="relative px-6 py-3">
                 <span className="sr-only">Hành động</span>
@@ -97,79 +68,85 @@ const OrderTable = ({
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {loading ? (
-              Array.from({ length: ITEMS_PER_PAGE }).map((_, idx) => (
+              Array.from({ length: 5 }).map((_, idx) => (
                 <SkeletonRow key={idx} />
               ))
-            ) : orders.length > 0 ? (
-              orders.map((order, index) => (
-                <tr
-                  key={order.donHangId || index}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    #{order.donHangId}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {order.userName}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      User ID: #{order.userId || "N/A"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDate(order.ngayDatHang)}
-                  </td>
-                  <td
-                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-[200px] truncate"
-                    title={order.diaChi}
+            ) : orders && orders.length > 0 ? (
+              orders.map((order, index) => {
+                const totalQty =
+                  order.chiTietDonHangs?.reduce(
+                    (sum, item) => sum + item.soLuong,
+                    0
+                  ) || 0;
+                return (
+                  <tr
+                    key={order.donHangId || index}
+                    className="hover:bg-gray-50 transition-colors"
                   >
-                    {order.diaChi}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                    {formatCurrency(order.tongTien)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {/* --- SỬA LẠI PHẦN NÀY --- */}
-                    {/* Sử dụng Component OrderStatusBadge thay vì tự viết class */}
-                    <OrderStatusBadge status={order.trangThai} />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex items-center justify-end space-x-2">
-                      <button
-                        title="Xem chi tiết"
-                        className="text-gray-400 hover:text-green-600 transition-colors"
-                        onClick={() => onViewDetail(order)}
-                      >
-                        <span className="material-symbols-outlined text-base">
-                          visibility
-                        </span>
-                      </button>
-                      <button
-                        title="Cập nhật đơn hàng"
-                        className="text-gray-400 hover:text-blue-500 transition-colors"
-                        onClick={() => onEdit(order)}
-                      >
-                        <span className="material-symbols-outlined text-base">
-                          edit_note
-                        </span>
-                      </button>
-                      <button
-                        title="Xóa/Hủy"
-                        className="text-gray-400 hover:text-red-500 transition-colors"
-                        onClick={() => onDelete(order.donHangId)}
-                      >
-                        <span className="material-symbols-outlined text-base">
-                          cancel
-                        </span>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      #{order.donHangId}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {order.tenNguoiDung}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {order.soDienThoaiNhan}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {formatDate(order.ngayDatHang)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {totalQty} SP
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {order.phuongThucThanhToan}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                      {formatCurrency(order.tongThanhToan)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <OrderStatusBadge status={order.trangThai} />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-red-500 italic">
+                      {order.lyDoHuy || "-"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex items-center justify-end space-x-2">
+                        <button
+                          className="text-gray-400 hover:text-green-600"
+                          onClick={() => onViewDetail(order)}
+                        >
+                          <span className="material-symbols-outlined text-base">
+                            visibility
+                          </span>
+                        </button>
+                        <button
+                          className="text-gray-400 hover:text-blue-500"
+                          onClick={() => onEdit(order)}
+                        >
+                          <span className="material-symbols-outlined text-base">
+                            edit_note
+                          </span>
+                        </button>
+                        <button
+                          className="text-gray-400 hover:text-red-500"
+                          onClick={() => onDelete(order.donHangId)}
+                        >
+                          <span className="material-symbols-outlined text-base">
+                            cancel
+                          </span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
-                <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
+                <td
+                  colSpan="10"
+                  className="px-6 py-10 text-center text-gray-500 italic"
+                >
                   Không tìm thấy đơn hàng nào.
                 </td>
               </tr>
@@ -178,7 +155,7 @@ const OrderTable = ({
         </table>
       </div>
 
-      {/* Pagination */}
+      {/* --- PHẦN PHÂN TRANG THEO MẪU PRODUCTTABLE --- */}
       <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
         <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
@@ -189,7 +166,7 @@ const OrderTable = ({
               </span>{" "}
               đến{" "}
               <span className="font-medium">
-                {indexOfFirstItem + orders.length}
+                {indexOfFirstItem + (orders ? orders.length : 0)}
               </span>{" "}
               trong số <span className="font-medium">{totalElements}</span> kết
               quả
@@ -203,25 +180,22 @@ const OrderTable = ({
               <button
                 onClick={() => onPageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
-                  currentPage === 1
-                    ? "text-gray-300 cursor-not-allowed"
-                    : "text-gray-500 hover:bg-gray-50"
-                }`}
+                className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="sr-only">Previous</span>
                 <span className="material-symbols-outlined text-base">
                   chevron_left
                 </span>
               </button>
+
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                 (number) => (
                   <button
                     key={number}
                     onClick={() => onPageChange(number)}
-                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium transition-colors ${
                       currentPage === number
-                        ? "z-10 bg-primary border-primary text-white"
+                        ? "z-10 bg-emerald-600 border-emerald-600 text-white"
                         : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
                     }`}
                   >
@@ -229,14 +203,11 @@ const OrderTable = ({
                   </button>
                 )
               )}
+
               <button
                 onClick={() => onPageChange(currentPage + 1)}
                 disabled={currentPage === totalPages || totalPages === 0}
-                className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
-                  currentPage === totalPages || totalPages === 0
-                    ? "text-gray-300 cursor-not-allowed"
-                    : "text-gray-500 hover:bg-gray-50"
-                }`}
+                className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="sr-only">Next</span>
                 <span className="material-symbols-outlined text-base">

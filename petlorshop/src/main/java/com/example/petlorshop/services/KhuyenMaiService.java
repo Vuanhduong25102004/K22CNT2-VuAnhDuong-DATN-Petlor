@@ -80,6 +80,15 @@ public class KhuyenMaiService {
         }
 
         LocalDateTime now = LocalDateTime.now();
+        
+        // --- DEBUG LOG ---
+        System.out.println("DEBUG CHECK KHUYEN MAI:");
+        System.out.println("Ma Code: " + maCode);
+        System.out.println("Current Time (Server): " + now);
+        System.out.println("Start Time: " + km.getNgayBatDau());
+        System.out.println("End Time: " + km.getNgayKetThuc());
+        // -----------------
+
         if (now.isBefore(km.getNgayBatDau())) {
             return "Mã khuyến mãi chưa đến thời gian áp dụng.";
         }

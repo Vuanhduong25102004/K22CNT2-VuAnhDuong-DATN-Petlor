@@ -93,7 +93,10 @@
         @apply py-3 pl-0 pr-8;
     }
 }
-
+/* Dành cho Chrome, Safari và các trình duyệt dùng nhân Blink */
+::-webkit-scrollbar {
+  display: none;
+}
 /* Config Global cho HTML/Body */
 html, body {
   margin: 0;
@@ -103,6 +106,8 @@ html, body {
   font-family: var(--font-display);
   background-color: var(--color-background-light);
   color: var(--color-text-main);
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 /* 1. Bỏ viền mặc định của trình duyệt khi click vào Link hoặc Button */
 aside nav a, 
@@ -142,3 +147,5 @@ aside nav a.bg-white {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #059669; /* Màu khi di chuột qua */
 }
+
+

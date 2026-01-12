@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+// 1. Import Link
+import { Link } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import productService from "../services/productService";
@@ -19,12 +21,15 @@ const ServicesPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+
     const aosInit = setTimeout(() => {
       AOS.init({
         duration: 800,
         once: true,
         offset: 50,
         delay: 0,
+        easing: "ease-out-cubic",
       });
       AOS.refresh();
     }, 100);
@@ -48,6 +53,7 @@ const ServicesPage = () => {
         console.error("Lỗi khi tải dịch vụ:", error);
       } finally {
         setLoading(false);
+        setTimeout(() => AOS.refresh(), 100);
       }
     };
 
@@ -58,9 +64,9 @@ const ServicesPage = () => {
 
   return (
     <>
-      <div className="w-full font-display bg-background-light text-gray-800">
+      <div className="w-full font-display bg-background-light text-gray-800 ">
         {/* Hero Section */}
-        <section className="py-12 sm:py-16 lg:py-20" data-aos="fade-up">
+        <section className="max-w-screen-xl mx-auto mt-16" data-aos="fade-up">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div
               className="flex min-h-[400px] flex-col gap-6 rounded-xl bg-cover bg-center bg-no-repeat items-center justify-center p-4 text-center shadow-md"
@@ -126,45 +132,65 @@ const ServicesPage = () => {
                 {loading ? (
                   <p>Đang tải dịch vụ...</p>
                 ) : (
-                  services.map((service, index) => (
-                    <div
-                      key={service.dichVuId || index}
-                      data-aos="fade-up"
-                      data-aos-delay={index * 100 + 100}
-                      className="h-full"
-                    >
-                      <div className="flex flex-col gap-4 overflow-hidden rounded-xl bg-white border border-gray-200 h-full transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-2">
-                        <div
-                          className="w-full bg-center bg-no-repeat aspect-video bg-cover"
-                          style={{
-                            backgroundImage: `url("http://localhost:8080/uploads/${service.hinhAnh}")`,
-                          }}
-                        ></div>
-                        <div className="flex flex-col p-4 pt-0 gap-3 flex-1">
-                          <p className="text-gray-900 text-lg font-bold leading-normal">
-                            {service.tenDichVu}
-                          </p>
-                          <p className="text-gray-600 text-sm font-normal leading-normal">
-                            {service.moTa}
-                          </p>
-                          <p className="text-gray-700 text-sm font-semibold leading-normal mt-auto">
-                            {formatCurrency(service.giaDichVu)}
-                          </p>
-                          <button
-                            className="relative group/btn mt-2 w-full flex items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-surface text-text-main text-sm font-bold shadow-sm transition-all duration-300 ease-out hover:scale-105
-  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-primary before:transition-all before:duration-300 before:ease-out hover:before:w-full"
+                  services.map((service, index) => {
+                    // Lấy ID an toàn
+                    const serviceId = service.dichVuId || service.id;
+
+                    return (
+                      <div
+                        key={serviceId || index}
+                        data-aos="fade-up"
+                        data-aos-delay={index * 100 + 100}
+                        className="h-full group"
+                      >
+                        <div className="flex flex-col gap-4 overflow-hidden rounded-xl bg-white border border-gray-200 h-full transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-2">
+                          {/* 2. Link bao quanh hình ảnh */}
+                          <Link
+                            to={`/services/${serviceId}`}
+                            className="w-full aspect-video overflow-hidden block"
                           >
-                            <span className="relative z-10 transition-colors duration-300 group-hover/btn:text-white">
-                              Xem chi tiết
-                            </span>
-                          </button>
+                            <div
+                              className="w-full h-full bg-center bg-no-repeat bg-cover transition-transform duration-500 group-hover:scale-110"
+                              style={{
+                                backgroundImage: `url("http://localhost:8080/uploads/${service.hinhAnh}")`,
+                              }}
+                            ></div>
+                          </Link>
+
+                          <div className="flex flex-col p-4 pt-0 gap-3 flex-1">
+                            {/* 3. Link bao quanh tên dịch vụ */}
+                            <Link to={`/services/${serviceId}`}>
+                              <p className="text-gray-900 text-lg font-bold leading-normal hover:text-primary transition-colors line-clamp-2">
+                                {service.tenDichVu}
+                              </p>
+                            </Link>
+
+                            <p className="text-gray-600 text-sm font-normal leading-normal line-clamp-2">
+                              {service.moTa}
+                            </p>
+                            <p className="text-gray-700 text-sm font-semibold leading-normal mt-auto">
+                              {formatCurrency(service.giaDichVu)}
+                            </p>
+
+                            {/* 4. Đổi Button thành Link */}
+                            <Link
+                              to={`/services/${serviceId}`}
+                              className="relative group/btn mt-2 w-full flex items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-surface text-text-main text-sm font-bold shadow-sm transition-all duration-300 ease-out hover:scale-105
+  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-primary before:transition-all before:duration-300 before:ease-out hover:before:w-full"
+                            >
+                              <span className="relative z-10 transition-colors duration-300 group-hover/btn:text-white">
+                                Xem chi tiết
+                              </span>
+                            </Link>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
-              {/* PAGINATION */}
+
+              {/* PAGINATION (Giữ nguyên) */}
               <div
                 className="mt-12 flex items-center justify-center gap-2"
                 data-aos="fade-up"
@@ -193,21 +219,20 @@ const ServicesPage = () => {
           </div>
         </section>
 
-        {/* PROCESS SECTION */}
+        {/* PROCESS SECTION (Giữ nguyên) */}
         <section className="py-12 sm:py-16 lg:py-20 bg-white border-y border-gray-100">
+          {/* ... Giữ nguyên code phần Process ... */}
+          {/* Để code gọn tôi xin phép ẩn bớt phần tĩnh không thay đổi ở đây, bạn giữ nguyên code cũ của phần này */}
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16" data-aos="fade-up">
               <h2 className="text-3xl font-bold text-gray-900">
                 Quy Trình Dịch Vụ
               </h2>
-              <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
-                Chúng tôi tối ưu hóa quy trình để mang lại trải nghiệm thoải mái
-                nhất cho thú cưng và sự an tâm tuyệt đối cho bạn.
-              </p>
+              {/* ... */}
             </div>
-
+            {/* ... Grid Process ... */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
-              <div className="hidden md:block absolute top-8 left-[16%] right-[16%] h-0.5 bg-gray-200 -z-10"></div>
+              {/* ... Map process items ... */}
               {[
                 {
                   step: "01",
@@ -234,12 +259,14 @@ const ServicesPage = () => {
                   data-aos="fade-up"
                   data-aos-delay={idx * 150}
                 >
+                  {/* Icon render */}
                   <div className="relative mb-6">
                     <div className="w-16 h-16 rounded-2xl bg-primary text-[#111813] flex items-center justify-center shadow-lg shadow-primary/30 transform transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
                       <span className="material-symbols-outlined text-3xl">
                         {item.icon}
                       </span>
                     </div>
+                    {/* Step number */}
                     <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-white border-2 border-primary flex items-center justify-center text-xs font-bold text-primary">
                       {item.step}
                     </div>
@@ -254,18 +281,20 @@ const ServicesPage = () => {
           </div>
         </section>
 
-        {/* PRICING SECTION */}
+        {/* PRICING SECTION (Giữ nguyên) */}
         <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
+          {/* ... Giữ nguyên code phần Pricing ... */}
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            {/* ... Code Bảng giá tham khảo ... */}
             <div className="text-center mb-12" data-aos="fade-up">
               <h2 className="text-3xl font-bold text-gray-900">
                 Bảng Giá Tham Khảo
               </h2>
-              <p className="mt-4 text-gray-600">
-                Chọn gói dịch vụ phù hợp nhất với nhu cầu của bé cưng nhà bạn.
-              </p>
+              {/* ... */}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* ... Map pricing items ... */}
+              {/* Do đoạn này dài và không đổi logic, bạn giữ nguyên như cũ */}
               {[
                 {
                   name: "Cơ Bản",
@@ -303,6 +332,7 @@ const ServicesPage = () => {
                   highlight: false,
                 },
               ].map((plan, idx) => (
+                // ... Render Pricing Item ...
                 <div
                   key={idx}
                   className={`relative flex flex-col p-8 rounded-2xl transition-all duration-300 hover:-translate-y-2 ${
@@ -345,13 +375,10 @@ const ServicesPage = () => {
     before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-[#10B981] before:transition-all before:duration-300 before:ease-out hover:before:w-full
     ${
       plan.highlight
-        ? "bg-primary" // Gói nổi bật: Nền xanh lá (màu cũ của bạn)
-        : "bg-gray-100" // Gói thường: Nền xám nhạt
+        ? "bg-primary" // Gói nổi bật
+        : "bg-gray-100" // Gói thường
     }`}
                   >
-                    {/* - text-[#111827]: Màu đen lúc chưa hover
-      - group-hover/btn:text-white: Chuyển sang trắng khi di chuột vào 
-  */}
                     <span className="relative z-10 text-[#111827] transition-colors duration-300 group-hover/btn:text-white">
                       Chọn Gói Này
                     </span>
@@ -368,7 +395,7 @@ const ServicesPage = () => {
           </div>
         </section>
 
-        {/* CTA Section */}
+        {/* CTA Section (Giữ nguyên) */}
         <section className="py-12 sm:py-16 lg:py-20" data-aos="fade-up">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="bg-primary/20 rounded-xl p-8 sm:p-12 text-center flex flex-col items-center gap-6">

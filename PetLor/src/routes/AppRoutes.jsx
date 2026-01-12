@@ -1,3 +1,4 @@
+import React from "react";
 import { Routes, Route } from "react-router-dom";
 import MainLayout from "../components/MainLayout";
 import AdminRoute from "./AdminRoute";
@@ -13,7 +14,7 @@ import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import ProductsPage from "../pages/ProductsPage";
 
-//admin pages
+// Admin pages
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminOrders from "../pages/admin/AdminOrders";
 import AdminLayout from "../pages/admin/components/AdminLayout";
@@ -31,29 +32,36 @@ import AdminVaccinations from "../pages/admin/AdminVaccinations";
 import AdminReviews from "../pages/admin/AdminReviews";
 import AdminPosts from "../pages/admin/AdminPosts";
 
-//user pages
+// User pages
 import UserLayout from "../pages/user/components/UserLayout";
 import UserProfile from "../pages/user/UserProfile";
 import MyPets from "../pages/user/MyPets";
-<<<<<<< HEAD
 import MyAppointments from "../pages/user/MyAppointments";
 import MyOrders from "../pages/user/MyOrders";
 import UserSettings from "../pages/user/UserSettings";
-=======
->>>>>>> fb28d851564a6753a782d5ccb9a31d6e44cd4328
+import ProductDetailPage from "../pages/ProductDetailPage";
+import CartPage from "../pages/CartPage";
+import ServiceDetailPage from "../pages/ServiceDetailPage";
+import Checkout from "../pages/Checkout";
 
 const AppRoutes = () => {
   return (
     <Routes>
+      {/* Public Routes & User Protected Routes */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/services" element={<ServicesPage />} />
+        <Route path="/services/:id" element={<ServiceDetailPage />} />
         <Route path="/aboutus" element={<AboutUsPage />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/products" element={<ProductsPage />} />
+        <Route path="/products/:id" element={<ProductDetailPage />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/checkout" element={<Checkout />} />
+
+        {/* Protected User Routes */}
         <Route element={<ProtectedRoute />}>
-<<<<<<< HEAD
           <Route element={<UserLayout />}>
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/my-pets" element={<MyPets />} />
@@ -61,25 +69,18 @@ const AppRoutes = () => {
             <Route path="/my-orders" element={<MyOrders />} />
             <Route path="/settings" element={<UserSettings />} />
           </Route>
-=======
-          <Route path="/profile" element={<UserProfile />} />
-          <Route path="/my-pets" element={<MyPets />} />
-          {/* <Route path="/change-password" element={<ChangePasswordPage />} /> */}
->>>>>>> fb28d851564a6753a782d5ccb9a31d6e44cd4328
         </Route>
       </Route>
 
+      {/* Auth Routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
       {/* Admin Routes */}
       <Route element={<AdminRoute />}>
         <Route path="/admin" element={<AdminLayout />}>
-          {/* Khi vào /admin, mặc định hiện Dashboard */}
           <Route index element={<AdminDashboard />} />
           <Route path="dashboard" element={<AdminDashboard />} />
-
-          {/* Các trang quản lý khác */}
           <Route path="users" element={<AdminUsers />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="pets" element={<AdminPets />} />

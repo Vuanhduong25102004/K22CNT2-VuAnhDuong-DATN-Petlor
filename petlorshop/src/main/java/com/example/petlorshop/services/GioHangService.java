@@ -70,6 +70,16 @@ public class GioHangService {
 
         return mapToGioHangResponse(gioHang);
     }
+    
+    public GioHangResponse clearGioHang(Integer userId) {
+        GioHang gioHang = gioHangRepository.findByNguoiDung_UserId(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giỏ hàng cho người dùng."));
+
+        gioHang.getChiTietGioHangList().clear();
+        gioHangRepository.save(gioHang);
+
+        return mapToGioHangResponse(gioHang);
+    }
 
     public GioHangResponse capNhatSoLuong(Integer userId, Integer sanPhamId, int soLuongMoi) {
         if (soLuongMoi <= 0) {

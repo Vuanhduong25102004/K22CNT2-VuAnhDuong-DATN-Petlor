@@ -54,25 +54,25 @@ const teamMembers = [
 
 const AboutUsPage = () => {
   useEffect(() => {
+    window.scrollTo(0, 0);
     const aosInit = setTimeout(() => {
       AOS.init({
         duration: 800,
         once: true,
         offset: 50,
         delay: 0,
+        easing: "ease-out-cubic",
       });
+
       AOS.refresh();
     }, 100);
     return () => clearTimeout(aosInit);
   }, []);
 
   return (
-    <div className="w-full font-display bg-white text-text-main pb-20">
+    <div className="w-full font-display bg-background-light text-text-main pb-20">
       {/* 1. HERO SECTION */}
-      <section
-        className="px-4 py-6 md:px-10 max-w-7xl mx-auto md:py-20"
-        data-aos="fade-up"
-      >
+      <section className="max-w-screen-xl mx-auto mt-16" data-aos="fade-up">
         <div
           className="relative w-full h-[500px] md:h-[600px] rounded-2xl overflow-hidden bg-cover bg-center flex items-center justify-center text-center px-4"
           style={{
@@ -97,8 +97,7 @@ const AboutUsPage = () => {
 
             {/* Button */}
             <div className="mt-4" data-aos="fade-up" data-aos-delay="300">
-              <button className="relative group flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary px-6 py-3 font-bold text-[#111813] shadow-sm transition-all duration-300 ease-out hover:scale-105">
-                <span className="absolute left-0 top-0 h-full w-0 bg-[#0dbd47] transition-all duration-300 ease-out group-hover:w-full"></span>
+              <button className="relative group flex min-w-[84px] cursor-pointer items-center text-white justify-center overflow-hidden rounded-lg bg-primary px-6 py-3 font-bold text-[#111813] shadow-sm transition-all duration-300 ease-out hover:scale-105">
                 <span className="relative z-10">Khám Phá Dịch Vụ</span>
               </button>
             </div>

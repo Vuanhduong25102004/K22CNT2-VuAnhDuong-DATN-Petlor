@@ -35,6 +35,9 @@ public class LichHen {
     @Column(name = "ghi_chu", columnDefinition = "TEXT")
     private String ghiChu;
 
+    @Column(name = "ly_do_huy", columnDefinition = "TEXT")
+    private String lyDoHuy;
+
     // --- Relationships ---
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -60,5 +63,22 @@ public class LichHen {
     // --- Enum for TrangThai ---
     public enum TrangThai {
         CHO_XAC_NHAN, DA_XAC_NHAN, DA_HOAN_THANH, DA_HUY
+    }
+
+    public enum LyDoHuyLich {
+        BAN_VIEC_DOT_XUAT("Bận việc đột xuất"),
+        MUON_DOI_LICH_SANG_NGAY_KHAC("Muốn đổi lịch sang ngày khác"),
+        MUON_DOI_DICH_VU("Muốn thay đổi dịch vụ"),
+        KHAC("Lý do khác");
+
+        private final String moTa;
+
+        LyDoHuyLich(String moTa) {
+            this.moTa = moTa;
+        }
+
+        public String getMoTa() {
+            return moTa;
+        }
     }
 }

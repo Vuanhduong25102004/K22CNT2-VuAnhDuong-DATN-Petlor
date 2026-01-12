@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -45,6 +46,12 @@ public class LichHenService {
         return lichHenRepository.findByNguoiDung_Email(email).stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
+    }
+    
+    public Optional<LichHenResponse> getMyLichHenDetail(String email, Integer id) {
+        return lichHenRepository.findById(id)
+                .filter(lichHen -> lichHen.getNguoiDung().getEmail().equals(email))
+                .map(this::convertToResponse);
     }
 
     @Transactional
@@ -201,7 +208,7 @@ public class LichHenService {
     }
 
     @Transactional
-    public LichHenResponse cancelMyLichHen(String email, Integer id) {
+    public LichHenResponse cancelMyLichHen(String email, Integer id, String lyDoHuy) {
         LichHen lichHen = lichHenRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Lịch hẹn không tồn tại: " + id));
 
@@ -218,6 +225,7 @@ public class LichHenService {
         }
 
         lichHen.setTrangThai(LichHen.TrangThai.DA_HUY);
+        lichHen.setLyDoHuy(lyDoHuy);
         LichHen savedLichHen = lichHenRepository.save(lichHen);
         return convertToResponse(savedLichHen);
     }
@@ -273,6 +281,14 @@ public class LichHenService {
         LichHen savedLichHen = lichHenRepository.save(lichHen);
         return convertToResponse(savedLichHen);
     }
+    
+    public List<String> getLyDoHuyLichOptions() {
+        List<String> options = new ArrayList<>();
+        for (LichHen.LyDoHuyLich lyDo : LichHen.LyDoHuyLich.values()) {
+            options.add(lyDo.getMoTa());
+        }
+        return options;
+    }
 
     public void deleteLichHen(Integer id) {
         lichHenRepository.deleteById(id);
@@ -287,10 +303,11 @@ public class LichHenService {
                 lichHen.getLichHenId(), lichHen.getThoiGianBatDau(), lichHen.getThoiGianKetThuc(),
                 lichHen.getTrangThai().name(),
                 lichHen.getGhiChu(),
+                lichHen.getLyDoHuy(),
                 nguoiDung != null ? nguoiDung.getUserId() : null, nguoiDung != null ? nguoiDung.getHoTen() : null,
                 nguoiDung != null ? nguoiDung.getSoDienThoai() : null,
                 thuCung != null ? thuCung.getThuCungId() : null, thuCung != null ? thuCung.getTenThuCung() : null,
-                dichVu != null ? dichVu.getDichVuId() : null, dichVu != null ? dichVu.getTenDichVu() : null,
+                dichVu != null ? dichVu.getDichVuId() : null, dichVu != null ? dichVu.getTenDichVu() : null, dichVu != null ? dichVu.getGiaDichVu() : null,
                 nhanVien != null ? nhanVien.getNhanVienId() : null, nhanVien != null ? nhanVien.getHoTen() : null
         );
     }

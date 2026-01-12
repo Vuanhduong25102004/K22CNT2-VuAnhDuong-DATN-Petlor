@@ -41,7 +41,7 @@ const AdminOrders = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const ITEMS_PER_PAGE = 5; // Theo JSON backend trả về size mặc định là 20
+  const ITEMS_PER_PAGE = 6; // Theo JSON backend trả về size mặc định là 20
 
   // State riêng cho các chỉ số thống kê
   const [statsData, setStatsData] = useState({

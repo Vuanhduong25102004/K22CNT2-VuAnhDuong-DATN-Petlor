@@ -8,11 +8,11 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const linkClass = (path) => {
-    if (location.pathname === path) {
-      return "block border-2 border-primary rounded-full";
-    }
-    return "block border-2 border-transparent";
+  // Logic active link
+  const isActive = (path) => {
+    return location.pathname === path
+      ? "text-primary font-bold"
+      : "text-slate-600 hover:text-primary";
   };
 
   useEffect(() => {
@@ -58,102 +58,134 @@ const Header = () => {
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
+  // Class chung cho các nút tròn (Search, Cart, Logout)
+  const iconButtonClass =
+    "w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-slate-100 text-slate-600";
+
   return (
     <header
       className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${
-        isScrolled
-          ? " backdrop-blur-md shadow-sm border-gray-200"
-          : "bg-transparent"
+        isScrolled ? "bg-white/40 backdrop-blur-md shadow-sm" : "bg-transparent"
       }`}
     >
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo - Tôi cũng bọc Link vào đây để khi bấm vào Logo thì về trang chủ */}
-          <Link
-            to="/"
-            className="flex items-center gap-4 text-gray-900 cursor-pointer"
-          >
-            <div className="flex items-center justify-center size-10 rounded-xl bg-primary/20 text-primary">
-              <span className="material-symbols-outlined text-[28px]">
-                pets
-              </span>
+      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        {/* LEFT SECTION: LOGO & NAV */}
+        <div className="flex items-center gap-8">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+              <span className="material-symbols-outlined">pets</span>
             </div>
-            <h2 className="text-xl font-bold leading-tight tracking-[-0.015em]">
+            <span className="text-xl font-bold tracking-tight text-slate-800">
               PetLor
-            </h2>
+            </span>
           </Link>
 
-          {/* Menu Navigation - Đã thay toàn bộ <a> thành <Link> */}
-          <div className="hidden md:flex items-center gap-9">
-            <Link
-              className="text-sm font-medium leading-normal hover:text-primary transition-colors"
-              to="/"
-            >
+          {/* Navigation - Desktop */}
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+            <Link className={`${isActive("/")} transition-colors`} to="/">
               Trang chủ
             </Link>
             <Link
-              className="text-sm font-medium leading-normal hover:text-primary transition-colors"
+              className={`${isActive("/services")} transition-colors`}
               to="/services"
             >
               Dịch vụ
             </Link>
             <Link
-              className="text-sm font-medium leading-normal hover:text-primary transition-colors"
+              className={`${isActive("/products")} transition-colors`}
               to="/products"
             >
               Sản phẩm
             </Link>
             <Link
-              className="text-sm font-medium leading-normal hover:text-primary transition-colors"
+              className={`${isActive("/aboutus")} transition-colors`}
               to="/aboutus"
             >
               Về chúng tôi
             </Link>
             <Link
-              className="text-sm font-medium leading-normal hover:text-primary transition-colors"
+              className={`${isActive("/blog")} transition-colors`}
               to="/blog"
             >
               Blog
             </Link>
-            <Link
-              className="text-sm font-medium leading-normal hover:text-primary transition-colors"
-              to="/contact"
-            >
-              Liên hệ
-            </Link>
-          </div>
+          </nav>
+        </div>
 
-          <div className="hidden md:flex items-center gap-9">
-            {user ? (
-              <div className="flex items-center gap-4">
-                <Link to="/profile" className={linkClass("/profile")}>
-                  <img
-                    src={
-                      user.anhDaiDien
-                        ? `${API_URL}/uploads/${user.anhDaiDien}`
-                        : `https://ui-avatars.com/api/?name=${user.hoTen}&background=random`
-                    }
-                    alt={user.hoTen}
-                    className="w-10 h-10 rounded-full object-cover bg-gray-200"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = `https://ui-avatars.com/api/?name=${user.hoTen}&background=random`;
-                    }}
-                  />
-                </Link>
-              </div>
-            ) : (
+        {/* RIGHT SECTION: ACTIONS & AUTH */}
+        <div className="flex items-center gap-3">
+          {/* Search Button - Đã sửa thành tròn và căn giữa */}
+          <button className={iconButtonClass}>
+            <span className="material-symbols-outlined">search</span>
+          </button>
+
+          {/* Cart Button - Đã sửa thành tròn và căn giữa */}
+          <Link to="/cart" className={`relative ${iconButtonClass}`}>
+            <span className="material-symbols-outlined">shopping_cart</span>
+            {/* Badge số lượng */}
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">
+              2
+            </span>
+          </Link>
+
+          {/* User Auth Logic */}
+          {user ? (
+            <div className="flex items-center gap-3 ml-2">
               <Link
-                className="text-sm font-medium leading-normal hover:text-primary transition-colors"
+                to="/profile"
+                className="flex items-center gap-2 p-1 pl-2 pr-1 hover:bg-slate-100 rounded-full transition-all border border-transparent hover:border-slate-200"
+              >
+                <span className="text-sm font-semibold text-slate-700 hidden sm:block max-w-[100px] truncate">
+                  {user.hoTen?.split(" ").pop()}
+                </span>
+                <img
+                  src={
+                    user.anhDaiDien
+                      ? `${API_URL}/uploads/${user.anhDaiDien}`
+                      : `https://ui-avatars.com/api/?name=${user.hoTen}&background=random`
+                  }
+                  alt={user.hoTen}
+                  className="w-8 h-8 rounded-full object-cover border border-white shadow-sm"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = `https://ui-avatars.com/api/?name=${user.hoTen}&background=random`;
+                  }}
+                />
+              </Link>
+
+              {/* Nút Logout - Đã sửa thành tròn và căn giữa */}
+              <button
+                onClick={handleLogout}
+                // Sử dụng lại logic căn giữa, nhưng override màu sắc khi hover
+                className="w-10 h-10 flex items-center justify-center rounded-full transition-colors text-slate-400 hover:text-red-600 hover:bg-red-50"
+                title="Đăng xuất"
+              >
+                <span className="material-symbols-outlined text-[20px]">
+                  logout
+                </span>
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-4 ml-2">
+              <Link
                 to="/login"
+                className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors"
               >
                 Đăng nhập
               </Link>
-            )}
-            <button className="hidden md:flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-[#111813] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-opacity">
-              <span className="truncate">Đặt lịch ngay</span>
+              <button className="bg-primary text-white px-5 py-2.5 rounded-full font-semibold text-sm hover:opacity-90 hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                Đặt lịch ngay
+              </button>
+            </div>
+          )}
+
+          {/* Nút Đặt lịch (Chỉ hiện khi đã đăng nhập) */}
+          {user && (
+            <button className="hidden lg:block ml-2 bg-primary text-white px-5 py-2.5 rounded-full font-semibold text-sm hover:opacity-90 hover:shadow-lg hover:-translate-y-0.5 transition-all">
+              Đặt lịch ngay
             </button>
-          </div>
+          )}
         </div>
       </div>
     </header>

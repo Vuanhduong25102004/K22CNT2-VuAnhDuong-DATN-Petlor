@@ -24,6 +24,7 @@ public class DonHangResponse {
     private DonHang.PhuongThucThanhToan phuongThucThanhToan;
     private String diaChiGiaoHang;
     private String soDienThoaiNhan;
+    private String lyDoHuy;
     private Integer userId;
     private String tenNguoiDung;
     private String maKhuyenMai;

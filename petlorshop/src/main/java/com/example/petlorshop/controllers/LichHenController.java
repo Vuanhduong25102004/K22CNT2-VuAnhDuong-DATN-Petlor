@@ -43,6 +43,15 @@ public class LichHenController {
         List<LichHenResponse> myLichHen = lichHenService.getMyLichHen(userEmail);
         return ResponseEntity.ok(myLichHen);
     }
+    
+    @GetMapping("/me/{id}")
+    public ResponseEntity<LichHenResponse> getMyLichHenDetail(@PathVariable Integer id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        return lichHenService.getMyLichHenDetail(userEmail, id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
     @PostMapping
     public ResponseEntity<LichHenResponse> createLichHen(@RequestBody LichHenRequest request) {
@@ -65,11 +74,17 @@ public class LichHenController {
     }
 
     @PutMapping("/me/{id}/cancel")
-    public ResponseEntity<LichHenResponse> cancelMyLichHen(@PathVariable Integer id) {
+    public ResponseEntity<LichHenResponse> cancelMyLichHen(@PathVariable Integer id, @RequestBody(required = false) Map<String, String> body) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userEmail = authentication.getName();
-        LichHenResponse cancelledLichHen = lichHenService.cancelMyLichHen(userEmail, id);
+        String lyDoHuy = body != null ? body.get("lyDoHuy") : null;
+        LichHenResponse cancelledLichHen = lichHenService.cancelMyLichHen(userEmail, id, lyDoHuy);
         return ResponseEntity.ok(cancelledLichHen);
+    }
+    
+    @GetMapping("/ly-do-huy")
+    public ResponseEntity<List<String>> getLyDoHuyLichOptions() {
+        return ResponseEntity.ok(lichHenService.getLyDoHuyLichOptions());
     }
 
     @DeleteMapping("/{id}")

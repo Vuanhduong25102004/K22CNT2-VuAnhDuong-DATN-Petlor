@@ -3,6 +3,7 @@ package com.example.petlorshop.controllers;
 import com.example.petlorshop.dto.DonHangRequest;
 import com.example.petlorshop.dto.DonHangResponse;
 import com.example.petlorshop.dto.DonHangUpdateRequest;
+import com.example.petlorshop.dto.GuestOrderRequest;
 import com.example.petlorshop.models.DonHang;
 import com.example.petlorshop.services.DonHangService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,12 +43,33 @@ public class DonHangController {
         List<DonHangResponse> myDonHang = donHangService.getMyDonHang(userEmail);
         return ResponseEntity.ok(myDonHang);
     }
+    
+    @GetMapping("/me/{id}")
+    public ResponseEntity<DonHangResponse> getMyDonHangDetail(@PathVariable Integer id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        return donHangService.getMyDonHangDetail(userEmail, id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
     @PostMapping
     public ResponseEntity<?> createDonHang(@RequestBody DonHangRequest donHangRequest) {
         try {
             DonHang createdDonHang = donHangService.createDonHang(donHangRequest);
             // Trả về DTO thay vì Entity để tránh lỗi lazy loading
+            return donHangService.getDonHangById(createdDonHang.getDonHangId())
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.internalServerError().build());
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    @PostMapping("/guest")
+    public ResponseEntity<?> createGuestOrder(@RequestBody GuestOrderRequest request) {
+        try {
+            DonHang createdDonHang = donHangService.createGuestOrder(request);
             return donHangService.getDonHangById(createdDonHang.getDonHangId())
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.internalServerError().build());
@@ -64,6 +86,24 @@ public class DonHangController {
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PutMapping("/me/{id}/cancel")
+    public ResponseEntity<?> cancelDonHang(@PathVariable Integer id, @RequestBody(required = false) Map<String, String> body) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userEmail = authentication.getName();
+            String lyDoHuy = body != null ? body.get("lyDoHuy") : null;
+            DonHangResponse cancelledDonHang = donHangService.cancelDonHang(id, userEmail, lyDoHuy);
+            return ResponseEntity.ok(cancelledDonHang);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    @GetMapping("/ly-do-huy")
+    public ResponseEntity<List<String>> getLyDoHuyDonOptions() {
+        return ResponseEntity.ok(donHangService.getLyDoHuyDonOptions());
     }
 
     @DeleteMapping("/{id}")

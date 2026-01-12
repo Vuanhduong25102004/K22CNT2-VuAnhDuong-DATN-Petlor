@@ -52,6 +52,9 @@ public class DonHang {
     @Column(name = "so_dien_thoai_nhan", nullable = false, length = 20)
     private String soDienThoaiNhan;
 
+    @Column(name = "ly_do_huy", columnDefinition = "TEXT")
+    private String lyDoHuy;
+
     // --- Relationships ---
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -88,5 +91,22 @@ public class DonHang {
 
     public enum PhuongThucThanhToan {
         COD, VNPAY, MOMO
+    }
+
+    public enum LyDoHuyDon {
+        MUON_THAY_DOI_DIA_CHI("Muốn thay đổi địa chỉ/số điện thoại nhận hàng"),
+        MUON_THAY_DOI_SAN_PHAM("Muốn thay đổi sản phẩm trong đơn hàng (size, màu sắc, số lượng...)"),
+        THAY_DOI_PHUONG_THUC_THANH_TOAN("Thay đổi phương thức thanh toán"),
+        KHAC("Lý do khác");
+
+        private final String moTa;
+
+        LyDoHuyDon(String moTa) {
+            this.moTa = moTa;
+        }
+
+        public String getMoTa() {
+            return moTa;
+        }
     }
 }

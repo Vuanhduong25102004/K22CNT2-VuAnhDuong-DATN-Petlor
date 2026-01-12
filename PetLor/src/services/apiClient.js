@@ -1,7 +1,10 @@
 import axios from 'axios';
 
-// Cấu hình URL cơ sở
-const API_BASE_URL = 'http://localhost:8080/api';
+// 1. Tách URL gốc ra và EXPORT để các trang khác (như CartPage) dùng ghép link ảnh
+export const SERVER_URL = 'http://localhost:8080';
+
+// 2. URL dành riêng cho gọi API
+const API_BASE_URL = `${SERVER_URL}/api`;
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,

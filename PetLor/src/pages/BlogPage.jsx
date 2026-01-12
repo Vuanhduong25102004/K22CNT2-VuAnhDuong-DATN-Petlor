@@ -66,15 +66,17 @@ const tags = [
 ];
 
 const BlogPage = () => {
-  // 2. Khởi tạo AOS
   useEffect(() => {
+    window.scrollTo(0, 0);
     const aosInit = setTimeout(() => {
       AOS.init({
         duration: 800,
         once: true,
         offset: 50,
         delay: 0,
+        easing: "ease-out-cubic",
       });
+
       AOS.refresh();
     }, 100);
     return () => clearTimeout(aosInit);
@@ -212,7 +214,7 @@ const BlogPage = () => {
               <div className="py-3" data-aos="fade-left" data-aos-delay="100">
                 <h3 className="font-bold text-lg mb-4">Tìm kiếm bài viết</h3>
                 <label className="flex flex-col min-w-40 h-12 w-full">
-                  <div className="flex w-full flex-1 items-stretch rounded-lg h-full overflow-hidden border border-gray-200 bg-white">
+                  <div className="flex w-full flex-1 items-stretch rounded-3xl h-full overflow-hidden border border-gray-200 bg-white">
                     <div className="text-text-muted flex items-center justify-center pl-4">
                       <span className="material-symbols-outlined">search</span>
                     </div>
@@ -280,7 +282,7 @@ const BlogPage = () => {
                     <a
                       key={index}
                       href="#"
-                      className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm text-text-muted hover:text-primary hover:border-primary transition-colors"
+                      className="px-3 py-1.5 bg-white border border-gray-200 rounded-3xl text-sm text-text-muted hover:text-primary hover:border-primary transition-colors"
                     >
                       {tag}
                     </a>

@@ -84,7 +84,11 @@ const petService = {
 
   getMyAppointments: () => apiClient.get('/lich-hen/me'),
   
-  cancelMyAppointment: (id) => apiClient.put(`/lich-hen/me/${id}/cancel`),
+  getAppointmentById: (id) => apiClient.get(`/lich-hen/me/${id}`),
+
+  getCancelReasons: () => apiClient.get('/lich-hen/ly-do-huy'),
+
+  cancelMyAppointment: (id, data) => apiClient.put(`/lich-hen/me/${id}/cancel`, data),
 };
 
 export default petService;

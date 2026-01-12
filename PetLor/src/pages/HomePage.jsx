@@ -6,13 +6,16 @@ import "aos/dist/aos.css";
 const Homepage = () => {
   // 2. Khởi tạo AOS khi trang web load xong
   useEffect(() => {
+    window.scrollTo(0, 0);
     const aosInit = setTimeout(() => {
       AOS.init({
         duration: 800,
         once: true,
         offset: 50,
         delay: 0,
+        easing: "ease-out-cubic",
       });
+
       AOS.refresh();
     }, 100);
     return () => clearTimeout(aosInit);
@@ -20,36 +23,84 @@ const Homepage = () => {
 
   return (
     <>
-      {/* HERO SECTION */}
-      <section className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-4 md:pt-20 md:pb-10">
-        <div className="@container">
-          <div className="@[480px]:p-4">
-            <div
-              className="flex min-h-[480px] flex-col gap-6 bg-cover bg-center bg-no-repeat @[480px]:gap-8 @[480px]:rounded-xl items-start justify-end px-4 pb-10 @[480px]:px-10"
-              data-alt="A happy golden retriever playing with a ball in a sunny park."
-              style={{
-                backgroundImage:
-                  'linear-gradient(rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuAtC6xXp4MJU3q98FgNk7hLwIs43g8l_9ptL6JcfCs97KZC-QwwcjbIPWXBfX5LAfvpEC9z9CZkQZlcHwiRTV4xYR5phHUjYLXXSuQTHrJlvcQBHl_h_sBvk9nDA9BrBPKAoSAT_ibd4eJzf_2J-qAaAZVjBp8drkinymn5TyHiL9-BrGGzz-yN9VSgRL7zVl5oG_x7Y5heAivA4TLq9KX0nJNk3OEiLl0dL3wv9d4FqcMdIiCRmD58ICO6TWk4zM3FkYktwh39py5-")',
-              }}
-            >
-              <div
-                className="flex flex-col gap-2 text-left max-w-2xl"
-                data-aos="fade-up"
-              >
-                <h1 className="text-white text-4xl font-black leading-tight tracking-[-0.033em] @[480px]:text-5xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em]">
-                  Chăm sóc đặc biệt cho người bạn thân nhất của bạn
-                </h1>
-                <h2 className="text-white text-sm font-normal leading-normal @[480px]:text-base @[480px]:font-normal @[480px]:leading-normal">
-                  Chúng tôi cung cấp dịch vụ chăm sóc thú cưng toàn diện và nhân
-                  ái để đảm bảo thú cưng của bạn luôn vui vẻ và khỏe mạnh.
-                </h2>
+      {/* --- NEW HERO SECTION --- */}
+      <section className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
+        <div
+          className="relative min-h-[560px] rounded-[40px] overflow-hidden bg-white shadow-2xl shadow-gray-200/50 flex flex-col md:flex-row"
+          data-aos="fade-up" // Thêm hiệu ứng AOS cho cả khối
+        >
+          {/* Pattern Background (Optional) */}
+          <div className="absolute inset-0 pointer-events-none bg-gray-50/50"></div>
+
+          {/* Left Content */}
+          <div className="relative z-10 w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-bold mb-6 w-fit">
+              <span className="material-symbols-outlined text-lg">
+                verified
+              </span>
+              <span>Chăm sóc tận tâm 24/7</span>
+            </div>
+
+            <h1 className="text-gray-900 text-4xl lg:text-5xl xl:text-6xl font-extrabold mb-6 leading-tight">
+              Chăm sóc đặc biệt cho{" "}
+              <span className="text-primary">người bạn thân nhất</span> của bạn
+            </h1>
+
+            <p className="text-gray-600 text-lg md:text-xl mb-10 font-medium max-w-xl">
+              Chúng tôi cung cấp dịch vụ chăm sóc thú cưng toàn diện và nhân ái
+              để đảm bảo thú cưng của bạn luôn vui vẻ và khỏe mạnh mỗi ngày.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button className="bg-primary hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all text-white font-bold px-10 py-5 rounded-2xl text-lg shadow-xl shadow-primary/30 flex items-center justify-center gap-3">
+                <span>Đặt lịch hẹn</span>
+                <span className="material-symbols-outlined">
+                  calendar_today
+                </span>
+              </button>
+              <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-10 py-5 rounded-2xl text-lg transition-all flex items-center justify-center gap-2">
+                <span>Xem dịch vụ</span>
+              </button>
+            </div>
+
+            {/* Stats */}
+            <div className="mt-12 flex items-center gap-8 border-t border-gray-100 pt-8">
+              <div>
+                <div className="text-2xl font-bold text-gray-900">10k+</div>
+                <div className="text-sm text-gray-500">Thú cưng hài lòng</div>
               </div>
-              <div className="mt-4" data-aos="fade-up" data-aos-delay="300">
-                <button className="relative group inline-flex items-center justify-center overflow-hidden rounded-lg bg-primary px-8 py-3 text-sm font-bold text-[#111813] shadow-lg transition-all duration-300 ease-out hover:scale-105 before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-[#10B981] before:transition-all before:duration-300 before:ease-out hover:before:w-full">
-                  <span className="relative z-10 truncate transition-colors duration-300 group-hover:text-white">
-                    Đặt lịch hẹn
-                  </span>
-                </button>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">50+</div>
+                <div className="text-sm text-gray-500">Chuyên gia thú y</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Image */}
+          <div className="relative w-full md:w-1/2 min-h-[400px] md:min-h-full">
+            <div className="absolute inset-0 md:inset-4 md:rounded-[32px] overflow-hidden">
+              <img
+                alt="Happy pets"
+                className="w-full h-full object-cover"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgEFjauwy_GNl54zK9RLRUWigecWZ6lzch52KOCovg1DHvhJjGLIbtpoRR2vOrHdrg0najDQWUDgJ9mWIaqUmAfxg5hFsz6ExRuOO6IyVPgrgnzmuecu9bvG6eXjOP6Mv_yj-YScjPhI9OhZ9zOZhN4xLE9-x1WNyHs_RlOSRhxLc5cz1HSA4fYr1APT2l5MMjbgM92S5BX6AZHKHbN1WgtDRwYLZ3_yv89-KZJpOnaPXvn5tFLQmIntVj2z6cy4uob3-OwT5A0NI"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent md:hidden"></div>
+            </div>
+
+            {/* Floating Badge */}
+            <div className="absolute bottom-12 left-12 bg-white p-4 rounded-2xl shadow-2xl hidden lg:flex items-center gap-4 animate-bounce">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="material-symbols-outlined text-primary">
+                  cardiology
+                </span>
+              </div>
+              <div>
+                <div className="text-sm font-bold text-gray-900">
+                  Chất lượng 5 sao
+                </div>
+                <div className="text-xs text-gray-400">
+                  Từ cộng đồng yêu pet
+                </div>
               </div>
             </div>
           </div>
@@ -144,7 +195,7 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* WHY CHOOSE US - (ĐÃ SỬA LỖI ANIMATION MƯỢT MÀ) */}
+      {/* WHY CHOOSE US */}
       <section className="bg-white">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-20">
           <div className="flex flex-col gap-10 @container">
@@ -153,7 +204,7 @@ const Homepage = () => {
               data-aos="fade-up"
             >
               <div className="flex flex-col gap-4">
-                <h1 className="text-text-main tracking-light text-[32px] font-bold leading-tight @[480px]:text-4xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em] max-w-[720px]">
+                <h1 className="text-text-main tracking-light text-[32px] font-bold leading-tight max-w-[720px]">
                   Tại sao chọn chúng tôi?
                 </h1>
                 <p className="text-text-secondary text-base font-normal leading-normal max-w-[720px]">
@@ -162,14 +213,14 @@ const Homepage = () => {
                 </p>
               </div>
               <button className="relative group inline-flex items-center justify-center overflow-hidden rounded-lg bg-primary px-8 py-3 text-sm font-bold text-[#111813] shadow-lg transition-all duration-300 ease-out hover:scale-105 before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-[#10B981] before:transition-all before:duration-300 before:ease-out hover:before:w-full">
-                <span className="relative z-10 truncate transition-colors duration-300 group-hover:text-white">
+                <span className="relative z-10 truncate text-white transition-colors duration-300">
                   Tìm hiểu thêm
                 </span>
               </button>
             </div>
 
             <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-6 p-0">
-              {/* Item 1: Nhân viên */}
+              {/* Item 1 */}
               <div data-aos="fade-up" data-aos-delay="200" className="h-full">
                 <div className="flex flex-1 gap-3 rounded-lg border border-border-color bg-background-light p-4 flex-col text-center items-center h-full transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-2">
                   <div className="text-primary text-3xl">
@@ -189,7 +240,7 @@ const Homepage = () => {
                 </div>
               </div>
 
-              {/* Item 2: Môi trường */}
+              {/* Item 2 */}
               <div data-aos="fade-up" data-aos-delay="300" className="h-full">
                 <div className="flex flex-1 gap-3 rounded-lg border border-border-color bg-background-light p-4 flex-col text-center items-center h-full transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-2">
                   <div className="text-primary text-3xl">
@@ -209,7 +260,7 @@ const Homepage = () => {
                 </div>
               </div>
 
-              {/* Item 3: Chăm sóc */}
+              {/* Item 3 */}
               <div data-aos="fade-up" data-aos-delay="400" className="h-full">
                 <div className="flex flex-1 gap-3 rounded-lg border border-border-color bg-background-light p-4 flex-col text-center items-center h-full transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-2">
                   <div className="text-primary text-3xl">
@@ -233,7 +284,7 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* --- Section: Thư viện khoảnh khắc --- */}
+      {/* GALLERY SECTION */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-20 border-t border-border-color">
         <div
           className="flex flex-col gap-4 mb-8 text-center"
@@ -319,7 +370,7 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* TESTIMONIALS - (ĐÃ SỬA DÙNG WRAPPER ĐỂ FIX LỖI & THÊM HIỆU ỨNG) */}
+      {/* TESTIMONIALS */}
       <section className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-20">
         <h2
           className="text-text-main text-[22px] font-bold leading-tight tracking-[-0.015em] text-center mb-8"
@@ -416,7 +467,7 @@ const Homepage = () => {
               về việc chăm sóc thú cưng.
             </p>
 
-            {/* Nút Liên hệ hỗ trợ (Wrapper Fix) */}
+            {/* Nút Liên hệ hỗ trợ */}
             <div
               className="inline-block"
               data-aos="zoom-in"
@@ -473,7 +524,7 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* LATEST BLOG SECTION - (MỚI THÊM) */}
+      {/* LATEST BLOG SECTION */}
       <section className="py-12 md:py-20 bg-white border-t border-border-color">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div
@@ -543,7 +594,7 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* NEWSLETTER SECTION - (MỚI THÊM) */}
+      {/* NEWSLETTER SECTION */}
       <section className="py-16 md:py-24 bg-[#e8fdf0] border-t border-border-color">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-2xl mx-auto" data-aos="fade-up">
@@ -567,7 +618,7 @@ const Homepage = () => {
                 className="flex-1 px-5 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm"
               />
               <button className="relative group/btn inline-flex items-center justify-center overflow-hidden rounded-lg bg-primary px-8 py-3 text-sm font-bold text-[#111813] shadow-lg transition-all duration-300 ease-out hover:scale-105 before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-[#10B981] before:transition-all before:duration-300 before:ease-out hover:before:w-full">
-                <span className="relative z-10 transition-colors duration-300 group-hover/btn:text-white">
+                <span className="relative z-10 transition-colors duration-300 text-white">
                   Đăng ký ngay
                 </span>
               </button>
@@ -576,7 +627,7 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* --- Section: Đối tác uy tín --- */}
+      {/* PARTNERS SECTION */}
       <section className="border-y border-border-color bg-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2

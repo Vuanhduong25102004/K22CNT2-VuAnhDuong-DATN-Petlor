@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import petService from "../../services/petService";
-import { renderStatusBadge } from "../../utils/formatters";
+import CancelAppointmentModal from "./modals/CancelAppointmentModal";
+import AppointmentDetailModal from "./modals/AppointmentDetailModal";
+
+import {
+  renderStatusBadge,
+  formatCurrency,
+  formatJustDate,
+} from "../../utils/formatters";
 import AOS from "aos";
 
 const MyAppointments = () => {
@@ -9,6 +16,18 @@ const MyAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [activeTab, setActiveTab] = useState("Sắp tới");
   const [loading, setLoading] = useState(true);
+
+  // --- States cho hủy đơn ---
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReasons, setCancelReasons] = useState([]);
+  const [selectedReason, setSelectedReason] = useState("");
+  const [appointmentToCancel, setAppointmentToCancel] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // --- States cho xem chi tiết ---
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [appointmentDetail, setAppointmentDetail] = useState(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
 
   const statusMap = {
     "Sắp tới": "DA_XAC_NHAN",
@@ -19,44 +38,76 @@ const MyAppointments = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    const res = await petService.getMyAppointments();
-    setAppointments(res.data || res);
-    setLoading(false);
+    try {
+      const res = await petService.getMyAppointments();
+      setAppointments(res.data || res);
+    } catch (error) {
+      console.error("Lỗi khi lấy lịch hẹn:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchData();
+    petService
+      .getCancelReasons()
+      .then((res) => setCancelReasons(res.data || res));
     AOS.init({ duration: 800 });
   }, []);
 
-  // ... các phần khác giữ nguyên ...
+  // --- Handlers ---
+  const handleOpenDetail = async (id) => {
+    setShowDetailModal(true);
+    setLoadingDetail(true);
 
-  const handleCancel = async (id) => {
-    if (window.confirm("Bạn có chắc chắn muốn hủy lịch hẹn này?")) {
-      try {
-        // Thay đổi ở đây:
-        await petService.cancelMyAppointment(id);
+    // Kích hoạt AOS cho phần tử mới xuất hiện
+    setTimeout(() => AOS.refresh(), 50);
 
-        // Thông báo thành công nếu muốn
-        alert("Hủy lịch hẹn thành công!");
-
-        // Load lại dữ liệu
-        fetchData();
-      } catch (error) {
-        console.error("Lỗi khi hủy hẹn:", error);
-        alert("Không thể hủy lịch hẹn. Vui lòng thử lại sau.");
-      }
+    try {
+      const res = await petService.getAppointmentById(id);
+      setAppointmentDetail(res.data || res);
+    } catch (error) {
+      console.error(error);
+      setShowDetailModal(false);
+    } finally {
+      setLoadingDetail(false);
     }
   };
 
-  // ... các phần render bên dưới giữ nguyên ...
+  const handleOpenCancelModal = (appointment) => {
+    setAppointmentToCancel(appointment);
+    setSelectedReason("");
+    setShowCancelModal(true);
+
+    // Kích hoạt AOS cho phần tử mới xuất hiện
+    setTimeout(() => AOS.refresh(), 50);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!selectedReason) return;
+    setIsSubmitting(true);
+    try {
+      await petService.cancelMyAppointment(appointmentToCancel.lichHenId, {
+        lyDoHuy: selectedReason,
+      });
+      setShowCancelModal(false);
+      fetchData();
+      alert("Hủy lịch hẹn thành công!");
+    } catch (error) {
+      alert(error.response?.data?.message || "Lỗi khi hủy");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const filtered = appointments.filter(
     (a) => a.trangThaiLichHen === statusMap[activeTab]
   );
 
   return (
-    <main className="flex-1 space-y-6 animate-fade-in">
+    <main className="flex-1 space-y-6 animate-fade-in pb-20">
+      {/* HEADER - Giữ nguyên */}
       <div
         className="bg-white rounded-3xl p-8 shadow-sm relative overflow-hidden border border-gray-100 isolate"
         data-aos="fade-down"
@@ -67,11 +118,9 @@ const MyAppointments = () => {
         </span>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-extrabold text-gray-900">
-                Quản lý <span className="text-[#10B981]">lịch hẹn</span>
-              </h1>
-            </div>
+            <h1 className="text-3xl font-extrabold text-gray-900">
+              Quản lý <span className="text-[#10B981]">lịch hẹn</span>
+            </h1>
             <p className="text-gray-500 text-lg">
               Theo dõi hành trình chăm sóc sức khỏe cho thú cưng.
             </p>
@@ -82,6 +131,7 @@ const MyAppointments = () => {
         </div>
       </div>
 
+      {/* TABS - Giữ nguyên */}
       <div
         className="bg-white rounded-3xl p-2 shadow-sm border border-gray-100 inline-flex flex-wrap gap-1"
         data-aos="fade-up"
@@ -101,52 +151,109 @@ const MyAppointments = () => {
         ))}
       </div>
 
+      {/* LIST */}
       <div className="space-y-4" data-aos="fade-up">
-        {filtered.map((item) => (
-          <div
-            key={item.lichHenId}
-            className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row gap-6 items-center hover:shadow-md transition-all"
-          >
-            <div className="flex-shrink-0 flex flex-col items-center justify-center bg-blue-50 text-blue-600 w-20 h-20 rounded-2xl border border-blue-100 font-bold">
-              <span className="text-[10px] uppercase opacity-70">
-                Tháng {new Date(item.thoiGianBatDau).getMonth() + 1}
-              </span>
-              <span className="text-2xl">
-                {new Date(item.thoiGianBatDau).getDate()}
-              </span>
-            </div>
-            <div className="flex-grow min-w-0">
-              <div className="flex justify-between gap-4 mb-2">
-                <h3 className="font-bold text-lg truncate">{item.tenDichVu}</h3>
-                {renderStatusBadge(item.trangThaiLichHen)}
-              </div>
-              <p className="text-sm text-gray-500 mb-1 flex items-center gap-1">
-                <span className="material-symbols-outlined text-sm">
-                  person
-                </span>{" "}
-                {item.tenNhanVien || "Đang xử lý"}
-              </p>
-              <p className="text-sm font-medium text-gray-700">
-                Thú cưng: {item.tenThuCung || "N/A"}
-              </p>
-            </div>
-            <div className="flex md:flex-col gap-2 w-full md:w-32 flex-shrink-0">
-              <button className="flex-1 px-4 py-2 rounded-xl text-sm font-bold bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-600 hover:text-white transition-all whitespace-nowrap shadow-sm">
-                Chi tiết
-              </button>
-              {(item.trangThaiLichHen === "CHO_XAC_NHAN" ||
-                item.trangThaiLichHen === "DA_XAC_NHAN") && (
-                <button
-                  onClick={() => handleCancel(item.lichHenId)}
-                  className="flex-1 px-4 py-2 rounded-xl text-sm font-bold border border-red-100 text-red-500 hover:bg-red-50 transition-all whitespace-nowrap"
-                >
-                  Hủy hẹn
-                </button>
-              )}
-            </div>
+        {loading ? (
+          <div className="text-center py-10 animate-pulse text-gray-400">
+            Đang tải...
           </div>
-        ))}
+        ) : filtered.length > 0 ? (
+          filtered.map((item) => (
+            <div
+              key={item.lichHenId}
+              className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row gap-6 items-center hover:shadow-md transition-all"
+            >
+              {/* Ngày tháng */}
+              <div className="flex-shrink-0 flex flex-col items-center justify-center bg-blue-50 text-blue-600 w-20 h-20 rounded-2xl border border-blue-100 font-bold">
+                <span className="text-[10px] uppercase opacity-70">
+                  Tháng {new Date(item.thoiGianBatDau).getMonth() + 1}
+                </span>
+                <span className="text-2xl">
+                  {new Date(item.thoiGianBatDau).getDate()}
+                </span>
+              </div>
+
+              {/* Thông tin giữa */}
+              <div className="flex-grow min-w-0 w-full">
+                <h3 className="font-bold text-xl text-gray-900 mb-2 truncate">
+                  {item.tenDichVu}
+                </h3>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                  {renderStatusBadge(item.trangThaiLichHen)}
+                  <div className="h-4 w-[1px] bg-gray-200 hidden md:block"></div>
+                  <p className="text-sm text-gray-500 flex items-center gap-1">
+                    <span className="material-symbols-outlined text-base">
+                      person
+                    </span>
+                    {item.tenNhanVien || "Đang xử lý"}
+                  </p>
+                  <p className="text-sm font-medium text-gray-700 flex items-center gap-1">
+                    <span className="material-symbols-outlined text-base text-[#10B981]">
+                      pets
+                    </span>
+                    {item.tenThuCung || "N/A"}
+                  </p>
+                </div>
+
+                {activeTab === "Đã hủy" && (
+                  <div className="mt-4 flex items-center gap-3 bg-red-50/60 p-3 rounded-2xl border border-red-100">
+                    <span className="material-symbols-outlined text-red-500 text-[20px] flex-shrink-0">
+                      info
+                    </span>
+                    <p className="text-sm text-red-600 font-bold leading-none flex items-center">
+                      <span className="opacity-80 font-medium mr-1">
+                        Lý do:
+                      </span>
+                      <span>{item.lyDoHuy || "Khách hàng yêu cầu hủy"}</span>
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Nút bấm */}
+              <div className="flex md:flex-col gap-2 w-full md:w-32 flex-shrink-0">
+                <button
+                  onClick={() => handleOpenDetail(item.lichHenId)}
+                  className="flex-1 px-4 py-2 rounded-xl text-sm font-bold bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                >
+                  Chi tiết
+                </button>
+                {(item.trangThaiLichHen === "CHO_XAC_NHAN" ||
+                  item.trangThaiLichHen === "DA_XAC_NHAN") && (
+                  <button
+                    onClick={() => handleOpenCancelModal(item)}
+                    className="flex-1 px-4 py-2 rounded-xl text-sm font-bold border border-red-100 text-red-500 hover:bg-red-50 transition-all"
+                  >
+                    Hủy hẹn
+                  </button>
+                )}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="bg-white rounded-3xl p-20 text-center text-gray-400">
+            Trống.
+          </div>
+        )}
       </div>
+
+      {/* MODALS */}
+      <AppointmentDetailModal
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        detail={appointmentDetail}
+        loading={loadingDetail}
+      />
+
+      <CancelAppointmentModal
+        isOpen={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        reasons={cancelReasons}
+        selectedReason={selectedReason}
+        onSelectReason={setSelectedReason}
+        onConfirm={handleConfirmCancel}
+        isSubmitting={isSubmitting}
+      />
     </main>
   );
 };
