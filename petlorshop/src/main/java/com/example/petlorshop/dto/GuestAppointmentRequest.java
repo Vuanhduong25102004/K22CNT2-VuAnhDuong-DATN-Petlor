@@ -1,5 +1,6 @@
 package com.example.petlorshop.dto;
 
+import com.example.petlorshop.models.LichHen;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -17,4 +18,6 @@ public class GuestAppointmentRequest {
     private Integer nhanVienId; // Optional
     private LocalDateTime thoiGianBatDau;
     private String ghiChu;
+    
+    private LichHen.LoaiLichHen loaiLichHen; // Thêm trường này
 }

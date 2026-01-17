@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-// 1. Import Link từ react-router-dom
 import { Link } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -78,205 +77,250 @@ const ProductsPage = () => {
     fetchProducts();
   }, []);
 
+  // Style cho background pattern (giả lập class .hero-pattern-subtle)
+  const heroPatternStyle = {
+    backgroundImage: "radial-gradient(#0FB478 0.5px, transparent 0.5px)",
+    backgroundSize: "24px 24px",
+    opacity: 0.1,
+  };
+
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-background-light font-display text-text-main overflow-x-hidden">
-      <main className="flex-1">
-        {/* --- BANNER SECTION (GIỮ NGUYÊN) --- */}
-        <section className="max-w-screen-xl mx-auto mt-16" data-aos="fade-up">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div className="w-full min-h-screen font-display bg-gray-50 text-gray-900 overflow-x-hidden transition-colors duration-300">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-16">
+        {/* --- HERO SECTION MỚI --- */}
+        <section
+          className="relative min-h-[480px] lg:h-[520px] rounded-3xl overflow-hidden mb-12 bg-white border border-gray-100 flex flex-col lg:flex-row"
+          data-aos="fade-up"
+        >
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={heroPatternStyle}
+          ></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none"></div>
+
+          <div className="relative z-10 w-full lg:w-1/2 p-8 lg:p-16 flex flex-col justify-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-bold w-fit mb-6">
+              <span className="material-symbols-outlined text-lg">stars</span>
+              BST Mới Nhất 2024
+            </div>
+            <h1 className="text-gray-900 text-4xl lg:text-6xl font-extrabold mb-6 leading-tight">
+              Sản phẩm của <br />
+              <span className="text-primary">chúng tôi</span>
+            </h1>
+            <p className="text-gray-600 text-lg lg:text-xl max-w-lg font-medium leading-relaxed mb-8">
+              Khám phá bộ sưu tập đầy đủ các loại thực phẩm, đồ chơi và phụ kiện
+              cao cấp nhất dành riêng cho người bạn nhỏ của bạn.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <button className="bg-primary text-white font-bold px-8 py-4 rounded-xl shadow-lg shadow-primary/30 hover:-translate-y-0.5 transition-all">
+                Mua sắm ngay
+              </button>
+              <button className="bg-gray-100 text-gray-700 font-bold px-8 py-4 rounded-xl hover:bg-gray-200 transition-all">
+                Xem ưu đãi
+              </button>
+            </div>
+          </div>
+
+          <div className="relative w-full lg:w-1/2 h-64 lg:h-auto overflow-hidden">
+            <img
+              alt="Happy pets"
+              className="w-full h-full object-cover"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsKA4bJQUp5mRHcMG9sYxHfPgEanH1R4WKbtETtGYSeII2bdl1KnUKZS5jLhumrTVcYaoFA9g30YR9WSoI0eEuJKFEwIYrHKPgP_PIsd-BjRV3taTMu40R5eaMe23-aseCmnOH32d-vjQ0Z350lTKAWKUWZmxxAUctnJZYBeUQrVDK-kGFZjT84yoJCczSy_UgCqUbbwcBPtia6SWvX-kHTZtlC3h36Vl5otzc9NJJuWDDoZOcoWqRzPTNsIHhcVcARru4tZYf9fw"
+            />
+            {/* Floating Badge 1 */}
             <div
-              className="flex min-h-[400px] flex-col gap-6 rounded-xl bg-cover bg-center bg-no-repeat items-center justify-center p-6 text-center shadow-md relative overflow-hidden"
-              style={{
-                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%), url("https://images.unsplash.com/photo-1450778869180-41d0601e046e?q=80&w=2000&auto=format&fit=crop")`,
-              }}
+              className="absolute top-8 right-8 bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-xl flex items-center gap-4 border border-white/20"
+              data-aos="zoom-in"
+              data-aos-delay="200"
             >
-              <div className="flex flex-col gap-4 relative z-10">
-                <h1
-                  className="text-white text-4xl font-black leading-tight tracking-[-0.033em] sm:text-5xl lg:text-6xl uppercase drop-shadow-md"
-                  data-aos="fade-up"
-                  data-aos-delay="100"
-                >
-                  Siêu Sale Mùa Đông <br />
-                  <span className="text-primary">Giảm tới 50%</span>
-                </h1>
-                <p
-                  className="text-white text-base font-normal leading-normal max-w-2xl mx-auto sm:text-lg drop-shadow-md"
-                  data-aos="fade-up"
-                  data-aos-delay="200"
-                >
-                  Dành tặng những điều tốt đẹp nhất cho thú cưng của bạn. Thức
-                  ăn, đồ chơi và phụ kiện chính hãng.
-                </p>
-                <div className="mt-4" data-aos="fade-up" data-aos-delay="300">
-                  <button className="relative group inline-flex items-center justify-center overflow-hidden rounded-lg bg-primary px-8 py-3 text-sm font-bold text-[#111813] shadow-lg transition-all duration-300 ease-out hover:scale-105 before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-[#10B981] before:transition-all before:duration-300 before:ease-out hover:before:w-full">
-                    <span className="relative z-10 transition-colors duration-300 text-white">
-                      Mua Ngay Hôm Nay
-                    </span>
-                  </button>
+              <div className="w-16 h-16 bg-gray-50 rounded-xl overflow-hidden p-1">
+                <img
+                  alt="Product"
+                  className="w-full h-full object-contain"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2mBWz25RdlG1JpVfULSsFNZsUYKSzflIAjwLvHSVf4isUMQg8fPMckeFI8cu_3OjuDM6EdDSdrwH9UHS0KuuVUN70GcVBAZgdR03PcsAyrJZ2rliR03Sga3T0cVhKi2sBRbuTAYrST-Mv5nmfjB08Ij9NJSjiQyahKSbiLXRG4RT5Gj2VsNpFNOV-E2jNDQt1CXNDg-VH6BfR4WAqkOvytwfJNT10slsOCcp1CPpSNa7rNZejsC9vc0IdmVH5Q8fHAb015f-M6Ts"
+                />
+              </div>
+              <div>
+                <div className="text-xs text-primary font-bold">
+                  Bán chạy nhất
+                </div>
+                <div className="text-sm font-bold text-gray-900">
+                  Royal Canin
+                </div>
+              </div>
+            </div>
+            {/* Floating Badge 2 */}
+            <div
+              className="absolute bottom-8 left-8 bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-xl flex items-center gap-4 border border-white/20"
+              data-aos="zoom-in"
+              data-aos-delay="300"
+            >
+              <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center">
+                <span className="material-symbols-outlined">redeem</span>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500">Giảm giá lên đến</div>
+                <div className="text-sm font-bold text-orange-500">
+                  30% Toàn bộ cửa hàng
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* --- SẢN PHẨM & BỘ LỌC --- */}
-        <section className="py-12 sm:py-16 lg:py-20">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            {/* Header Search & Filter (Giữ nguyên) */}
-            <div
-              className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8"
-              data-aos="fade-up"
-            >
-              <div>
-                <h2 className="text-3xl font-extrabold text-gray-900 mb-2">
-                  Sản Phẩm Của Chúng Tôi
-                </h2>
-                <p className="text-gray-500">
-                  Hơn 500+ sản phẩm chất lượng cao dành riêng cho bạn
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="relative min-w-[300px]">
-                  <span className="material-icons-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 select-none">
-                    search
-                  </span>
-                  <input
-                    className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-3xl focus:ring-2 focus:ring-primary focus:border-primary outline-none text-gray-600 transition-shadow"
-                    placeholder="Tìm kiếm thức ăn, đồ chơi..."
-                    type="text"
-                  />
-                </div>
-                <button className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 rounded-3xl font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                  <span className="material-icons-outlined select-none">
-                    tune
-                  </span>
-                  Bộ lọc
-                </button>
-              </div>
+        {/* --- FILTER & SEARCH SECTION --- */}
+        <section className="mb-12" data-aos="fade-up">
+          <div className="bg-white p-4 rounded-full border border-gray-100 shadow-sm flex flex-col lg:flex-row gap-6 items-center justify-between">
+            <div className="relative w-full lg:w-96">
+              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                search
+              </span>
+              <input
+                className="w-full pl-12 pr-4 py-3 bg-gray-50 border-none rounded-full focus:ring-2 focus:ring-primary outline-none text-sm"
+                placeholder="Tìm kiếm sản phẩm..."
+                type="text"
+              />
             </div>
 
-            {/* Category Buttons (Giữ nguyên) */}
-            <div
-              className="flex flex-wrap gap-3 mb-10"
-              data-aos="fade-up"
-              data-aos-delay="100"
-            >
-              <button className="bg-primary text-white px-6 py-2.5 rounded-full font-bold shadow-md shadow-primary/20 hover:opacity-90 transition-opacity">
+            {/* Category Buttons */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 no-scrollbar w-full lg:w-auto">
+              <button className="px-6 py-2.5 bg-primary text-white font-bold rounded-full whitespace-nowrap shadow-md shadow-primary/20">
                 Tất cả
               </button>
-              {["Thức ăn", "Đồ chơi", "Phụ kiện", "Vệ sinh & Chăm sóc"].map(
-                (item) => (
-                  <button
-                    key={item}
-                    className="bg-white border border-gray-200 text-gray-600 px-6 py-2.5 rounded-full font-medium hover:border-primary hover:text-primary transition-all"
-                  >
-                    {item}
-                  </button>
-                )
-              )}
+              {["Thức ăn", "Đồ chơi", "Phụ kiện", "Vệ sinh"].map((cat) => (
+                <button
+                  key={cat}
+                  className="px-6 py-2.5 bg-gray-50 text-gray-600 hover:bg-primary/10 hover:text-primary font-bold rounded-full transition-all whitespace-nowrap"
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
 
-            {/* Products Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {loading ? (
-                <p className="col-span-full text-center py-10">
-                  Đang tải sản phẩm...
-                </p>
-              ) : (
-                products.map((product, index) => (
-                  <div key={product.id} data-aos="fade-up">
-                    <div className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 flex flex-col h-full relative">
-                      {/* THAY ĐỔI 1: Link bao quanh ảnh để click vào xem chi tiết */}
-                      <Link
-                        to={`/products/${product.id}`}
-                        className="relative h-64 overflow-hidden bg-gray-50 block cursor-pointer"
-                      >
-                        <img
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          src={product.image}
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src =
-                              "https://placehold.co/400x400?text=No+Image";
-                          }}
-                        />
-                        <div className="absolute top-4 left-4 bg-white/90 px-3 py-1 rounded-lg text-xs font-bold text-gray-500 uppercase backdrop-blur-sm shadow-sm">
-                          {product.category}
-                        </div>
-                      </Link>
-
-                      <div className="p-5 flex flex-col flex-grow">
-                        {/* THAY ĐỔI 2: Link bao quanh tên sản phẩm */}
-                        <Link
-                          to={`/products/${product.id}`}
-                          className="font-bold text-lg mb-1 group-hover:text-primary transition-colors line-clamp-2 cursor-pointer"
-                          title={product.name}
-                        >
-                          {product.name}
-                        </Link>
-
-                        <div className="text-primary font-extrabold text-xl mb-4">
-                          {formatPrice(product.price)}
-                        </div>
-
-                        {/* Nút thêm vào giỏ (Giữ nguyên logic giỏ hàng, ko cần link) */}
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            addToCart(product, 1);
-                          }}
-                          className="mt-auto w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 font-bold py-3 rounded-xl transition-all duration-300"
-                        >
-                          <span className="material-icons-outlined text-xl">
-                            shopping_cart
-                          </span>
-                          Thêm vào giỏ
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Pagination (Giữ nguyên) */}
-            <div
-              className="mt-12 flex items-center justify-center gap-2"
-              data-aos="fade-up"
-            >
-              {/* ... (Code pagination) ... */}
-              <button className="flex size-10 items-center justify-center rounded-lg bg-primary text-white font-bold shadow-md hover:scale-105 transition-transform">
-                1
-              </button>
+            {/* Sort Dropdown */}
+            <div className="w-full lg:w-48">
+              <select className="w-full py-3 px-4 bg-gray-50 border-none rounded-full focus:ring-2 focus:ring-primary outline-none text-sm font-medium cursor-pointer">
+                <option>Mới nhất</option>
+                <option>Giá thấp đến cao</option>
+                <option>Giá cao đến thấp</option>
+              </select>
             </div>
           </div>
         </section>
 
-        {/* --- ADVICE SECTION (GIỮ NGUYÊN) --- */}
-        <section className="py-12 sm:py-16 lg:py-20 bg-white border-t border-gray-200">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div
-              className="bg-primary/20 rounded-2xl p-8 sm:p-12 text-center flex flex-col items-center gap-6 border border-primary/20"
-              data-aos="fade-up"
-            >
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
-                Bạn Cần Tư Vấn Chọn Sản Phẩm?
-              </h2>
-              <p className="text-base sm:text-lg text-gray-500 max-w-2xl">
-                Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng hỗ trợ bạn tìm
-                kiếm thức ăn, đồ chơi phù hợp nhất cho thú cưng của mình.
+        {/* --- PRODUCTS GRID --- */}
+        <section className="mb-24">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {loading ? (
+              <p className="col-span-full text-center py-10 text-gray-500">
+                Đang tải sản phẩm...
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-                <button className="relative group flex min-w-[160px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold leading-normal shadow-md transition-all duration-300 ease-out hover:scale-105">
-                  <span className="absolute left-0 top-0 h-full w-0 bg-[#0dbd47] transition-all duration-300 ease-out group-hover:w-full"></span>
-                  <span className="relative z-10">Chat Với Chúng Tôi</span>
-                </button>
+            ) : products.length > 0 ? (
+              products.map((product, index) => (
+                <div
+                  key={product.id}
+                  className="group bg-white rounded-3xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 flex flex-col"
+                  data-aos="fade-up"
+                  data-aos-delay={index * 50}
+                >
+                  {/* Image Area */}
+                  <div className="relative h-72 overflow-hidden bg-gray-50">
+                    <Link
+                      to={`/products/${product.id}`}
+                      className="block h-full w-full"
+                    >
+                      <img
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        src={product.image}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src =
+                            "https://placehold.co/400x400?text=No+Image";
+                        }}
+                      />
+                    </Link>
+                    {/* Badge mẫu (có thể custom logic) */}
+                    <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider shadow-sm">
+                      NEW
+                    </div>
+                  </div>
 
-                <button className="flex min-w-[160px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-white border border-gray-200 text-gray-900 text-base font-bold leading-normal transition-all duration-300 ease-out hover:bg-gray-50 hover:scale-105 hover:border-primary">
-                  Gọi Hotline 1900 1234
-                </button>
-              </div>
+                  {/* Content Area */}
+                  <div className="p-6 flex flex-col flex-grow">
+                    <Link to={`/products/${product.id}`}>
+                      <h3 className="font-bold text-lg mb-2 text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
+                        {product.name}
+                      </h3>
+                    </Link>
+
+                    <div className="text-primary font-extrabold text-xl mb-4">
+                      {formatPrice(product.price)}
+                    </div>
+
+                    <button
+                      onClick={() => addToCart(product, 1)}
+                      className="mt-auto w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 font-bold py-3.5 rounded-xl transition-all active:scale-95"
+                    >
+                      <span className="material-symbols-outlined text-xl">
+                        shopping_cart
+                      </span>
+                      Thêm vào giỏ
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="col-span-full text-center py-10 text-gray-500">
+                Không có sản phẩm nào.
+              </p>
+            )}
+          </div>
+
+          {/* Pagination */}
+          <div className="mt-16 flex justify-center gap-2" data-aos="fade-up">
+            <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-200 text-gray-400 hover:border-primary hover:text-primary transition-all">
+              <span className="material-symbols-outlined">chevron_left</span>
+            </button>
+            <button className="w-12 h-12 flex items-center justify-center rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/30">
+              1
+            </button>
+            <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-200 text-gray-600 hover:border-primary hover:text-primary transition-all font-bold">
+              2
+            </button>
+            <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-200 text-gray-600 hover:border-primary hover:text-primary transition-all font-bold">
+              3
+            </button>
+            <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-200 text-gray-400 hover:border-primary hover:text-primary transition-all">
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
+        </section>
+
+        {/* --- NEWSLETTER SECTION --- */}
+        <section
+          className="mt-20 py-16 bg-primary rounded-3xl text-center px-4 relative overflow-hidden mb-20"
+          data-aos="zoom-in"
+        >
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-10 -left-10 w-60 h-60 bg-white/10 rounded-full blur-3xl"></div>
+          <div className="relative z-10 max-w-2xl mx-auto">
+            <h2 className="text-3xl font-extrabold text-white mb-4">
+              Đăng ký nhận tin khuyến mãi
+            </h2>
+            <p className="text-white/80 mb-8">
+              Đừng bỏ lỡ các đợt giảm giá sâu và quà tặng độc quyền cho boss của
+              bạn.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
+                className="flex-grow px-6 py-4 rounded-3xl border-none focus:ring-2 focus:ring-white outline-none text-gray-900 bg-white"
+                placeholder="Địa chỉ email của bạn"
+                type="email"
+              />
+              <button className="bg-gray-900 text-white font-bold px-8 py-4 rounded-3xl hover:bg-black transition-colors">
+                Đăng ký ngay
+              </button>
             </div>
           </div>
         </section>

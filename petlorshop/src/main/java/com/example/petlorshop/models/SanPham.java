@@ -12,6 +12,7 @@ import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.Filter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -53,6 +54,22 @@ public class SanPham {
 
     @Column(name = "da_xoa")
     private boolean daXoa = false;
+    
+    // --- Thuộc tính đặc thù cho Thuốc ---
+    @Column(name = "han_su_dung")
+    private LocalDate hanSuDung;
+    
+    @Column(name = "so_lo")
+    private String soLo;
+    
+    @Column(name = "don_vi_tinh")
+    private String donViTinh; // Viên, Hộp, Chai...
+    
+    @Column(name = "thanh_phan", columnDefinition = "TEXT")
+    private String thanhPhan;
+    
+    @Column(name = "chi_dinh", columnDefinition = "TEXT")
+    private String chiDinh;
 
     // --- Relationships ---
 

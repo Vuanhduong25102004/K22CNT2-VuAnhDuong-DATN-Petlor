@@ -59,8 +59,15 @@ public class SanPhamService {
         newSanPham.setGia(request.getGia());
         newSanPham.setGiaGiam(request.getGiaGiam());
         newSanPham.setSoLuongTonKho(request.getSoLuongTonKho());
-        newSanPham.setTrongLuong(request.getTrongLuong() != null ? request.getTrongLuong() : 500); // Mặc định 500g
+        newSanPham.setTrongLuong(request.getTrongLuong() != null ? request.getTrongLuong() : 500);
         newSanPham.setDanhMucSanPham(danhMuc);
+        
+        // Thuốc
+        newSanPham.setHanSuDung(request.getHanSuDung());
+        newSanPham.setSoLo(request.getSoLo());
+        newSanPham.setDonViTinh(request.getDonViTinh());
+        newSanPham.setThanhPhan(request.getThanhPhan());
+        newSanPham.setChiDinh(request.getChiDinh());
 
         if (hinhAnh != null && !hinhAnh.isEmpty()) {
             String fileName = fileStorageService.storeFile(hinhAnh);
@@ -84,6 +91,13 @@ public class SanPhamService {
         if (request.getTrongLuong() != null) {
             sanPham.setTrongLuong(request.getTrongLuong());
         }
+        
+        // Thuốc
+        sanPham.setHanSuDung(request.getHanSuDung());
+        sanPham.setSoLo(request.getSoLo());
+        sanPham.setDonViTinh(request.getDonViTinh());
+        sanPham.setThanhPhan(request.getThanhPhan());
+        sanPham.setChiDinh(request.getChiDinh());
 
         if (hinhAnh != null && !hinhAnh.isEmpty()) {
             String fileName = fileStorageService.storeFile(hinhAnh);
@@ -115,7 +129,12 @@ public class SanPhamService {
                 sanPham.getHinhAnh(),
                 sanPham.getTrongLuong(),
                 sanPham.getDanhMucSanPham() != null ? sanPham.getDanhMucSanPham().getDanhMucId() : null,
-                sanPham.getDanhMucSanPham() != null ? sanPham.getDanhMucSanPham().getTenDanhMuc() : null
+                sanPham.getDanhMucSanPham() != null ? sanPham.getDanhMucSanPham().getTenDanhMuc() : null,
+                sanPham.getHanSuDung(),
+                sanPham.getSoLo(),
+                sanPham.getDonViTinh(),
+                sanPham.getThanhPhan(),
+                sanPham.getChiDinh()
         );
     }
 }

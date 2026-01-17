@@ -84,9 +84,6 @@ const Footer = () => {
             </form>
           </div>
         </div>
-        <div className="mt-8 pt-8 border-t border-[#dbe6df] text-center text-sm text-[#61896f]">
-          <p>© 2025 PetLor. All rights reserved.</p>
-        </div>
       </div>
     </footer>
   );

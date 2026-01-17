@@ -62,7 +62,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/search/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll() // Cho phép truy cập ảnh
-                        .requestMatchers(HttpMethod.GET, "/api/san-pham/**", "/api/dich-vu/**", "/api/danh-muc-san-pham/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/san-pham/**", "/api/dich-vu/**", "/api/danh-muc-san-pham/**", "/api/danh-muc-dich-vu/**").permitAll()
                         
                         // Public Order & Promotion APIs
                         .requestMatchers(HttpMethod.POST, "/api/don-hang/guest").permitAll()
@@ -87,13 +87,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/nhan-vien/**").hasAuthority(admin)
                         .requestMatchers(HttpMethod.PUT, "/api/nhan-vien/**").hasAuthority(admin)
                         .requestMatchers(HttpMethod.DELETE, "/api/nhan-vien/**").hasAuthority(admin)
-                        .requestMatchers(HttpMethod.POST, "/api/san-pham", "/api/dich-vu", "/api/danh-muc-san-pham").hasAuthority(admin)
-                        .requestMatchers(HttpMethod.PUT, "/api/san-pham/**", "/api/dich-vu/**", "/api/danh-muc-san-pham/**").hasAuthority(admin)
-                        .requestMatchers(HttpMethod.DELETE, "/api/san-pham/**", "/api/dich-vu/**", "/api/danh-muc-san-pham/**").hasAuthority(admin)
+                        .requestMatchers(HttpMethod.POST, "/api/san-pham", "/api/dich-vu", "/api/danh-muc-san-pham", "/api/danh-muc-dich-vu").hasAuthority(admin)
+                        .requestMatchers(HttpMethod.PUT, "/api/san-pham/**", "/api/dich-vu/**", "/api/danh-muc-san-pham/**", "/api/danh-muc-dich-vu/**").hasAuthority(admin)
+                        .requestMatchers(HttpMethod.DELETE, "/api/san-pham/**", "/api/dich-vu/**", "/api/danh-muc-san-pham/**", "/api/danh-muc-dich-vu/**").hasAuthority(admin)
                         .requestMatchers(HttpMethod.PUT, "/api/don-hang/**").hasAuthority(admin)
                         .requestMatchers(HttpMethod.GET, "/api/lich-hen/**").hasAuthority(admin)
                         .requestMatchers(HttpMethod.PUT, "/api/lich-hen/**").hasAuthority(admin)
                         .requestMatchers("/api/nha-cung-cap/**").hasAuthority(admin) // Nhà cung cấp chỉ admin được quản lý
+                        .requestMatchers("/api/cua-hang/**").hasAuthority(admin) // Cấu hình cửa hàng
 
                         // == ANY AUTHENTICATED USER ==
                         .requestMatchers(HttpMethod.GET, "/api/nhan-vien/**").authenticated()

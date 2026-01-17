@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -22,4 +23,11 @@ public class SanPhamResponse {
     private Integer trongLuong;
     private Integer danhMucId;
     private String tenDanhMuc;
+    
+    // Thuốc
+    private LocalDate hanSuDung;
+    private String soLo;
+    private String donViTinh;
+    private String thanhPhan;
+    private String chiDinh;
 }

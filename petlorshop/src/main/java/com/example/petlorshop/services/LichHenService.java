@@ -82,6 +82,9 @@ public class LichHenService {
         lichHen.setThuCung(thuCung);
         lichHen.setNhanVien(assignedNhanVien);
         lichHen.setTrangThai(LichHen.TrangThai.CHO_XAC_NHAN);
+        
+        // Set loại lịch hẹn (mặc định là THUONG_LE nếu null)
+        lichHen.setLoaiLichHen(request.getLoaiLichHen() != null ? request.getLoaiLichHen() : LichHen.LoaiLichHen.THUONG_LE);
 
         LichHen savedLichHen = lichHenRepository.save(lichHen);
         return convertToResponse(savedLichHen);
@@ -129,6 +132,9 @@ public class LichHenService {
         lichHen.setDichVu(dichVu);
         lichHen.setNhanVien(assignedNhanVien);
         lichHen.setTrangThai(LichHen.TrangThai.CHO_XAC_NHAN);
+        
+        // Set loại lịch hẹn
+        lichHen.setLoaiLichHen(request.getLoaiLichHen() != null ? request.getLoaiLichHen() : LichHen.LoaiLichHen.THUONG_LE);
 
         LichHen savedLichHen = lichHenRepository.save(lichHen);
         return convertToResponse(savedLichHen);
@@ -356,6 +362,7 @@ public class LichHenService {
         return new LichHenResponse(
                 lichHen.getLichHenId(), lichHen.getThoiGianBatDau(), lichHen.getThoiGianKetThuc(),
                 lichHen.getTrangThai().name(),
+                lichHen.getLoaiLichHen() != null ? lichHen.getLoaiLichHen().getDisplayName() : null, // Hiển thị loại lịch hẹn
                 lichHen.getGhiChu(),
                 lichHen.getLyDoHuy(),
                 nguoiDung != null ? nguoiDung.getUserId() : null, 

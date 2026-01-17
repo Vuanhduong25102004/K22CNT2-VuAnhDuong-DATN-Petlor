@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 
 // Services
 import userService from "../../../services/userService";
-import petService from "../../../services/petService";
+import bookingService from "../../../services/bookingService";
 import orderService from "../../../services/orderService";
 
 // Utils
@@ -44,8 +44,8 @@ const AdminDashboard = () => {
       const [userRes, staffRes, petRes, apptRes, orderRes] = await Promise.all([
         userService.getAllUsers({ page: 0, size: 1000 }),
         userService.getAllStaff({ page: 0, size: 1000 }),
-        petService.getAllPets({ page: 0, size: 1000 }),
-        petService.getAllAppointments({ page: 0, size: 1000 }),
+        bookingService.getAllPets({ page: 0, size: 1000 }),
+        bookingService.getAllAppointments({ page: 0, size: 1000 }),
         orderService.getAllOrders({ page: 0, size: 1000 }),
       ]);
 

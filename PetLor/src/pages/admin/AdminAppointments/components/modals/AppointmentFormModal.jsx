@@ -6,10 +6,19 @@ import {
 } from "../../../components/utils";
 import useEscapeKey from "../../../../../hooks/useEscapeKey";
 
+const APPOINTMENT_TYPES = [
+  { value: "THUONG_LE", label: "Thường lệ" },
+  { value: "TAI_KHAM", label: "Tái khám" },
+  { value: "TU_VAN", label: "Tư vấn" },
+  { value: "TIEM_PHONG", label: "Tiêm phòng" },
+  { value: "PHAU_THUAT", label: "Phẫu thuật" },
+  { value: "KHAN_CAP", label: "Khẩn cấp (Cấp cứu)" },
+];
+
 const AppointmentFormModal = ({
   isOpen,
   onClose,
-  initialData, // null = Create, object = Edit
+  initialData,
   servicesList,
   staffList,
   onSubmit,
@@ -23,14 +32,15 @@ const AppointmentFormModal = ({
     tenKhachHang: "",
     soDienThoaiKhachHang: "",
     tenThuCung: "",
-    chungLoai: "", // Chó, Mèo...
-    giongLoai: "", // Poodle, Husky...
+    chungLoai: "",
+    giongLoai: "",
     gioiTinh: "",
     ngaySinh: "",
     ghiChu: "",
-    date: "", // Tách ngày từ thoiGianBatDau
-    time: "", // Tách giờ từ thoiGianBatDau
+    date: "",
+    time: "",
     trangThai: "CHO_XAC_NHAN",
+    loaiLichHen: "",
   });
 
   useEffect(() => {
@@ -55,10 +65,12 @@ const AppointmentFormModal = ({
           ngaySinh: initialData.ngaySinh
             ? initialData.ngaySinh.split("T")[0]
             : "",
+          // Logic lấy dữ liệu cũ ok
           ghiChu: initialData.ghiChuKhachHang || initialData.ghiChu || "",
           date: datePart || "",
           time: timePart ? timePart.slice(0, 5) : "",
           trangThai: initialData.trangThai || "CHỜ XÁC NHẬN",
+          loaiLichHen: initialData.loaiLichHen || "THUONG_LE",
         });
       } else {
         // --- CHẾ ĐỘ CREATE ---
@@ -77,6 +89,7 @@ const AppointmentFormModal = ({
           date: today,
           time: "08:00",
           trangThai: "CHO_XAC_NHAN",
+          loaiLichHen: "THUONG_LE",
         });
       }
     }
@@ -86,15 +99,62 @@ const AppointmentFormModal = ({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    // Log nhẹ để xem input có ăn không
+    if (name === "ghiChu") {
+      console.log("⌨️ Typing Ghi chú:", value);
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // --- PHẦN QUAN TRỌNG: DEBUG LOG ---
   const handleSubmit = () => {
     const combinedDateTime = `${formData.date}T${formData.time}:00`;
+
+    // Tạo object gửi đi
     const submitData = {
       ...formData,
       thoiGianBatDau: combinedDateTime,
+      // Gửi cả 2 trường để "bắt dính" mọi kiểu DTO của backend
+      ghiChu: formData.ghiChu,
+      ghiChuKhachHang: formData.ghiChu,
     };
+
+    // --- BẮT ĐẦU LOG ---
+    console.group(
+      "%c🛑 DEBUG SUBMIT FORM",
+      "color: red; font-size: 14px; font-weight: bold;"
+    );
+
+    console.log(
+      `%cMODE: ${isEdit ? "EDIT (PUT)" : "CREATE (POST)"}`,
+      "color: blue; font-weight: bold"
+    );
+
+    if (isEdit) {
+      console.log("🆔 ID Lịch hẹn:", initialData?.lichHenId || initialData?.id);
+    }
+
+    console.log(
+      "📝 Giá trị người dùng nhập (formData.ghiChu):",
+      `"${formData.ghiChu}"`
+    );
+
+    console.log("📦 DATA CUỐI CÙNG GỬI ĐI (Payload):", submitData);
+
+    // Kiểm tra kỹ xem trong object cuối cùng field ghiChu có dữ liệu không
+    if (!submitData.ghiChu && !submitData.ghiChuKhachHang) {
+      console.warn("⚠️ CẢNH BÁO: Field ghi chú đang bị RỖNG hoặc UNDEFINED!");
+    } else {
+      console.log("✅ Check field ghiChu:", submitData.ghiChu);
+      console.log(
+        "✅ Check field ghiChuKhachHang:",
+        submitData.ghiChuKhachHang
+      );
+    }
+
+    console.groupEnd();
+    // --- KẾT THÚC LOG ---
+
     onSubmit(submitData);
   };
 
@@ -168,6 +228,23 @@ const AppointmentFormModal = ({
                   </h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* --- NEW FIELD: LOẠI LỊCH HẸN --- */}
+                  <div>
+                    <label className={labelClass}>Loại lịch hẹn</label>
+                    <select
+                      name="loaiLichHen"
+                      value={formData.loaiLichHen}
+                      onChange={handleChange}
+                      className={inputClass}
+                    >
+                      {APPOINTMENT_TYPES.map((type) => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
                   <div>
                     <label className={labelClass}>
                       Dịch vụ <span className="text-red-500">*</span>
@@ -236,7 +313,7 @@ const AppointmentFormModal = ({
                   </div>
 
                   {isEdit && (
-                    <div className="md:col-span-2">
+                    <div className="md:col-span-1">
                       <label className={labelClass}>Trạng thái</label>
                       <select
                         name="trangThai"

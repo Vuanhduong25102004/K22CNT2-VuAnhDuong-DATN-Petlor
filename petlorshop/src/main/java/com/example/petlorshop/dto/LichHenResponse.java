@@ -20,6 +20,8 @@ public class LichHenResponse {
     @JsonProperty("trangThaiLichHen")
     private String status;
     
+    private String loaiLichHen; // Thêm trường này
+    
     private String ghiChuKhachHang;
     private String lyDoHuy;
     
@@ -35,17 +37,18 @@ public class LichHenResponse {
     // Thông tin dịch vụ
     private Integer dichVuId;
     private String tenDichVu;
-    private BigDecimal giaDichVu; // Thêm giá dịch vụ
+    private BigDecimal giaDichVu;
 
     // Thông tin nhân viên (có thể null nếu chưa phân công)
     private Integer nhanVienId;
     private String tenNhanVien;
 
-    public LichHenResponse(Integer lichHenId, LocalDateTime thoiGianBatDau, LocalDateTime thoiGianKetThuc, String status, String ghiChuKhachHang, String lyDoHuy, Integer userId, String tenKhachHang, String soDienThoaiKhachHang, Integer thuCungId, String tenThuCung, Integer dichVuId, String tenDichVu, BigDecimal giaDichVu, Integer nhanVienId, String tenNhanVien) {
+    public LichHenResponse(Integer lichHenId, LocalDateTime thoiGianBatDau, LocalDateTime thoiGianKetThuc, String status, String loaiLichHen, String ghiChuKhachHang, String lyDoHuy, Integer userId, String tenKhachHang, String soDienThoaiKhachHang, Integer thuCungId, String tenThuCung, Integer dichVuId, String tenDichVu, BigDecimal giaDichVu, Integer nhanVienId, String tenNhanVien) {
         this.lichHenId = lichHenId;
         this.thoiGianBatDau = thoiGianBatDau;
         this.thoiGianKetThuc = thoiGianKetThuc;
         this.status = status;
+        this.loaiLichHen = loaiLichHen;
         this.ghiChuKhachHang = ghiChuKhachHang;
         this.lyDoHuy = lyDoHuy;
         this.userId = userId;

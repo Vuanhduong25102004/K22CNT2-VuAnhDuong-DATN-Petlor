@@ -6,7 +6,7 @@ import Footer from "./Footer";
 const MainLayout = () => {
   const location = useLocation();
 
-  const hideFooterPaths = ["/cart", "/checkout"];
+  const hideFooterPaths = ["/cart", "/checkout", "/booking"];
 
   const showFooter = !hideFooterPaths.includes(location.pathname);
 

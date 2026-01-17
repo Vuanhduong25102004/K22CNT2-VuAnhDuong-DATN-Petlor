@@ -1,39 +1,27 @@
 package com.example.petlorshop.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.example.petlorshop.models.LichHen;
+import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.time.LocalDate;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 public class LichHenRequest {
-    // Thông tin lịch hẹn (bắt buộc)
-    private LocalDateTime thoiGianBatDau;
-    private LocalDateTime thoiGianKetThuc;
-    private Integer dichVuId;
-    private String ghiChuKhachHang;
-
-    // Kịch bản 1: Khách quen, thú cưng quen (gửi ID)
     private Integer userId;
     private Integer thuCungId;
-
-    // Kịch bản 2: Khách vãng lai (gửi thông tin)
-    private String tenKhachHang;
-    private String soDienThoaiKhachHang;
-
-    // Kịch bản 3: Thú cưng mới (gửi thông tin)
-    private String tenThuCung;
+    private String tenThuCung; // Nếu chưa có ID
     private String chungLoai;
     private String giongLoai;
-    private LocalDate ngaySinh;
+    private java.time.LocalDate ngaySinh;
     private String gioiTinh;
     
-    // Tùy chọn: Chỉ định nhân viên
+    private String tenKhachHang; // Dành cho tạo user mới nếu cần
+    private String soDienThoaiKhachHang;
+
+    private Integer dichVuId;
     private Integer nhanVienId;
+    private LocalDateTime thoiGianBatDau;
+    private String ghiChuKhachHang;
+    
+    private LichHen.LoaiLichHen loaiLichHen; // Thêm trường này
 }

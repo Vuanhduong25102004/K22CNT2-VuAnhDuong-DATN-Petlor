@@ -43,6 +43,7 @@ import ProductDetailPage from "../pages/ProductDetailPage";
 import CartPage from "../pages/CartPage";
 import ServiceDetailPage from "../pages/ServiceDetailPage";
 import Checkout from "../pages/Checkout";
+import Booking from "../pages/Booking";
 
 const AppRoutes = () => {
   return (
@@ -59,6 +60,7 @@ const AppRoutes = () => {
         <Route path="/products/:id" element={<ProductDetailPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/booking" element={<Booking />} />
 
         {/* Protected User Routes */}
         <Route element={<ProtectedRoute />}>

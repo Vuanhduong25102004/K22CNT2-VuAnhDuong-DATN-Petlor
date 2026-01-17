@@ -31,6 +31,10 @@ public class LichHen {
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai")
     private TrangThai trangThai;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "loai_lich_hen")
+    private LoaiLichHen loaiLichHen = LoaiLichHen.THUONG_LE; // Mặc định là thường lệ
 
     @Column(name = "ghi_chu", columnDefinition = "TEXT")
     private String ghiChu;
@@ -73,6 +77,25 @@ public class LichHen {
     // --- Enum for TrangThai ---
     public enum TrangThai {
         CHO_XAC_NHAN, DA_XAC_NHAN, DA_HOAN_THANH, DA_HUY
+    }
+    
+    public enum LoaiLichHen {
+        KHAN_CAP("Khẩn cấp (Cấp cứu)"),
+        THUONG_LE("Thường lệ"),
+        TAI_KHAM("Tái khám"),
+        TU_VAN("Tư vấn"),
+        TIEM_PHONG("Tiêm phòng"),
+        PHAU_THUAT("Phẫu thuật");
+        
+        private final String displayName;
+        
+        LoaiLichHen(String displayName) {
+            this.displayName = displayName;
+        }
+        
+        public String getDisplayName() {
+            return displayName;
+        }
     }
 
     public enum LyDoHuyLich {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
-import petService from "../../services/petService";
+import bookingService from "../../services/bookingService";
 import CancelAppointmentModal from "./modals/CancelAppointmentModal";
 import AppointmentDetailModal from "./modals/AppointmentDetailModal";
 
@@ -39,7 +39,7 @@ const MyAppointments = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await petService.getMyAppointments();
+      const res = await bookingService.getMyAppointments();
       setAppointments(res.data || res);
     } catch (error) {
       console.error("Lỗi khi lấy lịch hẹn:", error);
@@ -50,7 +50,7 @@ const MyAppointments = () => {
 
   useEffect(() => {
     fetchData();
-    petService
+    bookingService
       .getCancelReasons()
       .then((res) => setCancelReasons(res.data || res));
     AOS.init({ duration: 800 });
@@ -65,7 +65,7 @@ const MyAppointments = () => {
     setTimeout(() => AOS.refresh(), 50);
 
     try {
-      const res = await petService.getAppointmentById(id);
+      const res = await bookingService.getAppointmentById(id);
       setAppointmentDetail(res.data || res);
     } catch (error) {
       console.error(error);
@@ -88,7 +88,7 @@ const MyAppointments = () => {
     if (!selectedReason) return;
     setIsSubmitting(true);
     try {
-      await petService.cancelMyAppointment(appointmentToCancel.lichHenId, {
+      await bookingService.cancelMyAppointment(appointmentToCancel.lichHenId, {
         lyDoHuy: selectedReason,
       });
       setShowCancelModal(false);

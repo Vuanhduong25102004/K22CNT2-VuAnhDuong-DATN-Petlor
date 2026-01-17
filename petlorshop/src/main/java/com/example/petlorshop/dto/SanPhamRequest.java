@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -19,4 +20,11 @@ public class SanPhamRequest {
     private Integer soLuongTonKho;
     private Integer danhMucId;
     private Integer trongLuong; // Đơn vị: gram
+    
+    // Thuốc
+    private LocalDate hanSuDung;
+    private String soLo;
+    private String donViTinh;
+    private String thanhPhan;
+    private String chiDinh;
 }

@@ -1,10 +1,8 @@
 import React, { useEffect } from "react";
-// 1. Import thư viện AOS và CSS của nó
 import AOS from "aos";
 import "aos/dist/aos.css";
 
 const Homepage = () => {
-  // 2. Khởi tạo AOS khi trang web load xong
   useEffect(() => {
     window.scrollTo(0, 0);
     const aosInit = setTimeout(() => {
@@ -15,7 +13,6 @@ const Homepage = () => {
         delay: 0,
         easing: "ease-out-cubic",
       });
-
       AOS.refresh();
     }, 100);
     return () => clearTimeout(aosInit);
@@ -23,16 +20,13 @@ const Homepage = () => {
 
   return (
     <>
-      {/* --- NEW HERO SECTION --- */}
-      <section className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
+      <section className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 mt-22 mb-24">
         <div
           className="relative min-h-[560px] rounded-[40px] overflow-hidden bg-white shadow-2xl shadow-gray-200/50 flex flex-col md:flex-row"
-          data-aos="fade-up" // Thêm hiệu ứng AOS cho cả khối
+          data-aos="fade-up"
         >
-          {/* Pattern Background (Optional) */}
           <div className="absolute inset-0 pointer-events-none bg-gray-50/50"></div>
 
-          {/* Left Content */}
           <div className="relative z-10 w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-bold mb-6 w-fit">
               <span className="material-symbols-outlined text-lg">
@@ -107,560 +101,554 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* SERVICES SECTION */}
-      <section className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-20">
-        <h2
-          className="text-text-main text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5 text-center"
-          data-aos="fade-up"
-        >
-          Dịch vụ của chúng tôi
-        </h2>
-        <p
-          className="text-center text-text-secondary max-w-2xl mx-auto pb-8"
-          data-aos="fade-up"
-          data-aos-delay="100"
-        >
-          Từ việc chải chuốt đến chăm sóc sức khỏe, chúng tôi cung cấp mọi thứ
-          mà người bạn lông xù của bạn cần để luôn hạnh phúc và khỏe mạnh.
-        </p>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-6 p-4">
-          <div
-            className="flex flex-col gap-3 pb-3"
-            data-aos="fade-up"
-            data-aos-delay="200"
-          >
-            <div
-              className="w-full bg-center bg-no-repeat aspect-square bg-cover rounded-xl"
-              style={{
-                backgroundImage:
-                  'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBlBe98eqx_FJ9BPC7rsfsHss7F30UJWfn02-Eu4aKJngW70smk9lXudT0bf6Vu3xJWjCifk0BH5BZC-ZOYmETasO_PCyzlskfPsL-_pzEpJaZmpJCE4d4W6fQ3RA3trdmwUopchZ7IqYTaYaEIW0TpJta9Hw3HXbWMMtOir-L6_VqE0heaKG_tXlpQr7pIXkB9OP5dQAPY2_1hGkqtY7VL31GiejBkE1c2RqjVYwvTns3NXmkUV3qj9-6Zh0rTSO2gfZC7S9x3JFIM")',
-              }}
-            ></div>
-            <div>
-              <p className="text-text-main text-base font-medium leading-normal">
-                Chăm sóc lông chuyên nghiệp
-              </p>
-              <p className="text-text-secondary text-sm font-normal leading-normal">
-                Giúp thú cưng của bạn trông đẹp nhất với các dịch vụ chăm sóc
-                lông của chúng tôi.
-              </p>
-            </div>
-          </div>
+      {/* =========================================
+          NEW SECTIONS (LIGHT MODE ONLY)
+      ========================================= */}
 
-          <div
-            className="flex flex-col gap-3 pb-3"
-            data-aos="fade-up"
-            data-aos-delay="300"
-          >
-            <div
-              className="w-full bg-center bg-no-repeat aspect-square bg-cover rounded-xl"
-              style={{
-                backgroundImage:
-                  'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDjvPaf-P0OKCyq-4m4KqS6JFxdjdlYo7X1BE7Th5T2aPeuGo52pZTlkfr1xXAE59edXVFWLHfqq5BOpatnPF_xMYbZvZGoGQs2csOt7sw86TCGPdlndMP3jy0wTdQcQhGen8-DOrgahc3Lg-84p6k6gDanv69cbD1z1CB3ojvD1Pev5TMko8e6PrN4bf7NOYLRyGW_yStlvzRCqsnHdsr7-t0HvUWQeq4SjgVFADnDsVf584zmC_Te4qUBqiwdoJ8raFEcl3m9TbKV")',
-              }}
-            ></div>
-            <div>
-              <p className="text-text-main text-base font-medium leading-normal">
-                Nhà trẻ an toàn & vui vẻ
-              </p>
-              <p className="text-text-secondary text-sm font-normal leading-normal">
-                Một môi trường được giám sát để thú cưng của bạn chơi và giao
-                lưu.
-              </p>
-            </div>
-          </div>
-
-          <div
-            className="flex flex-col gap-3 pb-3"
-            data-aos="fade-up"
-            data-aos-delay="400"
-          >
-            <div
-              className="w-full bg-center bg-no-repeat aspect-square bg-cover rounded-xl"
-              style={{
-                backgroundImage:
-                  'url("https://lh3.googleusercontent.com/aida-public/AB6AXuD7rzu48y5vAgElTRy0B4caAVV0ziu0bheApcmQHP-je0exqa3Gq4-QhpDw6r3cncaQDLn_JIMLA3pyTzwO1hG_POLbnFtrm7T34GJ84fbu0oNly6HCdRjIeRR4tAXkthbar9_7G_JPqgnr_PTRXgGldO63nz34UTBxUeJBv3Xd0JtKPmC7sQeUH1LPs6q0z50VTK0t5-ieb8SF1Sakssahg-zEFnJ3M6UX744QCsNZlDRQHOZyau7Yk8VuS3j42RJvFQRXz4ynP8iP")',
-              }}
-            ></div>
-            <div>
-              <p className="text-text-main text-base font-medium leading-normal">
-                Dịch vụ thú y chuyên nghiệp
-              </p>
-              <p className="text-text-secondary text-sm font-normal leading-normal">
-                Kiểm tra sức khỏe toàn diện và chăm sóc phòng ngừa từ các bác sĩ
-                thú y của chúng tôi.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* WHY CHOOSE US */}
-      <section className="bg-white">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-20">
-          <div className="flex flex-col gap-10 @container">
-            <div
-              className="flex flex-col gap-6 items-center text-center"
-              data-aos="fade-up"
-            >
-              <div className="flex flex-col gap-4">
-                <h1 className="text-text-main tracking-light text-[32px] font-bold leading-tight max-w-[720px]">
-                  Tại sao chọn chúng tôi?
-                </h1>
-                <p className="text-text-secondary text-base font-normal leading-normal max-w-[720px]">
-                  Chúng tôi cam kết cung cấp môi trường an toàn, chu đáo và tốt
-                  nhất cho thú cưng của bạn.
-                </p>
-              </div>
-              <button className="relative group inline-flex items-center justify-center overflow-hidden rounded-lg bg-primary px-8 py-3 text-sm font-bold text-[#111813] shadow-lg transition-all duration-300 ease-out hover:scale-105 before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-[#10B981] before:transition-all before:duration-300 before:ease-out hover:before:w-full">
-                <span className="relative z-10 truncate text-white transition-colors duration-300">
-                  Tìm hiểu thêm
-                </span>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-6 p-0">
-              {/* Item 1 */}
-              <div data-aos="fade-up" data-aos-delay="200" className="h-full">
-                <div className="flex flex-1 gap-3 rounded-lg border border-border-color bg-background-light p-4 flex-col text-center items-center h-full transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-2">
-                  <div className="text-primary text-3xl">
-                    <span className="material-symbols-outlined !text-4xl">
-                      groups
-                    </span>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <h2 className="text-text-main text-base font-bold leading-tight">
-                      Nhân viên giàu kinh nghiệm
-                    </h2>
-                    <p className="text-text-secondary text-sm font-normal leading-normal">
-                      Đội ngũ của chúng tôi bao gồm các chuyên gia yêu thú cưng
-                      tận tâm.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Item 2 */}
-              <div data-aos="fade-up" data-aos-delay="300" className="h-full">
-                <div className="flex flex-1 gap-3 rounded-lg border border-border-color bg-background-light p-4 flex-col text-center items-center h-full transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-2">
-                  <div className="text-primary text-3xl">
-                    <span className="material-symbols-outlined !text-4xl">
-                      shield
-                    </span>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <h2 className="text-text-main text-base font-bold leading-tight">
-                      Môi trường an toàn
-                    </h2>
-                    <p className="text-text-secondary text-sm font-normal leading-normal">
-                      Cơ sở vật chất của chúng tôi được thiết kế an toàn và
-                      thoải mái cho thú cưng.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Item 3 */}
-              <div data-aos="fade-up" data-aos-delay="400" className="h-full">
-                <div className="flex flex-1 gap-3 rounded-lg border border-border-color bg-background-light p-4 flex-col text-center items-center h-full transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-2">
-                  <div className="text-primary text-3xl">
-                    <span className="material-symbols-outlined !text-4xl">
-                      favorite
-                    </span>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <h2 className="text-text-main text-base font-bold leading-tight">
-                      Chăm sóc toàn diện
-                    </h2>
-                    <p className="text-text-secondary text-sm font-normal leading-normal">
-                      Từ chăm sóc sức khỏe đến vui chơi, chúng tôi đáp ứng mọi
-                      nhu cầu của thú cưng.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* GALLERY SECTION */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-20 border-t border-border-color">
-        <div
-          className="flex flex-col gap-4 mb-8 text-center"
-          data-aos="fade-up"
-        >
-          <h2 className="text-text-main text-[22px] font-bold leading-tight tracking-[-0.015em]">
-            Thư viện khoảnh khắc
+      {/* 1. DỊCH VỤ NỔI BẬT */}
+      <section className="mb-24 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12" data-aos="fade-up">
+          <h2 className="text-3xl font-extrabold text-gray-900 mb-4">
+            Dịch vụ nổi bật
           </h2>
-          <p className="text-text-secondary max-w-2xl mx-auto">
-            Những hình ảnh đáng yêu của các bé thú cưng khi sử dụng dịch vụ tại
-            PetCare.
+          <p className="text-gray-500 max-w-2xl mx-auto">
+            Chúng tôi cung cấp các giải pháp chăm sóc toàn diện nhất cho thú
+            cưng của bạn.
           </p>
         </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px]">
-          {/* Ảnh lớn */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Service 1 */}
           <div
-            className="col-span-2 row-span-2 relative group overflow-hidden rounded-xl"
-            data-aos="zoom-in"
-          >
-            <div
-              className="w-full h-full bg-cover bg-center hover:scale-105 transition-transform duration-500"
-              style={{
-                backgroundImage: `url("https://lh3.googleusercontent.com/aida-public/AB6AXuAtC6xXp4MJU3q98FgNk7hLwIs43g8l_9ptL6JcfCs97KZC-QwwcjbIPWXBfX5LAfvpEC9z9CZkQZlcHwiRTV4xYR5phHUjYLXXSuQTHrJlvcQBHl_h_sBvk9nDA9BrBPKAoSAT_ibd4eJzf_2J-qAaAZVjBp8drkinymn5TyHiL9-BrGGzz-yN9VSgRL7zVl5oG_x7Y5heAivA4TLq9KX0nJNk3OEiLl0dL3wv9d4FqcMdIiCRmD58ICO6TWk4zM3FkYktwh39py5-")`,
-              }}
-            ></div>
-            <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-              <span className="material-symbols-outlined text-white !text-4xl">
-                play_circle
-              </span>
-            </div>
-          </div>
-
-          {/* Các ảnh nhỏ */}
-          <div
-            className="col-span-1 row-span-1 rounded-xl overflow-hidden"
-            data-aos="zoom-in"
-            data-aos-delay="100"
-          >
-            <div
-              className="w-full h-full bg-cover bg-center hover:scale-105 transition-transform duration-500"
-              style={{
-                backgroundImage: `url("https://lh3.googleusercontent.com/aida-public/AB6AXuBlBe98eqx_FJ9BPC7rsfsHss7F30UJWfn02-Eu4aKJngW70smk9lXudT0bf6Vu3xJWjCifk0BH5BZC-ZOYmETasO_PCyzlskfPsL-_pzEpJaZmpJCE4d4W6fQ3RA3trdmwUopchZ7IqYTaYaEIW0TpJta9Hw3HXbWMMtOir-L6_VqE0heaKG_tXlpQr7pIXkB9OP5dQAPY2_1hGkqtY7VL31GiejBkE1c2RqjVYwvTns3NXmkUV3qj9-6Zh0rTSO2gfZC7S9x3JFIM")`,
-              }}
-            ></div>
-          </div>
-          <div
-            className="col-span-1 row-span-1 rounded-xl overflow-hidden"
-            data-aos="zoom-in"
-            data-aos-delay="200"
-          >
-            <div
-              className="w-full h-full bg-cover bg-center hover:scale-105 transition-transform duration-500"
-              style={{
-                backgroundImage: `url("https://lh3.googleusercontent.com/aida-public/AB6AXuDjvPaf-P0OKCyq-4m4KqS6JFxdjdlYo7X1BE7Th5T2aPeuGo52pZTlkfr1xXAE59edXVFWLHfqq5BOpatnPF_xMYbZvZGoGQs2csOt7sw86TCGPdlndMP3jy0wTdQcQhGen8-DOrgahc3Lg-84p6k6gDanv69cbD1z1CB3ojvD1Pev5TMko8e6PrN4bf7NOYLRyGW_yStlvzRCqsnHdsr7-t0HvUWQeq4SjgVFADnDsVf584zmC_Te4qUBqiwdoJ8raFEcl3m9TbKV")`,
-              }}
-            ></div>
-          </div>
-          <div
-            className="col-span-1 row-span-1 rounded-xl overflow-hidden"
-            data-aos="zoom-in"
-            data-aos-delay="100"
-          >
-            <div
-              className="w-full h-full bg-cover bg-center hover:scale-105 transition-transform duration-500"
-              style={{
-                backgroundImage: `url("https://lh3.googleusercontent.com/aida-public/AB6AXuD7rzu48y5vAgElTRy0B4caAVV0ziu0bheApcmQHP-je0exqa3Gq4-QhpDw6r3cncaQDLn_JIMLA3pyTzwO1hG_POLbnFtrm7T34GJ84fbu0oNly6HCdRjIeRR4tAXkthbar9_7G_JPqgnr_PTRXgGldO63nz34UTBxUeJBv3Xd0JtKPmC7sQeUH1LPs6q0z50VTK0t5-ieb8SF1Sakssahg-zEFnJ3M6UX744QCsNZlDRQHOZyau7Yk8VuS3j42RJvFQRXz4ynP8iP")`,
-              }}
-            ></div>
-          </div>
-          <div
-            className="col-span-1 row-span-1 rounded-xl overflow-hidden"
-            data-aos="zoom-in"
-            data-aos-delay="200"
-          >
-            <div
-              className="w-full h-full bg-cover bg-center hover:scale-105 transition-transform duration-500"
-              style={{
-                backgroundImage: `url("https://lh3.googleusercontent.com/aida-public/AB6AXuCC2Yw5KRIHmlkMIeMvskGAauYdQslWR4nhqV5KJArUu77Z7l4IQLvN3Lo3Juh0go0qQ6atwMJ4Mwg06gT2bugK9Ih8cxWnWZwBG4hG0cFy20lTm27unCUJ31N7xmZ6eo79omYRhuqKqHzE-wJr5ghI4zmM7DdbKbmM_WvDIv2XBK6UAKEMIX0jC_RGLUzOuqSjR8pefSeVhz8Rr-l8IcJ8pLhVMFkvYb06KpQoXYJv8wZeyVqPXAdyvH_-Nn71steakGNtckQ8FpAb")`,
-              }}
-            ></div>
-          </div>
-        </div>
-      </section>
-
-      {/* TESTIMONIALS */}
-      <section className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-20">
-        <h2
-          className="text-text-main text-[22px] font-bold leading-tight tracking-[-0.015em] text-center mb-8"
-          data-aos="fade-up"
-        >
-          Khách hàng nói gì về chúng tôi
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* Card 1 */}
-          <div data-aos="fade-up" data-aos-delay="200" className="h-full">
-            <div className="bg-white p-6 rounded-xl border border-border-color flex flex-col items-center text-center h-full transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1">
-              <img
-                className="w-20 h-20 rounded-full object-cover mb-4"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCC2Yw5KRIHmlkMIeMvskGAauYdQslWR4nhqV5KJArUu77Z7l4IQLvN3Lo3Juh0go0qQ6atwMJ4Mwg06gT2bugK9Ih8cxWnWZwBG4hG0cFy20lTm27unCUJ31N7xmZ6eo79omYRhuqKqHzE-wJr5ghI4zmM7DdbKbmM_WvDIv2XBK6UAKEMIX0jC_RGLUzOuqSjR8pefSeVhz8Rr-l8IcJ8pLhVMFkvYb06KpQoXYJv8wZeyVqPXAdyvH_-Nn71steakGNtckQ8FpAb"
-                alt="Whiskers"
-              />
-              <p className="text-text-secondary italic">
-                "Dịch vụ tuyệt vời! Whiskers nhà tôi luôn rất vui vẻ mỗi khi trở
-                về từ đây. Nhân viên rất thân thiện và chuyên nghiệp."
-              </p>
-              <div className="flex mt-2 text-primary">
-                {[...Array(5)].map((_, i) => (
-                  <span key={i} className="material-symbols-outlined !text-xl">
-                    star
-                  </span>
-                ))}
-              </div>
-              <p className="mt-4 font-bold text-text-main">
-                Lan Anh & Whiskers
-              </p>
-            </div>
-          </div>
-
-          {/* Card 2 */}
-          <div data-aos="fade-up" data-aos-delay="300" className="h-full">
-            <div className="bg-white p-6 rounded-xl border border-border-color flex flex-col items-center text-center h-full transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1">
-              <img
-                className="w-20 h-20 rounded-full object-cover mb-4"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1aC0yG6depGCWIo7KYj6trhBfJjnfw-utCgKWxckZzXiWKpqq-_80mk1edL3UFy_8e9CRKAX0N2xQKW10v2B6cxUr8wUqetwy2tRNOZIxPCpi0tDOwgFj2UjotzWuhwvYzXO3a_8qgQFJ3LV3iF8kLYU9mpAoq2MiJ-agsHBaBQna902sNkc6fIZCrzcDGlPAord4SWuu2khSVeoaOwdpBgQE5pq6y00Dt5ZWRhDgov7ffkwCcdVn17LSiB9FKrZ1ECyH8ZOMa7h9"
-                alt="Buddy"
-              />
-              <p className="text-text-secondary italic">
-                "Tôi hoàn toàn tin tưởng PetCare. Buddy luôn được chăm sóc tốt
-                nhất. Cơ sở vật chất sạch sẽ và an toàn."
-              </p>
-              <div className="flex mt-2 text-primary">
-                {[...Array(5)].map((_, i) => (
-                  <span key={i} className="material-symbols-outlined !text-xl">
-                    star
-                  </span>
-                ))}
-              </div>
-              <p className="mt-4 font-bold text-text-main">
-                Minh Khang & Buddy
-              </p>
-            </div>
-          </div>
-
-          {/* Card 3 */}
-          <div data-aos="fade-up" data-aos-delay="400" className="h-full">
-            <div className="bg-white p-6 rounded-xl border border-border-color flex flex-col items-center text-center h-full transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1">
-              <img
-                className="w-20 h-20 rounded-full object-cover mb-4"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHs7m1gBxyD-6h5qe8JwAEFlFsUusTbMHwBocRZXcrUxgab7NlNUb7PWkjuK2E3lVQAqveFLnjbYPFKqZOHYAzprlOIqLuxCvEJIvgcfXyzfFXLFnlDF1jDSIchYOQ_lZcOjzvBtyJ3RPLGpJ9Tvq-p1HfIJ_fObhE-k9_e573yKw8__nPTYDZpyIv9soMZZ9Hgt67HsDEcOpJ2sKDoI9bGmU3cPNO-pR7ZAfsIvNj8dMwL-Y76q4mIaQSds_-MYog6GZK2zUtFoNF"
-                alt="Luna"
-              />
-              <p className="text-text-secondary italic">
-                "Ngay cả với những thú cưng nhỏ như thỏ, họ cũng rất chu đáo.
-                Luna rất thích thú khi ở đây. Rất khuyến khích!"
-              </p>
-              <div className="flex mt-2 text-primary">
-                {[...Array(5)].map((_, i) => (
-                  <span key={i} className="material-symbols-outlined !text-xl">
-                    star
-                  </span>
-                ))}
-              </div>
-              <p className="mt-4 font-bold text-text-main">Hà My & Luna</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ SECTION */}
-      <section className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-20 border-t border-border-color">
-        <div className="flex flex-col md:flex-row gap-12">
-          {/* Cột trái */}
-          <div className="md:w-1/3" data-aos="fade-right">
-            <h2 className="text-text-main text-[28px] font-bold leading-tight mb-4">
-              Câu hỏi thường gặp
-            </h2>
-            <p className="text-text-secondary mb-6">
-              Bạn có thắc mắc? Chúng tôi ở đây để giải đáp mọi câu hỏi của bạn
-              về việc chăm sóc thú cưng.
-            </p>
-
-            {/* Nút Liên hệ hỗ trợ */}
-            <div
-              className="inline-block"
-              data-aos="zoom-in"
-              data-aos-delay="200"
-            >
-              <a
-                className="relative group inline-flex items-center justify-center rounded-lg bg-gray-100 px-4 py-2 text-sm font-bold text-[#111813] overflow-hidden shadow-sm transition-all duration-300 ease-out hover:scale-105"
-                href="#"
-              >
-                <span className="absolute left-0 top-0 h-full w-0 bg-gray-300 transition-all duration-300 ease-out group-hover:w-full"></span>
-                <span className="relative z-10">Liên hệ hỗ trợ</span>
-              </a>
-            </div>
-          </div>
-
-          {/* Cột phải */}
-          <div className="md:w-2/3 space-y-4" data-aos="fade-left">
-            <div className="border-b border-border-color pb-4">
-              <h3 className="flex items-center justify-between w-full text-left font-bold text-text-main text-lg">
-                Tôi cần đặt lịch trước bao lâu?
-                <span className="material-symbols-outlined text-text-secondary">
-                  expand_more
-                </span>
-              </h3>
-              <p className="mt-2 text-text-secondary">
-                Để đảm bảo dịch vụ tốt nhất, chúng tôi khuyến khích bạn đặt lịch
-                trước ít nhất 24 giờ.
-              </p>
-            </div>
-            <div className="border-b border-border-color pb-4">
-              <h3 className="flex items-center justify-between w-full text-left font-bold text-text-main text-lg">
-                PetCare có nhận trông giữ qua đêm không?
-                <span className="material-symbols-outlined text-text-secondary">
-                  expand_more
-                </span>
-              </h3>
-              <p className="mt-2 text-text-secondary">
-                Có, chúng tôi cung cấp dịch vụ khách sạn thú cưng với hệ thống
-                camera giám sát 24/7.
-              </p>
-            </div>
-            <div className="border-b border-border-color pb-4">
-              <h3 className="flex items-center justify-between w-full text-left font-bold text-text-main text-lg">
-                Dịch vụ có bao gồm đưa đón không?
-                <span className="material-symbols-outlined text-text-secondary">
-                  expand_more
-                </span>
-              </h3>
-              <p className="mt-2 text-text-secondary">
-                Chúng tôi hỗ trợ đưa đón thú cưng trong bán kính 10km.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* LATEST BLOG SECTION */}
-      <section className="py-12 md:py-20 bg-white border-t border-border-color">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div
-            className="flex flex-col md:flex-row justify-between items-end mb-10 gap-4"
+            className="group bg-white p-8 rounded-[32px] border border-gray-100 hover:border-primary transition-all duration-300 shadow-sm hover:shadow-xl text-center"
             data-aos="fade-up"
+            data-aos-delay="100"
           >
-            <div>
-              <h2 className="text-3xl font-bold text-text-main">
-                Tin tức & Mẹo vặt
-              </h2>
-              <p className="text-text-secondary mt-2 text-lg">
-                Kiến thức chăm sóc thú cưng hữu ích dành cho bạn.
-              </p>
+            <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-primary group-hover:text-white transition-colors">
+              <span className="material-symbols-outlined text-4xl">spa</span>
             </div>
+            <h3 className="text-xl font-bold mb-3">Pet Spa</h3>
+            <p className="text-gray-500 mb-6 text-sm">
+              Tắm, chải lông và tạo hình phong cách cho boss.
+            </p>
             <a
-              href="/blog"
-              className="hidden md:flex items-center gap-2 text-primary font-bold hover:underline transition-all group"
+              className="text-primary font-bold flex items-center justify-center gap-1 hover:gap-2 transition-all"
+              href="#"
             >
-              Xem tất cả bài viết
-              <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">
+              Xem thêm{" "}
+              <span className="material-symbols-outlined text-lg">
                 arrow_forward
               </span>
             </a>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                title: "5 mẹo huấn luyện mèo đi vệ sinh đúng chỗ",
-                img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDJDe-Fc03oujRDxzfhE2e0_6ua-wKaYbEik04_Zmma5ydBKsyiJK50xsYgwUI_R4yOWvpS88M1v1tmmtWIECCEtuKLm4pd0lLNZswoA4-N7jzETlzCxCNTH6rOAKBvkdbIg9USfwNAtZPXMQ-NYE-dQsF7-x4adyFVsNk_HgK3-NlYVQyxQuQK8AwSrTJ_eA7-JD79Yn4VXXVfuD0NyZNt01rITJZgMb-p7vZ-NGW2ausSwLVp_cu1rX5i_0jWA4XsSnnRwcgBM3Wc",
-                date: "12 Tháng 10, 2023",
-              },
-              {
-                title: "Dấu hiệu nhận biết thú cưng bị stress",
-                img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCfF4FuwTpz0kuzEow2KiuQ0DR_zkAPZhpCWaC6dwxCC9IvwbXPxDL7_yJJ0pxs8aaDF4iANur7fxRM-9b5Z4c2lZmwjQqRCTNdzZbWMdNtpTTjA12xMV2NZg13RAs7sXAShBAtRcD6VhVh0d9go7pCf-zroVQysDs5YpEIkd457Uc_tWMsvgwBC9ob_LwECxtbwbWVv6god0S6uHVmmxMfI0eMNqwWzRWd4uijnjglq8D_Ls3b4WDvIkYteeiLgusKsiRNUwtJj77W",
-                date: "10 Tháng 10, 2023",
-              },
-              {
-                title: "Review các loại thức ăn hạt tốt nhất",
-                img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDosikFGM5_X9HSmyfiH4Zt1-Q5n-iBDuUGNA_3Dzm-FvtBWboukxrKdvMsPxCBwekeqmM2diAcMSMi_oGlCBwyjVfkC9rr1PMIHc-JiXGxipVG5p14-FkYW0ENblu-IL45IkTei0AAtkm0GvZkM8wIxvQLsgLeNjoCEbTxwBlyflN75dpujRpRCpshatxiSchMnoSwVTnMLT-KTDJF6dpdE_huIaqieovh3MDD-TO4ghmAQ4whU3Bs8c4Tvgem1BbSvb03USeqBvJG",
-                date: "08 Tháng 10, 2023",
-              },
-            ].map((post, idx) => (
-              <div
-                key={idx}
-                className="group cursor-pointer flex flex-col gap-3"
-                data-aos="fade-up"
-                data-aos-delay={idx * 100 + 100}
-              >
-                <div className="overflow-hidden rounded-xl aspect-[4/3]">
-                  <div
-                    className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                    style={{ backgroundImage: `url("${post.img}")` }}
-                  ></div>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <span className="text-xs font-bold text-primary uppercase tracking-wider">
-                    {post.date}
-                  </span>
-                  <h3 className="text-xl font-bold text-text-main leading-tight group-hover:text-primary transition-colors line-clamp-2">
-                    {post.title}
-                  </h3>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* NEWSLETTER SECTION */}
-      <section className="py-16 md:py-24 bg-[#e8fdf0] border-t border-border-color">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="max-w-2xl mx-auto" data-aos="fade-up">
-            <span className="material-symbols-outlined text-primary text-5xl mb-4">
-              mail
-            </span>
-            <h2 className="text-3xl font-bold text-text-main mb-4">
-              Đừng bỏ lỡ tin tức thú vị!
-            </h2>
-            <p className="text-text-secondary mb-8 text-lg">
-              Đăng ký nhận bản tin để cập nhật các mẹo chăm sóc thú cưng hữu ích
-              và nhận ưu đãi độc quyền từ PetLor.
-            </p>
-            <form
-              className="flex flex-col sm:flex-row gap-3"
-              onSubmit={(e) => e.preventDefault()}
-            >
-              <input
-                type="email"
-                placeholder="Nhập email của bạn..."
-                className="flex-1 px-5 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-sm"
-              />
-              <button className="relative group/btn inline-flex items-center justify-center overflow-hidden rounded-lg bg-primary px-8 py-3 text-sm font-bold text-[#111813] shadow-lg transition-all duration-300 ease-out hover:scale-105 before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-[#10B981] before:transition-all before:duration-300 before:ease-out hover:before:w-full">
-                <span className="relative z-10 transition-colors duration-300 text-white">
-                  Đăng ký ngay
-                </span>
-              </button>
-            </form>
-          </div>
-        </div>
-      </section>
-
-      {/* PARTNERS SECTION */}
-      <section className="border-y border-border-color bg-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2
-            className="text-center text-text-secondary text-sm font-bold uppercase tracking-wider mb-8"
-            data-aos="fade-up"
-          >
-            Đối tác uy tín của chúng tôi
-          </h2>
+          {/* Service 2 */}
           <div
-            className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-300"
+            className="group bg-white p-8 rounded-[32px] border border-gray-100 hover:border-primary transition-all duration-300 shadow-sm hover:shadow-xl text-center"
             data-aos="fade-up"
             data-aos-delay="200"
           >
-            <div className="h-8 text-text-main font-black text-xl flex items-center gap-2">
-              <span className="material-symbols-outlined">pets</span> PetFood
+            <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-primary group-hover:text-white transition-colors">
+              <span className="material-symbols-outlined text-4xl">
+                medical_services
+              </span>
             </div>
-            <div className="h-8 text-text-main font-black text-xl flex items-center gap-2">
-              <span className="material-symbols-outlined">
-                health_and_safety
-              </span>{" "}
-              VetMed
+            <h3 className="text-xl font-bold mb-3">Pet Clinic</h3>
+            <p className="text-gray-500 mb-6 text-sm">
+              Khám sức khỏe tổng quát và điều trị chuyên sâu.
+            </p>
+            <a
+              className="text-primary font-bold flex items-center justify-center gap-1 hover:gap-2 transition-all"
+              href="#"
+            >
+              Xem thêm{" "}
+              <span className="material-symbols-outlined text-lg">
+                arrow_forward
+              </span>
+            </a>
+          </div>
+
+          {/* Service 3 */}
+          <div
+            className="group bg-white p-8 rounded-[32px] border border-gray-100 hover:border-primary transition-all duration-300 shadow-sm hover:shadow-xl text-center"
+            data-aos="fade-up"
+            data-aos-delay="300"
+          >
+            <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-primary group-hover:text-white transition-colors">
+              <span className="material-symbols-outlined text-4xl">
+                apartment
+              </span>
             </div>
-            <div className="h-8 text-text-main font-black text-xl flex items-center gap-2">
-              <span className="material-symbols-outlined">toys</span> JoyToy
+            <h3 className="text-xl font-bold mb-3">Pet Hotel</h3>
+            <p className="text-gray-500 mb-6 text-sm">
+              Nơi ở sang trọng, sạch sẽ cho thú cưng khi bạn vắng nhà.
+            </p>
+            <a
+              className="text-primary font-bold flex items-center justify-center gap-1 hover:gap-2 transition-all"
+              href="#"
+            >
+              Xem thêm{" "}
+              <span className="material-symbols-outlined text-lg">
+                arrow_forward
+              </span>
+            </a>
+          </div>
+
+          {/* Service 4 */}
+          <div
+            className="group bg-white p-8 rounded-[32px] border border-gray-100 hover:border-primary transition-all duration-300 shadow-sm hover:shadow-xl text-center"
+            data-aos="fade-up"
+            data-aos-delay="400"
+          >
+            <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-primary group-hover:text-white transition-colors">
+              <span className="material-symbols-outlined text-4xl">school</span>
             </div>
-            <div className="h-8 text-text-main font-black text-xl flex items-center gap-2">
-              <span className="material-symbols-outlined">home_health</span>{" "}
-              SafeHome
+            <h3 className="text-xl font-bold mb-3">Pet Training</h3>
+            <p className="text-gray-500 mb-6 text-sm">
+              Huấn luyện kỹ năng và hành vi chuyên nghiệp.
+            </p>
+            <a
+              className="text-primary font-bold flex items-center justify-center gap-1 hover:gap-2 transition-all"
+              href="#"
+            >
+              Xem thêm{" "}
+              <span className="material-symbols-outlined text-lg">
+                arrow_forward
+              </span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. SẢN PHẨM MỚI NHẤT */}
+      <section className="mb-24 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          className="flex items-center justify-between mb-10"
+          data-aos="fade-right"
+        >
+          <div>
+            <h2 className="text-3xl font-extrabold text-gray-900 mb-2">
+              Sản phẩm mới nhất
+            </h2>
+            <p className="text-gray-500">
+              Những món đồ chơi và thực phẩm chất lượng vừa cập bến.
+            </p>
+          </div>
+          <a
+            className="bg-white border border-gray-200 px-6 py-3 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition-colors"
+            href="#"
+          >
+            Xem tất cả
+          </a>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Product 1 */}
+          <div
+            className="group bg-white rounded-[24px] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 flex flex-col"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
+            <div className="relative h-72 overflow-hidden bg-gray-50">
+              <img
+                alt="Royal Canin Puppy"
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2mBWz25RdlG1JpVfULSsFNZsUYKSzflIAjwLvHSVf4isUMQg8fPMckeFI8cu_3OjuDM6EdDSdrwH9UHS0KuuVUN70GcVBAZgdR03PcsAyrJZ2rliR03Sga3T0cVhKi2sBRbuTAYrST-Mv5nmfjB08Ij9NJSjiQyahKSbiLXRG4RT5Gj2VsNpFNOV-E2jNDQt1CXNDg-VH6BfR4WAqkOvytwfJNT10slsOCcp1CPpSNa7rNZejsC9vc0IdmVH5Q8fHAb015f-M6Ts"
+              />
+              <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
+                New
+              </div>
             </div>
-            <div className="h-8 text-text-main font-black text-xl flex items-center gap-2">
-              <span className="material-symbols-outlined">water_drop</span>{" "}
-              FreshPet
+            <div className="p-6 flex flex-col flex-grow">
+              <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">
+                Royal Canin Puppy
+              </h3>
+              <div className="text-primary font-extrabold text-xl mb-4">
+                185.000 đ
+              </div>
+              <button className="mt-auto w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 font-bold py-3.5 rounded-xl transition-all">
+                <span className="material-symbols-outlined text-xl">
+                  shopping_cart
+                </span>
+                Thêm vào giỏ
+              </button>
             </div>
+          </div>
+
+          {/* Product 2 */}
+          <div
+            className="group bg-white rounded-[24px] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 flex flex-col"
+            data-aos="fade-up"
+            data-aos-delay="200"
+          >
+            <div className="relative h-72 overflow-hidden bg-gray-50">
+              <img
+                alt="Whiskas Cá Biển"
+                className="w-full h-full object-contain p-8 group-hover:scale-110 transition-transform duration-500"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvRb94YN-b1Ir5YETEy2Y_z9hpPRAbwmT0A7jw_j0P-bOBkPZCARM1Hzf08CaSF0K_cgcFmLqknApHchKyQSUvS1vEDhhIGFC0MjflsLeAbMOWkziYHun83WId0XfR_2uMA9kZl8OGox4CRZmbJXTf-j2n-qdbbya9yvuk5-obmwovmibENfA5YpVROCmpyWBVYmnLmUD-DA_QLgLnZZxDw-UtIeCl94gDQh3RbXwrg4IqMhYXeurq8rWRUxhcdJ_HUKH0VUHNvTE"
+              />
+              <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
+                New
+              </div>
+            </div>
+            <div className="p-6 flex flex-col flex-grow">
+              <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">
+                Whiskas Cá Biển 480g
+              </h3>
+              <div className="text-primary font-extrabold text-xl mb-4">
+                15.000 đ
+              </div>
+              <button className="mt-auto w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 font-bold py-3.5 rounded-xl transition-all">
+                <span className="material-symbols-outlined text-xl">
+                  shopping_cart
+                </span>
+                Thêm vào giỏ
+              </button>
+            </div>
+          </div>
+
+          {/* Product 3 */}
+          <div
+            className="group bg-white rounded-[24px] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 flex flex-col"
+            data-aos="fade-up"
+            data-aos-delay="300"
+          >
+            <div className="relative h-72 overflow-hidden bg-gray-50">
+              <img
+                alt="Vòng cổ chó"
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8taaj-PupF2Taii4OS4kyq7i2IknhEb_bjH23DfhHR4tfpu95Nq5XcKP0g9c25SHRzBoHghYIYeDOqBeDinW1Y_VT-q6XYZ0fi_XaBZkQHM4aOLSFDZmg-6lHIs1wgXZUrbz7nbpffd1g0HwSjvvN5zfOVj6caFXo6hfOXiaGWvSiUbYOXwKXyaEzhgj7n8Dhllsnvf7A2PpdJainCZkesYItK-XKuNimKzQV_BE6EeF47E5odwZOgqpYCpJH0b_zc5bNAtOqQQ4"
+              />
+              <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
+                New
+              </div>
+            </div>
+            <div className="p-6 flex flex-col flex-grow">
+              <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">
+                Vòng cổ Premium
+              </h3>
+              <div className="text-primary font-extrabold text-xl mb-4">
+                50.000 đ
+              </div>
+              <button className="mt-auto w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 font-bold py-3.5 rounded-xl transition-all">
+                <span className="material-symbols-outlined text-xl">
+                  shopping_cart
+                </span>
+                Thêm vào giỏ
+              </button>
+            </div>
+          </div>
+
+          {/* Product 4 */}
+          <div
+            className="group bg-white rounded-[24px] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 flex flex-col"
+            data-aos="fade-up"
+            data-aos-delay="400"
+          >
+            <div className="relative h-72 overflow-hidden bg-gray-50">
+              <img
+                alt="Bóng cao su"
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZRw-SvfOGkMjQrBgZ7b5_vNdJs4kr9yW-J9pW66e9CVeQz-WphWeZPbhUanBV01f0P3leuQUZxkG8QFOZhExf1fT3EurB_takFc8uOwaqESWfPRRUsaO1b62lCH8UeC0I0eHKQNE5oU87Boq0sFgmwq6Rc1m-uaNCH-xpt-5GuWlWkAuYTYLPRgETPOBKieoNhXHq8zZW1KY5po8QbtTptqACCe5HrG9xn8WdWpNqjO5QoFjNHZYJ4b37_-akAfFFRU5QpGxxbPU"
+              />
+              <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
+                New
+              </div>
+            </div>
+            <div className="p-6 flex flex-col flex-grow">
+              <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">
+                Bóng cao su bền bỉ
+              </h3>
+              <div className="text-primary font-extrabold text-xl mb-4">
+                40.000 đ
+              </div>
+              <button className="mt-auto w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 font-bold py-3.5 rounded-xl transition-all">
+                <span className="material-symbols-outlined text-xl">
+                  shopping_cart
+                </span>
+                Thêm vào giỏ
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. TẠI SAO CHỌN PETLOR */}
+      <section
+        className="mb-24 py-16 px-8 bg-white rounded-[40px] border border-gray-100 max-w-screen-xl mx-auto"
+        data-aos="fade-up"
+      >
+        <div className="text-center mb-16">
+          <h2 className="text-3xl font-extrabold text-gray-900 mb-4">
+            Tại sao chọn PetLor?
+          </h2>
+          <p className="text-gray-500 max-w-2xl mx-auto">
+            Chúng tôi cam kết mang lại những điều tốt đẹp nhất cho cộng đồng yêu
+            thú cưng.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div
+            className="flex flex-col items-center text-center"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6">
+              <span className="material-symbols-outlined text-3xl">
+                diversity_1
+              </span>
+            </div>
+            <h3 className="text-xl font-bold mb-4">Chuyên gia tận tâm</h3>
+            <p className="text-gray-500">
+              Đội ngũ y bác sĩ và nhân viên có trình độ chuyên môn cao và tình
+              yêu thương vô bờ bến.
+            </p>
+          </div>
+          <div
+            className="flex flex-col items-center text-center"
+            data-aos="fade-up"
+            data-aos-delay="200"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6">
+              <span className="material-symbols-outlined text-3xl">
+                star_half
+              </span>
+            </div>
+            <h3 className="text-xl font-bold mb-4">Dịch vụ 5 sao</h3>
+            <p className="text-gray-500">
+              Trang thiết bị hiện đại, quy trình chuyên nghiệp đảm bảo sự thoải
+              mái tối đa cho boss.
+            </p>
+          </div>
+          <div
+            className="flex flex-col items-center text-center"
+            data-aos="fade-up"
+            data-aos-delay="300"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6">
+              <span className="material-symbols-outlined text-3xl">
+                receipt_long
+              </span>
+            </div>
+            <h3 className="text-xl font-bold mb-4">Giá cả minh bạch</h3>
+            <p className="text-gray-500">
+              Mọi chi phí đều được công khai và tư vấn kỹ càng trước khi thực
+              hiện dịch vụ.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. TIN TỨC & BLOG */}
+      <section className="mb-24 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          className="flex items-center justify-between mb-10"
+          data-aos="fade-right"
+        >
+          <div>
+            <h2 className="text-3xl font-extrabold text-gray-900 mb-2">
+              Tin tức & Blog
+            </h2>
+            <p className="text-gray-500">
+              Cập nhật kiến thức và kinh nghiệm chăm sóc thú cưng mỗi ngày.
+            </p>
+          </div>
+          <a className="text-primary font-bold hover:underline" href="#">
+            Tất cả bài viết
+          </a>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Blog 1 */}
+          <div
+            className="group cursor-pointer"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
+            <div className="relative h-60 rounded-[24px] overflow-hidden mb-6">
+              <img
+                alt="Blog 1"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgEFjauwy_GNl54zK9RLRUWigecWZ6lzch52KOCovg1DHvhJjGLIbtpoRR2vOrHdrg0najDQWUDgJ9mWIaqUmAfxg5hFsz6ExRuOO6IyVPgrgnzmuecu9bvG6eXjOP6Mv_yj-YScjPhI9OhZ9zOZhN4xLE9-x1WNyHs_RlOSRhxLc5cz1HSA4fYr1APT2l5MMjbgM92S5BX6AZHKHbN1WgtDRwYLZ3_yv89-KZJpOnaPXvn5tFLQmIntVj2z6cy4uob3-OwT5A0NI"
+              />
+              <div className="absolute top-4 left-4 bg-white/90 px-3 py-1 rounded-lg text-xs font-bold text-gray-600">
+                Dinh dưỡng
+              </div>
+            </div>
+            <div className="text-sm text-gray-400 mb-2 font-medium">
+              15 Tháng 5, 2024
+            </div>
+            <h3 className="text-xl font-bold group-hover:text-primary transition-colors leading-snug">
+              Top 5 loại thức ăn giàu dinh dưỡng nhất cho mèo Anh lông ngắn
+            </h3>
+          </div>
+
+          {/* Blog 2 */}
+          <div
+            className="group cursor-pointer"
+            data-aos="fade-up"
+            data-aos-delay="200"
+          >
+            <div className="relative h-60 rounded-[24px] overflow-hidden mb-6">
+              <img
+                alt="Blog 2"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2mBWz25RdlG1JpVfULSsFNZsUYKSzflIAjwLvHSVf4isUMQg8fPMckeFI8cu_3OjuDM6EdDSdrwH9UHS0KuuVUN70GcVBAZgdR03PcsAyrJZ2rliR03Sga3T0cVhKi2sBRbuTAYrST-Mv5nmfjB08Ij9NJSjiQyahKSbiLXRG4RT5Gj2VsNpFNOV-E2jNDQt1CXNDg-VH6BfR4WAqkOvytwfJNT10slsOCcp1CPpSNa7rNZejsC9vc0IdmVH5Q8fHAb015f-M6Ts"
+              />
+              <div className="absolute top-4 left-4 bg-white/90 px-3 py-1 rounded-lg text-xs font-bold text-gray-600">
+                Sức khỏe
+              </div>
+            </div>
+            <div className="text-sm text-gray-400 mb-2 font-medium">
+              12 Tháng 5, 2024
+            </div>
+            <h3 className="text-xl font-bold group-hover:text-primary transition-colors leading-snug">
+              Lịch tiêm phòng định kỳ quan trọng như thế nào đối với chó con?
+            </h3>
+          </div>
+
+          {/* Blog 3 */}
+          <div
+            className="group cursor-pointer"
+            data-aos="fade-up"
+            data-aos-delay="300"
+          >
+            <div className="relative h-60 rounded-[24px] overflow-hidden mb-6">
+              <img
+                alt="Blog 3"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8taaj-PupF2Taii4OS4kyq7i2IknhEb_bjH23DfhHR4tfpu95Nq5XcKP0g9c25SHRzBoHghYIYeDOqBeDinW1Y_VT-q6XYZ0fi_XaBZkQHM4aOLSFDZmg-6lHIs1wgXZUrbz7nbpffd1g0HwSjvvN5zfOVj6caFXo6hfOXiaGWvSiUbYOXwKXyaEzhgj7n8Dhllsnvf7A2PpdJainCZkesYItK-XKuNimKzQV_BE6EeF47E5odwZOgqpYCpJH0b_zc5bNAtOqQQ4"
+              />
+              <div className="absolute top-4 left-4 bg-white/90 px-3 py-1 rounded-lg text-xs font-bold text-gray-600">
+                Cẩm nang
+              </div>
+            </div>
+            <div className="text-sm text-gray-400 mb-2 font-medium">
+              10 Tháng 5, 2024
+            </div>
+            <h3 className="text-xl font-bold group-hover:text-primary transition-colors leading-snug">
+              Làm thế nào để huấn luyện chó đi vệ sinh đúng chỗ trong 7 ngày?
+            </h3>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. ĐÁNH GIÁ TỪ CỘNG ĐỒNG */}
+      {/* 5. ĐÁNH GIÁ TỪ CỘNG ĐỒNG (Đã sửa lỗi hiển thị) */}
+      <section
+        className="mb-24 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8"
+        data-aos="fade-up"
+      >
+        <div className="text-center mb-16">
+          <h2 className="text-3xl font-extrabold text-gray-900 mb-4">
+            Đánh giá từ cộng đồng
+          </h2>
+          <div className="flex items-center justify-center gap-1 text-yellow-400 mb-2">
+            {[...Array(5)].map((_, i) => (
+              <span key={i} className="material-symbols-outlined fill-1">
+                star
+              </span>
+            ))}
+          </div>
+          <p className="text-gray-500">
+            4.9/5 dựa trên hơn 2,000 đánh giá từ khách hàng.
+          </p>
+        </div>
+
+        {/* Thay đổi từ Flex Scroll sang Grid để không bị cắt */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* Review 1 */}
+          <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 hover:shadow-lg transition-shadow duration-300">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-14 h-14 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                <img
+                  alt="User"
+                  className="w-full h-full object-cover"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBh5Ebb9RT5mHA_DCn6fMyCMrW1qz17Su5yfFQzX6s3EmdobnrNzJ7DESM7VL3ZXoAW-A5gLAsBIHhqgVs6cgMjAVN-X45Ym9-Ikh6qlCJqfWqVtyQ2aTZPobULp8mKEn6utHaDGYFERx8lbKLmmDt3bPwJmB3wbfKqah0MoUugsykzHgw3D_bdcmbuRQxzgbjiY2ws8kjhnnUt3RFMrJa4KBxPeyqvNmlgYNQU_gn5mwRC3RiaX_z1FxWu7FhdCd4EdzI22YCr8Wc"
+                />
+              </div>
+              <div>
+                <div className="font-bold text-gray-900">Nguyễn Minh Anh</div>
+                <div className="text-xs text-gray-400">
+                  Chủ nhân của bé Corgi Mochi
+                </div>
+              </div>
+            </div>
+            <p className="text-gray-600 italic">
+              "Dịch vụ spa ở đây cực kỳ tốt. Bé nhà mình rất nhát nhưng các bạn
+              nhân viên dỗ dành rất khéo. Về nhà thơm tho và sạch sẽ hẳn!"
+            </p>
+          </div>
+
+          {/* Review 2 */}
+          <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 hover:shadow-lg transition-shadow duration-300">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-14 h-14 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                <img
+                  alt="User"
+                  className="w-full h-full object-cover"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgkhqO5Sz6n3jPe7L1K09dx8_9nT8GB4AtEFl6GQ5AhP9InELBL41J1k6Ze6hABsdkeWcMmfO5bp-lj9Py3F2x6oh-DO-YHpsSLewCvVPOS-eGtNLGA-RGxM42dpq4oSSs_3SE1pXPMKqCs5WHZ54nZIsSvaxTgyCdyWEh5QjRf3nVjHU4ogHuBlNJjisAhM6HeajTUixjkftD-UvpXdpyV-roIQEnbD-cwBXZk8Zca8IIPVZhZqu7CX5HLlCzsPcZOpLbKJNyWRY"
+                />
+              </div>
+              <div>
+                <div className="font-bold text-gray-900">Trần Hoàng Nam</div>
+                <div className="text-xs text-gray-400">
+                  Chủ nhân của bé Golden Lu
+                </div>
+              </div>
+            </div>
+            <p className="text-gray-600 italic">
+              "Phòng khám sạch sẽ, bác sĩ tư vấn rất nhiệt tình. Giá cả hợp lý
+              so với chất lượng dịch vụ 5 sao như thế này. Rất yên tâm."
+            </p>
+          </div>
+
+          {/* Review 3 */}
+          <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 hover:shadow-lg transition-shadow duration-300">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-14 h-14 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                <img
+                  alt="User"
+                  className="w-full h-full object-cover"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyLXK7AzVH26RrOe1AGCe_9exeYBwM09ls5yxE-_SqNHSRzf6Q-L2Quyq1Wl6Scb_yHQ_4pWwtuB8Mbc1TGdikvfgJLPM73bRcwSVPZHpZWA_qH8vQ8JqQd-72ZKPVh2va38WhoCxG1c-fPczsbt4GycYQrvM58rpJR9Jp_ZLSEWY4ka6rm_0f3FjeNKOPbjpqJutosAf8TvTy1_1yJ0uM-VPMonbUjWxUDs64mxL0c8mDYUwVttU03TfSbGCAhorH59ZpeEhvaLc"
+                />
+              </div>
+              <div>
+                <div className="font-bold text-gray-900">Lê Thu Hà</div>
+                <div className="text-xs text-gray-400">
+                  Chủ nhân của bé Mèo Sim
+                </div>
+              </div>
+            </div>
+            <p className="text-gray-600 italic">
+              "Gửi bé ở khách sạn thú cưng PetLor mình hoàn toàn yên tâm. Ngày
+              nào cũng được gửi clip bé chơi đùa và ăn uống."
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. ĐĂNG KÝ NHẬN TIN */}
+      <section
+        className="mt-20 py-16 bg-primary rounded-[40px] text-center px-4 relative overflow-hidden max-w-screen-xl mx-auto mb-20"
+        data-aos="zoom-in"
+      >
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-10 -left-10 w-60 h-60 bg-white/10 rounded-full blur-3xl"></div>
+        <div className="relative z-10 max-w-2xl mx-auto">
+          <h2 className="text-3xl font-extrabold text-white mb-4">
+            Đăng ký nhận tin khuyến mãi
+          </h2>
+          <p className="text-white/80 mb-8">
+            Đừng bỏ lỡ các đợt giảm giá sâu và quà tặng độc quyền cho boss của
+            bạn.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              className="flex-grow px-6 py-4 rounded-3xl border-none focus:ring-2 focus:ring-white outline-none text-gray-800 bg-white"
+              placeholder="Địa chỉ email của bạn"
+              type="email"
+            />
+            <button className="bg-gray-900 text-white font-bold px-8 py-4 rounded-3xl hover:bg-black transition-colors">
+              Đăng ký ngay
+            </button>
           </div>
         </div>
       </section>
