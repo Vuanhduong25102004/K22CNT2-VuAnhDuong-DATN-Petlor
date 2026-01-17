@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import MainLayout from "../components/MainLayout";
 import AdminRoute from "./AdminRoute";
 import ProtectedRoute from "./ProtectedRoute";
+import DoctorRoute from "./DoctorRoute";
 
 // Pages
 import HomePage from "../pages/HomePage";
@@ -44,6 +45,9 @@ import CartPage from "../pages/CartPage";
 import ServiceDetailPage from "../pages/ServiceDetailPage";
 import Checkout from "../pages/Checkout";
 import Booking from "../pages/Booking";
+
+// Doctor pages
+import Doctor from "../pages/doctor/Doctor";
 
 const AppRoutes = () => {
   return (
@@ -98,6 +102,9 @@ const AppRoutes = () => {
           <Route path="reviews" element={<AdminReviews />} />
           <Route path="posts" element={<AdminPosts />} />
         </Route>
+      </Route>
+      <Route element={<DoctorRoute />}>
+        <Route path="/doctor" element={<Doctor />} />
       </Route>
     </Routes>
   );

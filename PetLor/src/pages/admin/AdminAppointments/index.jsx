@@ -1,13 +1,14 @@
 /**
  * @file index.jsx
- * @description Trang quản lý lịch hẹn (Container) - Đã cập nhật dùng bookingService.
+ * @description Trang quản lý lịch hẹn (Container) - Updated to work with Smart Modal
  */
 import React, { useState, useEffect } from "react";
-import useEscapeKey from "../../../hooks/useEscapeKey";
-import petService from "../../../services/petService"; // Giữ lại để lấy Dịch vụ
-import userService from "../../../services/userService";
-import bookingService from "../../../services/bookingService"; // <--- IMPORT MỚI
 import { toast } from "react-toastify";
+
+// Services
+import petService from "../../../services/petService";
+import userService from "../../../services/userService";
+import bookingService from "../../../services/bookingService";
 
 // Components
 import AppointmentStats from "./components/AppointmentStats";
@@ -15,7 +16,7 @@ import AppointmentFilters from "./components/AppointmentFilters";
 import AppointmentTable from "./components/AppointmentTable";
 import AppointmentDetailModal from "./components/modals/AppointmentDetailModal";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
-import AppointmentFormModal from "./components/modals/AppointmentFormModal";
+import AppointmentFormModal from "./components/modals/AppointmentFormModal"; // Import Modal Mới của bạn
 
 const AdminAppointments = () => {
   // --- State ---
@@ -54,22 +55,18 @@ const AdminAppointments = () => {
   const [totalElements, setTotalElements] = useState(0);
   const ITEMS_PER_PAGE = 5;
 
-  // --- 1. Fetch Logic ---
+  // --- 1. Fetch Logic (Giữ nguyên logic cũ của bạn) ---
 
-  // Hàm tính toán thống kê (Fix lỗi logic năm)
   const fetchStats = async () => {
     try {
-      // SỬA: Dùng bookingService
       const response = await bookingService.getAllAppointments({
         page: 0,
-        size: 1000, // Lấy danh sách lớn để tính toán
+        size: 1000,
       });
       const allApts = response?.content || [];
-
       const now = new Date();
-      // Chuỗi YYYY-MM-DD hôm nay
       const todayStr = now.toISOString().slice(0, 10);
-      const currentMonth = now.getMonth(); // 0-11
+      const currentMonth = now.getMonth();
       const currentYear = now.getFullYear();
 
       let countToday = 0;
@@ -78,19 +75,11 @@ const AdminAppointments = () => {
       let countCompletedMonth = 0;
 
       allApts.forEach((apt) => {
-        // 1. Đếm hôm nay
-        if (apt.thoiGianBatDau && apt.thoiGianBatDau.startsWith(todayStr)) {
+        if (apt.thoiGianBatDau && apt.thoiGianBatDau.startsWith(todayStr))
           countToday++;
-        }
+        if (apt.trangThaiLichHen === "CHO_XAC_NHAN") countPending++;
+        else if (apt.trangThaiLichHen === "DA_XAC_NHAN") countConfirmed++;
 
-        // 2. Đếm trạng thái
-        if (apt.trangThaiLichHen === "CHO_XAC_NHAN") {
-          countPending++;
-        } else if (apt.trangThaiLichHen === "DA_XAC_NHAN") {
-          countConfirmed++;
-        }
-
-        // 3. Đếm hoàn thành trong tháng (Check cả Tháng + Năm)
         if (apt.trangThaiLichHen === "DA_HOAN_THANH" && apt.thoiGianBatDau) {
           const aptDate = new Date(apt.thoiGianBatDau);
           if (
@@ -113,7 +102,6 @@ const AdminAppointments = () => {
     }
   };
 
-  // Hàm tải dữ liệu bảng (Phân trang)
   const fetchAppointments = async () => {
     setLoading(true);
     try {
@@ -127,25 +115,24 @@ const AdminAppointments = () => {
       if (!params.search) delete params.search;
       if (!params.status) delete params.status;
 
-      // SỬA: Dùng bookingService
       const response = await bookingService.getAllAppointments(params);
       setAppointments(response?.content || []);
       setTotalPages(response?.totalPages || 0);
       setTotalElements(response?.totalElements || 0);
     } catch (error) {
       console.error("Lỗi tải lịch hẹn:", error);
+      toast.error("Không thể tải danh sách lịch hẹn");
     } finally {
       setLoading(false);
     }
   };
 
-  // Initial Fetch (Dropdowns & Stats)
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
         const [staffRes, servicesRes] = await Promise.all([
           userService.getAllStaff({ page: 0, size: 100 }),
-          petService.getAllServices(), // Vẫn dùng petService cho Dịch vụ
+          petService.getAllServices(),
         ]);
         setStaffList(staffRes?.content || []);
         setServicesList(
@@ -159,13 +146,11 @@ const AdminAppointments = () => {
     fetchStats();
   }, []);
 
-  // Debounce Search
   useEffect(() => {
     const handler = setTimeout(() => setDebouncedSearchTerm(searchTerm), 500);
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // Fetch Table Data
   useEffect(() => {
     fetchAppointments();
   }, [currentPage, debouncedSearchTerm, statusFilter]);
@@ -173,12 +158,8 @@ const AdminAppointments = () => {
   // --- Handlers ---
 
   const handlePageChange = (page) => {
-    if (page > 0 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    if (page > 0 && page <= totalPages) setCurrentPage(page);
   };
-
-  const indexOfFirstItem = (currentPage - 1) * ITEMS_PER_PAGE;
 
   const handleDeleteClick = (id) => {
     setAppointmentToDeleteId(id);
@@ -188,12 +169,10 @@ const AdminAppointments = () => {
   const confirmDelete = async () => {
     if (!appointmentToDeleteId) return;
     try {
-      // SỬA: Dùng bookingService
       await bookingService.deleteAppointment(appointmentToDeleteId);
-
       toast.success("Xóa lịch hẹn thành công!");
       fetchAppointments();
-      fetchStats(); // Update stats logic
+      fetchStats();
     } catch (error) {
       toast.error("Xóa thất bại!");
     } finally {
@@ -208,88 +187,48 @@ const AdminAppointments = () => {
   };
 
   const handleOpenCreateModal = () => {
-    setEditingAppointment(null);
+    setEditingAppointment(null); // null = Chế độ tạo mới
     setIsFormModalOpen(true);
   };
 
   const handleOpenEditModal = (appointment) => {
+    // Truyền nguyên object appointment vào.
+    // Modal mới có useEffect thông minh để tự bóc tách dữ liệu (nested objects)
+    // Lưu ý: Đảm bảo mapping đúng tên trường trạng thái nếu cần
     const appointmentForForm = {
       ...appointment,
-      trangThai: appointment.trangThaiLichHen,
+      trangThai: appointment.trangThaiLichHen, // Mapping lại tên nếu backend trả về khác tên form
     };
     setEditingAppointment(appointmentForForm);
     setIsFormModalOpen(true);
   };
 
+  // --- 2. HÀM SUBMIT MỚI (GỌN HƠN) ---
   const handleFormSubmit = async (formData) => {
-    if (
-      !formData.thoiGianBatDau ||
-      !formData.dichVuId ||
-      !formData.tenKhachHang
-    ) {
-      toast.warning("Vui lòng nhập đầy đủ thông tin bắt buộc.");
-      return;
-    }
     try {
       if (editingAppointment) {
-        // UPDATE Logic
-        const updatePayload = {
-          dichVuId: formData.dichVuId ? parseInt(formData.dichVuId) : null,
-          nhanVienId: formData.nhanVienId
-            ? parseInt(formData.nhanVienId)
-            : null,
-          thoiGianBatDau: formData.thoiGianBatDau,
-          trangThai: formData.trangThai,
-          ghiChuKhachHang: formData.ghiChu,
-          tenKhachHang: formData.tenKhachHang,
-          soDienThoaiKhachHang: formData.soDienThoaiKhachHang,
-          tenThuCung: formData.tenThuCung,
-        };
-        const cleanPayload = Object.fromEntries(
-          Object.entries(updatePayload).filter(
-            ([_, v]) => v !== null && v !== undefined && v !== ""
-          )
-        );
-
-        // SỬA: Dùng bookingService
+        // === UPDATE ===
         await bookingService.updateAppointment(
           editingAppointment.lichHenId,
-          cleanPayload
+          formData
         );
         toast.success("Cập nhật lịch hẹn thành công!");
       } else {
-        // CREATE Logic
-        const createPayload = {
-          thoiGianBatDau: formData.thoiGianBatDau,
-          dichVuId: parseInt(formData.dichVuId),
-          nhanVienId: formData.nhanVienId
-            ? parseInt(formData.nhanVienId)
-            : null,
-          tenKhachHang: formData.tenKhachHang,
-          soDienThoaiKhachHang: formData.soDienThoaiKhachHang,
-          tenThuCung: formData.tenThuCung,
-          chungLoai: formData.chungLoai,
-          giongLoai: formData.giongLoai,
-          gioiTinh: formData.gioiTinh,
-          ngaySinh: formData.ngaySinh,
-          ghiChuKhachHang: formData.ghiChu,
-        };
-        const cleanPayload = Object.fromEntries(
-          Object.entries(createPayload).filter(
-            ([_, v]) => v != null && v !== ""
-          )
-        );
-
-        // SỬA: Dùng bookingService
-        await bookingService.createAppointment(cleanPayload);
+        // === CREATE ===
+        await bookingService.createAppointment(formData);
         toast.success("Tạo lịch hẹn mới thành công!");
       }
+
+      // Refresh lại dữ liệu
       setIsFormModalOpen(false);
       fetchAppointments();
-      fetchStats(); // Update stats logic
+      fetchStats();
     } catch (error) {
       console.error("Lỗi thao tác:", error);
-      toast.error(error.response?.data?.message || "Thao tác thất bại.");
+      // Hiển thị lỗi chi tiết từ backend nếu có
+      const message =
+        error.response?.data?.message || error.message || "Thao tác thất bại.";
+      toast.error(message);
     }
   };
 
@@ -325,7 +264,7 @@ const AdminAppointments = () => {
         currentPage={currentPage}
         ITEMS_PER_PAGE={ITEMS_PER_PAGE}
         onPageChange={handlePageChange}
-        indexOfFirstItem={indexOfFirstItem}
+        indexOfFirstItem={(currentPage - 1) * ITEMS_PER_PAGE}
         onViewDetail={handleViewDetail}
         onEdit={handleOpenEditModal}
         onDelete={handleDeleteClick}
@@ -337,14 +276,17 @@ const AdminAppointments = () => {
         onClose={() => setIsDetailModalOpen(false)}
         appointment={selectedAppointment}
       />
+
+      {/* --- MODAL FORM MỚI --- */}
       <AppointmentFormModal
         isOpen={isFormModalOpen}
         onClose={() => setIsFormModalOpen(false)}
-        initialData={editingAppointment}
-        servicesList={servicesList}
-        staffList={staffList}
-        onSubmit={handleFormSubmit}
+        initialData={editingAppointment} // Truyền dữ liệu sửa (hoặc null)
+        servicesList={servicesList} // Danh sách dịch vụ
+        staffList={staffList} // Danh sách nhân viên
+        onSubmit={handleFormSubmit} // Hàm xử lý API
       />
+
       <ConfirmDeleteModal
         isOpen={isConfirmDeleteModalOpen}
         onClose={() => setIsConfirmDeleteModalOpen(false)}

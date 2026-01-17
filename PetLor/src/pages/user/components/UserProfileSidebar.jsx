@@ -52,12 +52,31 @@ const UserProfileSidebar = ({ user }) => {
             <h2 className="font-bold text-[#111827]">
               {user?.hoTen || "Khách"}
             </h2>
-            <p className="text-xs text-gray-500">Thành viên Bạc</p>
+            <p className="text-xs text-gray-500">
+              {/* Hiển thị chức danh nếu là Bác sĩ */}
+              {user?.role === "DOCTOR" ? "Bác sĩ Thú Y" : "Thành viên Bạc"}
+            </p>
           </div>
         </div>
 
         {/* Navigation */}
         <nav className="space-y-1">
+          {/* --- [MỚI] LOGIC KIỂM TRA QUYỀN DOCTOR --- */}
+          {user?.role === "DOCTOR" && (
+            <Link
+              to="/doctor"
+              className={`${getLinkClass(
+                "/doctor"
+              )} mb-2 border-l-4 border-red-500 bg-red-50 hover:bg-red-100`}
+            >
+              <span className={`${getIconClass("/doctor")} text-red-500`}>
+                stethoscope
+              </span>
+              <span className="text-red-600 font-bold">Khu vực làm việc</span>
+            </Link>
+          )}
+          {/* ----------------------------------------- */}
+
           <Link to="/profile" className={getLinkClass("/profile")}>
             <span className={getIconClass("/profile")}>person</span>
             Hồ sơ của tôi

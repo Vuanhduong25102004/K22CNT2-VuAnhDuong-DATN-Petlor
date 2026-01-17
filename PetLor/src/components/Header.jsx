@@ -110,7 +110,7 @@ const Header = () => {
               className={`${isActive("/blog")} transition-colors`}
               to="/blog"
             >
-              Blog
+              Bài viết
             </Link>
           </nav>
         </div>

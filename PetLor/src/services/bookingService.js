@@ -42,6 +42,9 @@ const bookingService = {
   
   // Lấy danh sách lý do hủy
   getCancelReasons: () => apiClient.get('/lich-hen/ly-do-huy'),
+
+  // Lấy danh sách lịch hẹn được phân công cho bác sĩ đang đăng nhập
+  getDoctorAppointments: () => apiClient.get('/lich-hen/doctor/me'),
 };
 
 export default bookingService;

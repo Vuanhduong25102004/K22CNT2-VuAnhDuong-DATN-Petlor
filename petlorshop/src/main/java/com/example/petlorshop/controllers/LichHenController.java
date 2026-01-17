@@ -54,6 +54,24 @@ public class LichHenController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // API cho bác sĩ xem lịch hẹn của mình
+    @GetMapping("/doctor/me")
+    public ResponseEntity<List<LichHenResponse>> getDoctorAppointments() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        List<LichHenResponse> doctorAppointments = lichHenService.getDoctorAppointments(userEmail);
+        return ResponseEntity.ok(doctorAppointments);
+    }
+
+    // API cho bác sĩ xác nhận lịch hẹn
+    @PutMapping("/doctor/{id}/confirm")
+    public ResponseEntity<LichHenResponse> confirmAppointment(@PathVariable Integer id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        LichHenResponse confirmedLichHen = lichHenService.confirmAppointment(userEmail, id);
+        return ResponseEntity.ok(confirmedLichHen);
+    }
+
     @PostMapping
     public ResponseEntity<LichHenResponse> createLichHen(@RequestBody LichHenRequest request) {
         LichHenResponse createdLichHen = lichHenService.createLichHen(request);

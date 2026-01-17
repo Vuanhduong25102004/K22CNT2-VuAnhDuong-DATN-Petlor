@@ -52,6 +52,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         String admin = "ROLE_" + Role.ADMIN.name();
+        String doctor = "ROLE_" + Role.DOCTOR.name();
 
         http
                 .cors(Customizer.withDefaults())
@@ -81,6 +82,11 @@ public class SecurityConfig {
                         // Phải đặt trước rule ADMIN của /api/nguoi-dung/**
                         .requestMatchers("/api/nguoi-dung/me/**").authenticated()
 
+                        // == DOCTOR ONLY ==
+                        // Đặt rule cho DOCTOR lên trước ADMIN nếu endpoint trùng nhau hoặc cụ thể hơn
+                        .requestMatchers("/api/lich-hen/doctor/**").hasAnyAuthority(doctor, admin)
+                        .requestMatchers("/api/so-tiem-chung/**").hasAnyAuthority(doctor, admin)
+
                         // == ADMIN ONLY ==
                         .requestMatchers("/api/admin/**").hasAuthority(admin) // Rule for all admin endpoints
                         .requestMatchers("/api/nguoi-dung/**").hasAuthority(admin)
@@ -104,7 +110,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/don-hang/user/**").authenticated()
 
                         // Authenticated: Các tính năng mới
-                        .requestMatchers("/api/so-tiem-chung/**").authenticated()
                         .requestMatchers("/api/chat/**").authenticated()
                         .requestMatchers("/api/thong-bao/**").authenticated()
                         .requestMatchers("/api/giao-dich/**").authenticated()

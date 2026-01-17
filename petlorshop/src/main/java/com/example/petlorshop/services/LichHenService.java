@@ -55,6 +55,21 @@ public class LichHenService {
                 .map(this::convertToResponse);
     }
 
+    // Lấy danh sách lịch hẹn của bác sĩ (nhân viên) đang đăng nhập
+    public List<LichHenResponse> getDoctorAppointments(String email) {
+        NguoiDung user = nguoiDungRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + email));
+        
+        if (user.getNhanVien() == null) {
+            throw new RuntimeException("Tài khoản này không được liên kết với hồ sơ nhân viên.");
+        }
+        
+        Integer nhanVienId = user.getNhanVien().getNhanVienId();
+        return lichHenRepository.findByNhanVien_NhanVienId(nhanVienId).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public LichHenResponse createLichHen(LichHenRequest request) {
         validateBusinessHours(request.getThoiGianBatDau());
@@ -78,6 +93,12 @@ public class LichHenService {
         lichHen.setThoiGianKetThuc(thoiGianKetThuc);
         lichHen.setGhiChu(request.getGhiChuKhachHang());
         lichHen.setNguoiDung(nguoiDung);
+        
+        // Lưu thông tin khách hàng từ User vào bảng LichHen
+        lichHen.setTenKhachHang(nguoiDung.getHoTen());
+        lichHen.setSdtKhachHang(nguoiDung.getSoDienThoai());
+        lichHen.setEmailKhachHang(nguoiDung.getEmail());
+        
         lichHen.setDichVu(dichVu);
         lichHen.setThuCung(thuCung);
         lichHen.setNhanVien(assignedNhanVien);
@@ -197,13 +218,42 @@ public class LichHenService {
             }
             return nhanVien;
         } else {
+            // Xác định Role cần thiết dựa trên dịch vụ
+            Role requiredRole = determineRequiredRole(dichVu);
+            
             List<NhanVien> potentialStaff = nhanVienRepository.findAll();
             if (potentialStaff.isEmpty()) throw new RuntimeException("Không có nhân viên nào trong hệ thống.");
 
             return potentialStaff.stream()
+                .filter(staff -> staff.getNguoiDung() != null && staff.getNguoiDung().getRole() == requiredRole) // Lọc theo Role
                 .filter(staff -> isTimeSlotAvailable(staff.getNhanVienId(), start, end))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Hết nhân viên rảnh cho dịch vụ này vào thời gian bạn chọn."));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhân viên phù hợp (" + getRoleDisplayName(requiredRole) + ") rảnh vào thời gian này."));
+        }
+    }
+    
+    private Role determineRequiredRole(DichVu dichVu) {
+        String category = "";
+        if (dichVu.getDanhMucDichVu() != null) {
+            category = dichVu.getDanhMucDichVu().getTenDanhMucDv().toLowerCase();
+        }
+        String serviceName = dichVu.getTenDichVu().toLowerCase();
+        
+        // Logic xác định Role dựa trên tên danh mục hoặc tên dịch vụ
+        if (category.contains("spa") || category.contains("làm đẹp") || category.contains("vệ sinh") || 
+            serviceName.contains("spa") || serviceName.contains("cắt tỉa") || serviceName.contains("tắm") || serviceName.contains("grooming")) {
+            return Role.SPA;
+        }
+        
+        // Mặc định là DOCTOR cho các dịch vụ y tế (khám, chữa bệnh, tiêm...)
+        return Role.DOCTOR;
+    }
+    
+    private String getRoleDisplayName(Role role) {
+        switch (role) {
+            case DOCTOR: return "Bác sĩ";
+            case SPA: return "Nhân viên Spa";
+            default: return role.name();
         }
     }
     
@@ -239,6 +289,11 @@ public class LichHenService {
         if (request.getGhiChu() != null) {
             lichHen.setGhiChu(request.getGhiChu());
         }
+        
+        // Cập nhật loại lịch hẹn
+        if (request.getLoaiLichHen() != null) {
+            lichHen.setLoaiLichHen(request.getLoaiLichHen());
+        }
 
         if (request.getTrangThai() != null) {
             // Logic tự động tạo sổ tiêm chủng khi hoàn thành lịch hẹn
@@ -259,6 +314,33 @@ public class LichHenService {
         }
         
         return lichHenRepository.save(lichHen);
+    }
+
+    // API xác nhận lịch hẹn cho bác sĩ
+    @Transactional
+    public LichHenResponse confirmAppointment(String email, Integer id) {
+        NguoiDung user = nguoiDungRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + email));
+        
+        if (user.getNhanVien() == null) {
+            throw new RuntimeException("Tài khoản này không được liên kết với hồ sơ nhân viên.");
+        }
+        
+        LichHen lichHen = lichHenRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Lịch hẹn không tồn tại: " + id));
+        
+        // Kiểm tra xem lịch hẹn có phải của bác sĩ này không
+        if (!lichHen.getNhanVien().getNhanVienId().equals(user.getNhanVien().getNhanVienId())) {
+            throw new RuntimeException("Bạn không có quyền xác nhận lịch hẹn này.");
+        }
+        
+        if (lichHen.getTrangThai() != LichHen.TrangThai.CHO_XAC_NHAN) {
+            throw new RuntimeException("Lịch hẹn không ở trạng thái chờ xác nhận.");
+        }
+        
+        lichHen.setTrangThai(LichHen.TrangThai.DA_XAC_NHAN);
+        LichHen savedLichHen = lichHenRepository.save(lichHen);
+        return convertToResponse(savedLichHen);
     }
 
     @Transactional
@@ -347,16 +429,13 @@ public class LichHenService {
         DichVu dichVu = lichHen.getDichVu();
         NhanVien nhanVien = lichHen.getNhanVien();
         
-        // Logic hiển thị tên khách hàng: Nếu có User thì lấy tên User, nếu không thì lấy tên khách vãng lai
-        String tenKhachHang = null;
-        String sdtKhachHang = null;
+        // Logic hiển thị tên khách hàng: Ưu tiên lấy từ bảng LichHen (vì đã lưu snapshot), nếu không có thì lấy từ User
+        String tenKhachHang = lichHen.getTenKhachHang();
+        String sdtKhachHang = lichHen.getSdtKhachHang();
         
-        if (nguoiDung != null) {
+        if (tenKhachHang == null && nguoiDung != null) {
             tenKhachHang = nguoiDung.getHoTen();
             sdtKhachHang = nguoiDung.getSoDienThoai();
-        } else {
-            tenKhachHang = lichHen.getTenKhachHang();
-            sdtKhachHang = lichHen.getSdtKhachHang();
         }
         
         return new LichHenResponse(

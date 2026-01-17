@@ -99,16 +99,11 @@ const CartPage = () => {
       giaTriDonHang: selectedStat.totalPrice,
     };
 
-    console.log("🚀 DỮ LIỆU GỬI LÊN API:", payload);
-
     try {
       const response = await promotionService.validateCoupon(
         payload.maCode,
         payload.giaTriDonHang
       );
-
-      console.log("✅ KẾT QUẢ API TRẢ VỀ:", response);
-
       const discount = response?.soTienGiam || response?.data?.soTienGiam || 0;
 
       if (discount > 0) {
@@ -122,7 +117,6 @@ const CartPage = () => {
         setDiscountAmount(0);
       }
     } catch (error) {
-      console.error("❌ LỖI API:", error);
       const errorMsg =
         error.response?.data?.message || "Lỗi khi áp dụng mã khuyến mãi!";
       alert(errorMsg);

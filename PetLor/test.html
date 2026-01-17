@@ -1,226 +1,306 @@
 <!DOCTYPE html>
-<html lang="vi"><head>
+
+<html class="light" lang="vi"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>PetLor - Cập nhật Lịch hẹn</title>
+<title>Dashboard Duyệt lịch cho Bác sĩ | PetLor</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        primary: "#14b8a6",
-                        "primary-dark": "#0d9488",
-                        "background-light": "#f8fafc",
-                        "background-dark": "#0f172a",
-                        "card-light": "#ffffff",
-                        "card-dark": "#1e293b",
+                        "primary": "#007a7a",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0f2323",
                     },
                     fontFamily: {
-                        display: ["Inter", "sans-serif"],
-                        body: ["Inter", "sans-serif"],
+                        "display": ["Inter", "sans-serif"]
                     },
                     borderRadius: {
-                        DEFAULT: "0.5rem",
-                        'xl': '0.75rem',
-                        '2xl': '1rem',
-                        '3xl': '1.5rem',
-                        '4xl': '2rem',
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
                     },
                 },
             },
-        };
+        }
     </script>
-<style type="text/tailwindcss">
-        body {
-            font-family: 'Inter', sans-serif;
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
         }
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
         }
-        .modal-overlay {
-            background-color: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(8px);
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cdeaea;
+            border-radius: 10px;
         }
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #14b8a6 !important;
-            box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1) !important;
+        .emergency-glow {
+            box-shadow: 0 0 15px rgba(239, 83, 80, 0.1);
         }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
-<div class="fixed inset-0 z-[100] flex items-center justify-center p-4 modal-overlay overflow-y-auto">
-<div class="bg-white dark:bg-card-dark w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 my-8">
-<div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-card-dark sticky top-0 z-10">
-<div class="flex items-center gap-4">
-<div class="w-14 h-14 rounded-2xl bg-teal-50 dark:bg-teal-900/20 flex items-center justify-center text-primary border border-teal-100/50 dark:border-teal-500/20">
-<span class="material-symbols-outlined text-3xl">edit_calendar</span>
-</div>
-<div>
-<h2 class="text-2xl font-800 text-slate-900 dark:text-white tracking-tight">Cập nhật Lịch hẹn <span class="text-primary">#12</span></h2>
-<p class="text-sm text-slate-500 dark:text-slate-400">Thay đổi thông tin hoặc trạng thái lịch hẹn</p>
-</div>
-</div>
-<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full">
-<span class="material-symbols-outlined">close</span>
-</button>
-</div>
-<div class="p-8 space-y-10">
-<section>
-<div class="flex items-center gap-3 mb-6">
-<span class="material-symbols-outlined text-primary bg-teal-50 dark:bg-teal-900/20 p-1.5 rounded-lg text-xl">calendar_month</span>
-<h3 class="text-lg font-700 text-slate-900 dark:text-white">Thông tin Lịch hẹn</h3>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-<div class="space-y-1.5">
-<label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Dịch vụ <span class="text-red-500">*</span></label>
-<select class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 font-medium focus:ring-0 transition-all appearance-none">
-<option selected="">Khám tổng quát</option>
-<option>Tắm &amp; Spa</option>
-<option>Tiêm chủng</option>
-<option>Lưu trú</option>
-</select>
-</div>
-<div class="space-y-1.5">
-<label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Nhân viên phụ trách</label>
-<select class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 font-medium focus:ring-0 transition-all">
-<option selected="">Bác sĩ Minh (Nhân viên Spa)</option>
-<option>Bác sĩ Hoàng</option>
-<option>Y tá Lan</option>
-</select>
-</div>
-<div class="space-y-1.5">
-<label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Ngày hẹn <span class="text-red-500">*</span></label>
-<div class="relative">
-<input class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 font-medium focus:ring-0 transition-all" type="date" value="2025-12-21"/>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#0c1d1d] dark:text-[#f8fcfc] antialiased h-screen overflow-hidden">
+<div class="flex h-full w-full">
+<!-- Persistent Left Sidebar -->
+<aside class="w-64 flex flex-col border-r border-[#cdeaea] dark:border-[#1a3a3a] bg-white dark:bg-[#122b2b] h-full">
+<div class="p-6 flex flex-col gap-6 h-full">
+<!-- Profile -->
+<div class="flex gap-3 items-center">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12 border-2 border-primary/20" data-alt="Portrait of a professional veterinarian" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBqx5WmLswfF2DBPbYF0dooVJrVeYPzlGe-lOgi6weGtO0ZCthmh5moGnr1h3Gb_ropUD7QpC13Bk7HGKmawUW_IWp_RwG8NnBp7a17VnuTDmPvZWko_dUOBs5scInKJFpEXztAil362JPY_Ii8gdfa2TjwDS3FVGyMMBlshl8NJLb4wc09ZemdjZlMbfDkTGvTe9PRCTW9vpbfn-4q5qjkr9NDjzEwi9CV402xrwKgx-SIpgKhNThP850SlxOiVSLKC1lehQF46g0");'></div>
+<div class="flex flex-col">
+<h1 class="text-[#0c1d1d] dark:text-white text-base font-bold leading-tight">Dr. PetLor</h1>
+<p class="text-primary text-xs font-medium uppercase tracking-wider">Khoa Nội vụ</p>
 </div>
 </div>
-<div class="space-y-1.5">
-<label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Giờ hẹn <span class="text-red-500">*</span></label>
-<div class="relative">
-<input class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 font-medium focus:ring-0 transition-all" type="time" value="09:00"/>
+<!-- Navigation -->
+<nav class="flex flex-col gap-1 flex-grow">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary group" href="#">
+<span class="material-symbols-outlined text-[22px] fill-1">dashboard</span>
+<p class="text-sm font-semibold">Tổng quan</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#45a1a1] hover:bg-background-light dark:hover:bg-[#1a3a3a] transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">calendar_today</span>
+<p class="text-sm font-medium">Lịch hẹn</p>
+<span class="ml-auto bg-[#ef5350] text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">12</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#45a1a1] hover:bg-background-light dark:hover:bg-[#1a3a3a] transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">pets</span>
+<p class="text-sm font-medium">Bệnh nhân</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#45a1a1] hover:bg-background-light dark:hover:bg-[#1a3a3a] transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">description</span>
+<p class="text-sm font-medium">Báo cáo</p>
+</a>
+<div class="mt-8 pt-8 border-t border-[#cdeaea] dark:border-[#1a3a3a]">
+<p class="px-3 text-[10px] font-bold text-[#45a1a1] uppercase tracking-widest mb-3">Lịch làm việc</p>
+<!-- Mini Calendar Simulation -->
+<div class="px-3 py-4 bg-background-light dark:bg-background-dark rounded-xl">
+<div class="flex justify-between items-center mb-2">
+<span class="text-xs font-bold">Tháng 10</span>
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-xs cursor-pointer">chevron_left</span>
+<span class="material-symbols-outlined text-xs cursor-pointer">chevron_right</span>
 </div>
 </div>
-<div class="md:col-span-2 space-y-1.5">
-<label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Trạng thái</label>
-<select class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 font-medium focus:ring-0 transition-all">
-<option selected="">Chờ xác nhận</option>
-<option>Đã xác nhận</option>
-<option>Đang thực hiện</option>
-<option>Hoàn thành</option>
-<option>Đã hủy</option>
-</select>
-</div>
-</div>
-</section>
-<div class="h-px bg-slate-100 dark:bg-slate-800 w-full"></div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-<section class="space-y-6">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-primary bg-teal-50 dark:bg-teal-900/20 p-1.5 rounded-lg text-xl">person</span>
-<h3 class="text-lg font-700 text-slate-900 dark:text-white">Thông tin Khách hàng</h3>
-</div>
-<div class="space-y-4 p-5 bg-slate-50/50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-700/50">
-<div class="space-y-1.5">
-<label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Họ và tên <span class="text-red-500">*</span></label>
-<input class="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 font-medium focus:ring-0 transition-all" type="text" value="Nguyễn Văn Test"/>
-</div>
-<div class="space-y-1.5">
-<label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Số điện thoại <span class="text-red-500">*</span></label>
-<input class="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 font-medium focus:ring-0 transition-all" type="tel" value="0909998887"/>
-</div>
-<div class="space-y-1.5">
-<label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Ghi chú</label>
-<textarea class="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 font-medium focus:ring-0 transition-all resize-none" rows="3">Bé hơi nhát người lạ.</textarea>
-</div>
-</div>
-</section>
-<section class="space-y-6">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-orange-500 bg-orange-50 dark:bg-orange-900/20 p-1.5 rounded-lg text-xl">pets</span>
-<h3 class="text-lg font-700 text-slate-900 dark:text-white">Thông tin Thú cưng</h3>
-</div>
-<div class="space-y-4 p-5 bg-slate-50/50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-700/50">
-<div class="space-y-1.5">
-<label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Tên thú cưng</label>
-<input class="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 font-medium focus:ring-0 transition-all" placeholder="Tên bé" type="text"/>
-</div>
-<div class="grid grid-cols-2 gap-4">
-<div class="space-y-1.5">
-<label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Chủng loại</label>
-<select class="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 font-medium focus:ring-0 transition-all">
-<option>-- Chọn --</option>
-<option>Chó</option>
-<option>Mèo</option>
-<option>Khác</option>
-</select>
-</div>
-<div class="space-y-1.5">
-<label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Giới tính</label>
-<select class="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 font-medium focus:ring-0 transition-all">
-<option>-- Chọn --</option>
-<option>Đực</option>
-<option>Cái</option>
-</select>
-</div>
-</div>
-<div class="space-y-1.5">
-<label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Giống loài</label>
-<input class="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 font-medium focus:ring-0 transition-all" placeholder="VD: Poodle" type="text"/>
-</div>
-<div class="space-y-1.5">
-<label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Ngày sinh</label>
-<input class="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 font-medium focus:ring-0 transition-all" type="date"/>
-</div>
-</div>
-</section>
-</div>
-</div>
-<div class="p-8 border-t border-slate-100 dark:border-slate-800 flex justify-end items-center gap-6 bg-slate-50/30 dark:bg-slate-800/10">
-<button class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 font-600 transition-colors">
-                Hủy bỏ
-            </button>
-<button class="flex items-center gap-2 px-10 py-3.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl shadow-lg shadow-teal-500/25 transition-all transform hover:-translate-y-0.5 active:scale-95">
-<span class="material-symbols-outlined text-xl">save</span>
-                Lưu thay đổi
-            </button>
+<div class="grid grid-cols-7 gap-1 text-center">
+<span class="text-[9px] text-gray-400">S</span><span class="text-[9px] text-gray-400">M</span><span class="text-[9px] text-gray-400">T</span><span class="text-[9px] text-gray-400">W</span><span class="text-[9px] text-gray-400">T</span><span class="text-[9px] text-gray-400">F</span><span class="text-[9px] text-gray-400">S</span>
+<span class="text-[10px] py-1">12</span>
+<span class="text-[10px] py-1 bg-primary text-white rounded-full font-bold">13</span>
+<span class="text-[10px] py-1">14</span>
+<span class="text-[10px] py-1">15</span>
+<span class="text-[10px] py-1">16</span>
+<span class="text-[10px] py-1">17</span>
+<span class="text-[10px] py-1">18</span>
 </div>
 </div>
 </div>
-<header class="bg-card-light dark:bg-card-dark shadow-sm sticky top-0 z-50">
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-<div class="flex justify-between items-center h-16">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-primary text-3xl">pets</span>
-<span class="font-bold text-xl tracking-tight text-slate-900 dark:text-white">PetLor</span>
-</div>
-<div class="hidden md:flex items-center gap-8">
-<nav class="flex space-x-8">
-<a class="text-slate-500 dark:text-slate-400 hover:text-primary font-medium transition" href="#">Trang chủ</a>
-<a class="text-slate-500 dark:text-slate-400 hover:text-primary font-medium transition" href="#">Dịch vụ</a>
 </nav>
-<div class="flex items-center gap-4 border-l pl-8 border-slate-200 dark:border-slate-700">
-<button class="text-slate-500 dark:text-slate-400 hover:text-primary transition">
-<span class="material-symbols-outlined">notifications</span>
+<button class="flex items-center justify-center gap-2 w-full rounded-lg h-11 bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 hover:brightness-110 transition-all">
+<span class="material-symbols-outlined text-sm">logout</span>
+<span>Đăng xuất</span>
 </button>
+</div>
+</aside>
+<!-- Main Workspace -->
+<main class="flex-1 flex flex-col overflow-hidden bg-background-light dark:bg-background-dark">
+<!-- Header -->
+<header class="h-20 flex items-center justify-between px-8 border-b border-[#cdeaea] dark:border-[#1a3a3a] bg-white dark:bg-[#122b2b]">
+<div class="flex flex-col">
+<h2 class="text-2xl font-black text-[#0c1d1d] dark:text-white tracking-tight">Duyệt lịch hẹn</h2>
+<p class="text-xs font-medium text-[#45a1a1]">Quản lý và triage 24 yêu cầu khám bệnh hôm nay</p>
+</div>
+<div class="flex gap-3">
 <div class="relative">
-<img alt="User" class="h-8 w-8 rounded-full border border-slate-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCs3YAvb66y6nwxNkY9fAdoxNyfwdp0ESsPECez_s1VUYCzXO_IZG7FLsv56G0dqRZ52FIERsyLb-kH1Zb4QlU9TrArAxGbtER6nPpwc2X91t-aGvhTt4vAmEi0yWu76x59FP8o2H188eu-ok5JtmXaMAt2m-UkWZOY-a04WcPncXB3lFisKu_PYuuF_6kOABSrvRonAW7eauHDNChtN1I4CTlhoVdaRKoKyauQWlSjQT21LkYDx8qSyeFcN-3IMlEoXTSZQUQeDK8"/>
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-gray-400 text-lg">search</span>
+<input class="pl-10 pr-4 py-2 bg-background-light dark:bg-background-dark border-none rounded-lg text-sm focus:ring-2 focus:ring-primary/50 w-64" placeholder="Tìm kiếm bệnh nhân..." type="text"/>
 </div>
-</div>
-</div>
-</div>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg text-sm font-bold hover:bg-primary/20 transition-all">
+<span class="material-symbols-outlined text-lg">add</span>
+                        Thêm lịch hẹn
+                    </button>
 </div>
 </header>
-<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 opacity-40 pointer-events-none select-none">
-<div class="bg-white dark:bg-card-dark rounded-3xl p-8 shadow-sm">
-<div class="h-64 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl">
-<p class="text-slate-400">Nội dung trang chủ</p>
+<div class="flex flex-1 overflow-hidden">
+<!-- Appointment Queue (Middle Column) -->
+<section class="w-[420px] border-r border-[#cdeaea] dark:border-[#1a3a3a] flex flex-col">
+<!-- Tabs -->
+<div class="flex border-b border-[#cdeaea] dark:border-[#1a3a3a] bg-white dark:bg-[#122b2b] px-4">
+<a class="flex-1 text-center py-4 text-xs font-bold border-b-2 border-primary text-primary" href="#">CHỜ DUYỆT (12)</a>
+<a class="flex-1 text-center py-4 text-xs font-bold border-b-2 border-transparent text-[#45a1a1]" href="#">KHẨN CẤP (3)</a>
+<a class="flex-1 text-center py-4 text-xs font-bold border-b-2 border-transparent text-[#45a1a1]" href="#">ĐÃ XONG</a>
 </div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
+<!-- Emergency Card -->
+<div class="bg-white dark:bg-[#122b2b] p-4 rounded-xl border-l-4 border-[#ef5350] shadow-sm cursor-pointer emergency-glow transition-all ring-2 ring-[#ef5350]/20">
+<div class="flex justify-between items-start mb-2">
+<span class="px-2 py-0.5 bg-[#ef5350]/10 text-[#ef5350] text-[10px] font-black rounded uppercase tracking-tighter">Khẩn cấp</span>
+<span class="text-[11px] font-bold text-gray-400">09:15 AM</span>
+</div>
+<h3 class="font-bold text-[#0c1d1d] dark:text-white">Lu (Husky)</h3>
+<p class="text-xs text-[#45a1a1] mb-3">Chủ nuôi: Chị Lan • Bỏ ăn, sốt cao</p>
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px] text-primary">history</span>
+</div>
+<span class="text-[10px] font-medium text-[#45a1a1]">Gần nhất: 2 tuần trước</span>
+</div>
+</div>
+<!-- Regular Card -->
+<div class="bg-white dark:bg-[#122b2b] p-4 rounded-xl border-l-4 border-primary/40 shadow-sm cursor-pointer hover:shadow-md transition-all">
+<div class="flex justify-between items-start mb-2">
+<span class="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-black rounded uppercase tracking-tighter">Thường lệ</span>
+<span class="text-[11px] font-bold text-gray-400">10:00 AM</span>
+</div>
+<h3 class="font-bold text-[#0c1d1d] dark:text-white">Milo (Poodle)</h3>
+<p class="text-xs text-[#45a1a1] mb-3">Chủ nuôi: Anh Tuấn • Tiêm phòng</p>
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px] text-gray-400">history</span>
+</div>
+<span class="text-[10px] font-medium text-[#45a1a1]">Gần nhất: 6 tháng trước</span>
+</div>
+</div>
+<!-- Checkup Card -->
+<div class="bg-white dark:bg-[#122b2b] p-4 rounded-xl border-l-4 border-amber-400/40 shadow-sm cursor-pointer hover:shadow-md transition-all opacity-80">
+<div class="flex justify-between items-start mb-2">
+<span class="px-2 py-0.5 bg-amber-100 text-amber-600 text-[10px] font-black rounded uppercase tracking-tighter">Tái khám</span>
+<span class="text-[11px] font-bold text-gray-400">10:45 AM</span>
+</div>
+<h3 class="font-bold text-[#0c1d1d] dark:text-white">Bông (Mèo Anh)</h3>
+<p class="text-xs text-[#45a1a1] mb-3">Chủ nuôi: Anh Nam • Kiểm tra vết thương</p>
+</div>
+<!-- More Cards... -->
+<div class="bg-white dark:bg-[#122b2b] p-4 rounded-xl border-l-4 border-primary/40 shadow-sm cursor-pointer hover:shadow-md transition-all">
+<div class="flex justify-between items-start mb-2">
+<span class="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-black rounded uppercase tracking-tighter">Tư vấn</span>
+<span class="text-[11px] font-bold text-gray-400">11:30 AM</span>
+</div>
+<h3 class="font-bold text-[#0c1d1d] dark:text-white">Xuka (Corgi)</h3>
+<p class="text-xs text-[#45a1a1] mb-3">Chủ nuôi: Chị Hoa • Dinh dưỡng</p>
+</div>
+</div>
+</section>
+<!-- Patient Detail Panel (Right Column) -->
+<section class="flex-1 bg-white dark:bg-[#0f2323] flex flex-col overflow-hidden relative">
+<div class="flex-1 overflow-y-auto custom-scrollbar p-8">
+<div class="max-w-3xl mx-auto space-y-8">
+<!-- Pet Profile Header -->
+<div class="flex items-start gap-6">
+<div class="w-32 h-32 rounded-2xl bg-primary/5 flex-shrink-0 relative overflow-hidden group">
+<img class="w-full h-full object-cover" data-alt="Close up of a cute Siberian Husky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUhXtGAygXimYDsZeE25Xt7RPg5QQRXHOhZNzQhn7FtswwoGFqqQwhXDdG_M5ao_a6NXfxYtcp0eoQ11mGZCLtiqZh11TfJL4V1oSHXQNEn4zacZDDu6kp_eOuo3uSSwTQLf14bXpdmXWqPmxxWYobXBqWHDM7tiFpJDFZCQpSo7Pbl6yT3001vZXw7jp_wDik_hB6DhMPQXf0JFQoLNBL1NO-XEuUtUy4bMgYwsjWlxXRV0W95DNUHmCkPcJbqf7D71hksUQoSmY"/>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="material-symbols-outlined text-white">zoom_in</span>
+</div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between">
+<div>
+<h2 class="text-3xl font-black text-[#0c1d1d] dark:text-white mb-1">Lu <span class="text-[#45a1a1] font-normal text-xl">(Husky)</span></h2>
+<div class="flex gap-4 text-sm font-medium text-[#45a1a1]">
+<span>3 tuổi • Đực</span>
+<span>•</span>
+<span>24.5 kg</span>
+<span>•</span>
+<span class="text-primary">Mã: PET-2024-88</span>
+</div>
+</div>
+<div class="text-right">
+<p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Chủ nuôi</p>
+<p class="font-bold text-[#0c1d1d] dark:text-white">Nguyễn Thị Lan</p>
+<p class="text-xs text-primary">+84 90 1234 567</p>
+</div>
+</div>
+<div class="mt-4 flex gap-2">
+<span class="px-3 py-1 bg-[#ef5350]/10 text-[#ef5350] text-[11px] font-bold rounded-full">Sốt cao (39.5°C)</span>
+<span class="px-3 py-1 bg-amber-100 text-amber-700 text-[11px] font-bold rounded-full">Bỏ ăn 2 ngày</span>
+<span class="px-3 py-1 bg-primary/10 text-primary text-[11px] font-bold rounded-full">Tiêm chủng đầy đủ</span>
+</div>
+</div>
+</div>
+<hr class="border-[#cdeaea] dark:border-[#1a3a3a]"/>
+<!-- Medical History Timeline -->
+<div>
+<h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">history_edu</span>
+                                    Lịch sử điều trị gần đây
+                                </h3>
+<div class="space-y-4">
+<div class="flex gap-4 items-start relative pb-4 before:absolute before:left-3 before:top-8 before:bottom-0 before:w-0.5 before:bg-[#cdeaea]">
+<div class="w-6 h-6 rounded-full bg-primary flex-shrink-0 border-4 border-white dark:border-[#0f2323] z-10"></div>
+<div class="bg-background-light dark:bg-[#1a3a3a] p-4 rounded-xl flex-1">
+<div class="flex justify-between mb-1">
+<h4 class="font-bold text-sm uppercase">Khám tổng quát</h4>
+<span class="text-xs font-medium text-[#45a1a1]">15/09/2024</span>
+</div>
+<p class="text-sm text-[#45a1a1]">Kết quả: Sức khỏe tốt, đã tẩy giun định kỳ. Ghi chú: Cần theo dõi cân nặng.</p>
+</div>
+</div>
+<div class="flex gap-4 items-start relative pb-4 before:absolute before:left-3 before:top-8 before:bottom-0 before:w-0.5 before:bg-[#cdeaea]">
+<div class="w-6 h-6 rounded-full bg-primary/40 flex-shrink-0 border-4 border-white dark:border-[#0f2323] z-10"></div>
+<div class="bg-background-light dark:bg-[#1a3a3a] p-4 rounded-xl flex-1">
+<div class="flex justify-between mb-1">
+<h4 class="font-bold text-sm uppercase">Viêm tai ngoài</h4>
+<span class="text-xs font-medium text-[#45a1a1]">02/05/2024</span>
+</div>
+<p class="text-sm text-[#45a1a1]">Điều trị: Thuốc nhỏ tai Dexoryl, uống kháng sinh 7 ngày. Phục hồi hoàn toàn.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Doctor's Notes Area -->
+<div>
+<h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">edit_note</span>
+                                    Ghi chú sơ bộ của bác sĩ
+                                </h3>
+<textarea class="w-full bg-background-light dark:bg-[#1a3a3a] border-2 border-dashed border-[#cdeaea] dark:border-[#2a4a4a] rounded-xl p-4 text-sm focus:ring-primary focus:border-primary transition-all placeholder:italic" placeholder="Viết ghi chú nhanh hoặc dự đoán chẩn đoán trước khi khám..." rows="4"></textarea>
+</div>
+<!-- Workload Visual -->
+<div class="bg-primary/5 p-4 rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">assessment</span>
+<div>
+<p class="text-sm font-bold">Khối lượng công việc hôm nay</p>
+<p class="text-xs text-[#45a1a1]">Bác sĩ còn 6 lịch hẹn trong buổi sáng</p>
+</div>
+</div>
+<div class="w-16 h-16 relative">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-gray-200 dark:text-gray-700" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-width="6"></circle>
+<circle class="text-primary" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-dasharray="175" stroke-dashoffset="40" stroke-width="6"></circle>
+</svg>
+<span class="absolute inset-0 flex items-center justify-center text-[10px] font-black">75%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sticky Action Toolbar -->
+<div class="p-6 bg-white dark:bg-[#122b2b] border-t border-[#cdeaea] dark:border-[#1a3a3a] flex items-center justify-between gap-4">
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-black text-sm shadow-xl shadow-primary/30 hover:brightness-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined">check_circle</span>
+                                CHẤP NHẬN LỊCH
+                            </button>
+<button class="flex items-center gap-2 px-6 py-3 border-2 border-primary/20 text-primary rounded-xl font-bold text-sm hover:bg-primary/5 transition-all">
+<span class="material-symbols-outlined">contact_support</span>
+                                THÊM THÔNG TIN
+                            </button>
+</div>
+<button class="flex items-center gap-2 px-6 py-3 text-[#ef5350] rounded-xl font-bold text-sm hover:bg-[#ef5350]/5 transition-all">
+<span class="material-symbols-outlined">move_up</span>
+                            CHUYỂN KHOA
+                        </button>
+</div>
+</section>
 </div>
 </main>
-
+</div>
 </body></html>

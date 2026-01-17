@@ -36,7 +36,8 @@ public class NguoiDungService {
     @Autowired
     private FileStorageService fileStorageService;
 
-    private static final List<Role> STAFF_ROLES = Arrays.asList(Role.DOCTOR, Role.SPA, Role.STAFF, Role.RECEPTIONIST);
+    // Danh sách các Role được coi là nhân viên
+    private static final List<Role> STAFF_ROLES = Arrays.asList(Role.ADMIN, Role.DOCTOR, Role.SPA, Role.STAFF, Role.RECEPTIONIST);
 
     @Transactional
     public NguoiDungResponse createUnifiedUser(UnifiedCreateUserRequest request, MultipartFile anhDaiDien) {
@@ -72,6 +73,7 @@ public class NguoiDungService {
         newUser.setAnhDaiDien(fileName);
         NguoiDung savedUser = nguoiDungRepository.save(newUser);
 
+        // Nếu Role thuộc nhóm nhân viên (bao gồm cả ADMIN), tự động tạo bản ghi trong bảng NhanVien
         if (STAFF_ROLES.contains(role)) {
             NhanVien newNhanVien = new NhanVien();
             newNhanVien.setHoTen(savedUser.getHoTen());
@@ -111,7 +113,7 @@ public class NguoiDungService {
             case SPA: return "Nhân viên Spa/Grooming";
             case RECEPTIONIST: return "Lễ tân";
             case STAFF: return "Nhân viên cửa hàng";
-            case ADMIN: return "Admin";
+            case ADMIN: return "Quản trị viên";
             default: return "Nhân viên";
         }
     }
@@ -194,6 +196,7 @@ public class NguoiDungService {
 
         NguoiDung savedUser = nguoiDungRepository.save(nguoiDung);
 
+        // Nếu user đã có bản ghi nhân viên, cập nhật thông tin
         if (savedUser.getNhanVien() != null) {
             NhanVien nhanVien = savedUser.getNhanVien();
             nhanVien.setHoTen(savedUser.getHoTen());
@@ -206,6 +209,17 @@ public class NguoiDungService {
             }
             
             nhanVienRepository.save(nhanVien);
+        }
+        // Nếu user chưa có bản ghi nhân viên nhưng role mới thuộc nhóm nhân viên, tạo mới
+        else if (roleChanged && STAFF_ROLES.contains(savedUser.getRole())) {
+            NhanVien newNhanVien = new NhanVien();
+            newNhanVien.setHoTen(savedUser.getHoTen());
+            newNhanVien.setEmail(savedUser.getEmail());
+            newNhanVien.setSoDienThoai(savedUser.getSoDienThoai());
+            newNhanVien.setChucVu(getDefaultTitleForRole(savedUser.getRole()));
+            newNhanVien.setAnhDaiDien(savedUser.getAnhDaiDien());
+            newNhanVien.setNguoiDung(savedUser);
+            nhanVienRepository.save(newNhanVien);
         }
 
         return savedUser;

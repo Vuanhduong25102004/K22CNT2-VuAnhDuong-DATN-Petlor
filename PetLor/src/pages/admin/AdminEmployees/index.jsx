@@ -209,52 +209,42 @@ const AdminEmployees = () => {
 
     try {
       if (editingEmployee) {
-        // UPDATE
         const updateData = {
-          hoTen: formData.hoTen,
-          chucVu: formData.chucVu,
-          soDienThoai: formData.soDienThoai,
-          email: formData.email,
-          chuyenKhoa: formData.chuyenKhoa,
-          kinhNghiem: formData.kinhNghiem,
-          role: formData.role,
+          ...formData,
           userId: editingEmployee.userId,
         };
-        if (formData.password) {
-          updateData.password = formData.password;
-        }
+        dataPayload.append("nhanVien", JSON.stringify(updateData));
 
-        dataPayload.append(
-          "nhanVien",
-          new Blob([JSON.stringify(updateData)], { type: "application/json" })
-        );
         if (avatarFile) {
           dataPayload.append("anhDaiDien", avatarFile);
         }
 
+        // 4. Gọi API
         await userService.updateStaff(editingEmployee.nhanVienId, dataPayload);
         toast.success("Cập nhật nhân viên thành công!");
       } else {
-        // CREATE
+        // === CREATE ===
         if (!formData.password) {
           toast.warning("Vui lòng nhập mật khẩu cho nhân viên mới.");
           return;
         }
-        dataPayload.append(
-          "nhanVien",
-          new Blob([JSON.stringify(formData)], { type: "application/json" })
-        );
+
+        // 1. Append JSON String
+        dataPayload.append("nhanVien", JSON.stringify(formData));
+
+        // 2. Append File nếu có
         if (avatarFile) {
           dataPayload.append("anhDaiDien", avatarFile);
         }
 
+        // 3. Gọi API
         await userService.createStaff(dataPayload);
         toast.success("Tạo mới nhân viên thành công!");
       }
 
       setIsFormModalOpen(false);
       fetchEmployees();
-      fetchStats(); // Cập nhật lại thống kê sau khi thêm/sửa
+      fetchStats();
     } catch (error) {
       console.error("Lỗi submit form:", error);
       const msg =

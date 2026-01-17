@@ -25,4 +25,7 @@ public interface LichHenRepository extends JpaRepository<LichHen, Integer> {
     List<LichHen> searchByKeyword(@Param("keyword") String keyword);
 
     List<LichHen> findByNguoiDung_Email(String email);
+    
+    // Tìm lịch hẹn theo ID nhân viên
+    List<LichHen> findByNhanVien_NhanVienId(Integer nhanVienId);
 }

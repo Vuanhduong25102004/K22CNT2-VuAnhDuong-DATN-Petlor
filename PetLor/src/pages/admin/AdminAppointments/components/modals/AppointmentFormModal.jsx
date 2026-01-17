@@ -25,7 +25,6 @@ const AppointmentFormModal = ({
 }) => {
   const isEdit = !!initialData;
 
-  // State form
   const [formData, setFormData] = useState({
     dichVuId: "",
     nhanVienId: "",
@@ -40,7 +39,7 @@ const AppointmentFormModal = ({
     date: "",
     time: "",
     trangThai: "CHO_XAC_NHAN",
-    loaiLichHen: "",
+    loaiLichHen: "THUONG_LE",
   });
 
   useEffect(() => {
@@ -50,27 +49,48 @@ const AppointmentFormModal = ({
         const dateTime = initialData.thoiGianBatDau || "";
         const [datePart, timePart] = dateTime.split("T");
 
+        // Logic Enum
+        const rawType = initialData.loaiLichHen;
+        const foundType = APPOINTMENT_TYPES.find(
+          (t) => t.value === rawType || t.label === rawType
+        );
+        const normalizedLoaiLichHen = foundType ? foundType.value : "THUONG_LE";
+
+        // --- QUAN TRỌNG: LẤY DỮ LIỆU LỒNG NHAU (NESTED OBJECTS) ---
+        // Kiểm tra xem backend trả về phẳng hay lồng trong object thuCung/khachHang
+        const petData = initialData.thuCung || {};
+        const customerData = initialData.khachHang || {};
+
         setFormData({
           dichVuId:
             initialData.dichVuId ||
             (initialData.dichVu ? initialData.dichVu.id : "") ||
             "",
           nhanVienId: initialData.nhanVienId || "",
-          tenKhachHang: initialData.tenKhachHang || "",
-          soDienThoaiKhachHang: initialData.soDienThoaiKhachHang || "",
-          tenThuCung: initialData.tenThuCung || "",
-          chungLoai: initialData.chungLoai || "",
-          giongLoai: initialData.giongLoai || "",
-          gioiTinh: initialData.gioiTinh || "",
-          ngaySinh: initialData.ngaySinh
-            ? initialData.ngaySinh.split("T")[0]
-            : "",
-          // Logic lấy dữ liệu cũ ok
-          ghiChu: initialData.ghiChuKhachHang || initialData.ghiChu || "",
+
+          // --- FIX LỖI Ở ĐÂY: Ưu tiên lấy từ object con ---
+          tenKhachHang:
+            initialData.tenKhachHang || customerData.tenKhachHang || "",
+          soDienThoaiKhachHang:
+            initialData.soDienThoaiKhachHang ||
+            customerData.soDienThoai ||
+            customerData.soDienThoaiKhachHang ||
+            "",
+
+          tenThuCung: initialData.tenThuCung || petData.tenThuCung || "",
+          chungLoai: initialData.chungLoai || petData.chungLoai || "",
+          giongLoai: initialData.giongLoai || petData.giongLoai || "",
+          gioiTinh: initialData.gioiTinh || petData.gioiTinh || "",
+          ngaySinh:
+            initialData.ngaySinh || petData.ngaySinh
+              ? (initialData.ngaySinh || petData.ngaySinh).split("T")[0]
+              : "",
+
+          ghiChu: initialData.ghiChu || initialData.ghiChuKhachHang || "",
           date: datePart || "",
           time: timePart ? timePart.slice(0, 5) : "",
           trangThai: initialData.trangThai || "CHỜ XÁC NHẬN",
-          loaiLichHen: initialData.loaiLichHen || "THUONG_LE",
+          loaiLichHen: normalizedLoaiLichHen,
         });
       } else {
         // --- CHẾ ĐỘ CREATE ---
@@ -99,66 +119,68 @@ const AppointmentFormModal = ({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Log nhẹ để xem input có ăn không
-    if (name === "ghiChu") {
-      console.log("⌨️ Typing Ghi chú:", value);
-    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // --- PHẦN QUAN TRỌNG: DEBUG LOG ---
   const handleSubmit = () => {
-    const combinedDateTime = `${formData.date}T${formData.time}:00`;
+    // 1. Xử lý thời gian (Giữ nguyên)
+    const startDateTimeString = `${formData.date}T${formData.time}:00`;
+    const startDateObj = new Date(startDateTimeString);
+    const endDateObj = new Date(startDateObj.getTime() + 60 * 60 * 1000);
+    const pad = (n) => n.toString().padStart(2, "0");
+    const endDateTimeString = `${endDateObj.getFullYear()}-${pad(
+      endDateObj.getMonth() + 1
+    )}-${pad(endDateObj.getDate())}T${pad(endDateObj.getHours())}:${pad(
+      endDateObj.getMinutes()
+    )}:${pad(endDateObj.getSeconds())}`;
 
-    // Tạo object gửi đi
-    const submitData = {
-      ...formData,
-      thoiGianBatDau: combinedDateTime,
-      // Gửi cả 2 trường để "bắt dính" mọi kiểu DTO của backend
+    // 2. KHỞI TẠO submitData (Dùng cho cả PUT và POST)
+    let submitData = {
+      dichVuId: formData.dichVuId,
+      nhanVienId: formData.nhanVienId || null,
+      thoiGianBatDau: startDateTimeString,
+      thoiGianKetThuc: endDateTimeString,
+      trangThai: formData.trangThai,
+
+      // 👇👇👇 QUAN TRỌNG: BẠN PHẢI THÊM DÒNG NÀY Ở ĐÂY 👇👇👇
+      loaiLichHen: formData.loaiLichHen,
+      // 👆👆👆 Nếu thiếu dòng này, PUT sẽ không gửi loaiLichHen đi
+
       ghiChu: formData.ghiChu,
-      ghiChuKhachHang: formData.ghiChu,
     };
 
-    // --- BẮT ĐẦU LOG ---
-    console.group(
-      "%c🛑 DEBUG SUBMIT FORM",
-      "color: red; font-size: 14px; font-weight: bold;"
-    );
-
-    console.log(
-      `%cMODE: ${isEdit ? "EDIT (PUT)" : "CREATE (POST)"}`,
-      "color: blue; font-weight: bold"
-    );
-
-    if (isEdit) {
-      console.log("🆔 ID Lịch hẹn:", initialData?.lichHenId || initialData?.id);
+    // 3. NẾU LÀ TẠO MỚI (POST) -> Gửi thêm thông tin khách
+    if (!isEdit) {
+      submitData = {
+        ...submitData,
+        tenKhachHang: formData.tenKhachHang,
+        soDienThoaiKhachHang: formData.soDienThoaiKhachHang,
+        tenThuCung: formData.tenThuCung,
+        chungLoai: formData.chungLoai,
+        giongLoai: formData.giongLoai,
+        gioiTinh: formData.gioiTinh,
+        ngaySinh: formData.ngaySinh || null,
+      };
     }
 
-    console.log(
-      "📝 Giá trị người dùng nhập (formData.ghiChu):",
-      `"${formData.ghiChu}"`
-    );
+    // 4. Clean và Submit
+    const finalData = cleanData(submitData);
+    console.log("Dữ liệu gửi đi (PUT/POST):", finalData);
+    // ^^^ Bật F12 xem log này, phải thấy dòng "loaiLichHen": "THUONG_LE" thì mới đúng
 
-    console.log("📦 DATA CUỐI CÙNG GỬI ĐI (Payload):", submitData);
-
-    // Kiểm tra kỹ xem trong object cuối cùng field ghiChu có dữ liệu không
-    if (!submitData.ghiChu && !submitData.ghiChuKhachHang) {
-      console.warn("⚠️ CẢNH BÁO: Field ghi chú đang bị RỖNG hoặc UNDEFINED!");
-    } else {
-      console.log("✅ Check field ghiChu:", submitData.ghiChu);
-      console.log(
-        "✅ Check field ghiChuKhachHang:",
-        submitData.ghiChuKhachHang
-      );
-    }
-
-    console.groupEnd();
-    // --- KẾT THÚC LOG ---
-
-    onSubmit(submitData);
+    onSubmit(finalData);
   };
 
-  // Class style chung cho input để code gọn hơn
+  const cleanData = (obj) => {
+    const cleaned = { ...obj };
+    Object.keys(cleaned).forEach((key) => {
+      if (cleaned[key] === "") {
+        cleaned[key] = null;
+      }
+    });
+    return cleaned;
+  };
+
   const inputClass =
     "w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-slate-700 font-medium focus:ring-0 transition-all focus:border-primary outline-none";
   const labelClass =
@@ -179,7 +201,7 @@ const AppointmentFormModal = ({
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
             className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]"
           >
-            {/* --- HEADER --- */}
+            {/* HEADER */}
             <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10 shrink-0">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-teal-50 flex items-center justify-center text-primary border border-teal-100/50">
@@ -215,9 +237,9 @@ const AppointmentFormModal = ({
               </button>
             </div>
 
-            {/* --- BODY (Scrollable) --- */}
+            {/* BODY */}
             <div className="p-8 space-y-10 overflow-y-auto custom-scrollbar flex-1">
-              {/* SECTION 1: THÔNG TIN LỊCH HẸN */}
+              {/* SECTION 1: LỊCH HẸN */}
               <section>
                 <div className="flex items-center gap-3 mb-6">
                   <span className="material-symbols-outlined text-primary bg-teal-50 p-1.5 rounded-lg text-xl">
@@ -228,7 +250,6 @@ const AppointmentFormModal = ({
                   </h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* --- NEW FIELD: LOẠI LỊCH HẸN --- */}
                   <div>
                     <label className={labelClass}>Loại lịch hẹn</label>
                     <select
@@ -244,7 +265,6 @@ const AppointmentFormModal = ({
                       ))}
                     </select>
                   </div>
-
                   <div>
                     <label className={labelClass}>
                       Dịch vụ <span className="text-red-500">*</span>
@@ -268,7 +288,6 @@ const AppointmentFormModal = ({
                       ))}
                     </select>
                   </div>
-
                   <div>
                     <label className={labelClass}>Nhân viên phụ trách</label>
                     <select
@@ -285,7 +304,6 @@ const AppointmentFormModal = ({
                       ))}
                     </select>
                   </div>
-
                   <div>
                     <label className={labelClass}>
                       Ngày hẹn <span className="text-red-500">*</span>
@@ -298,7 +316,6 @@ const AppointmentFormModal = ({
                       className={inputClass}
                     />
                   </div>
-
                   <div>
                     <label className={labelClass}>
                       Giờ hẹn <span className="text-red-500">*</span>
@@ -311,7 +328,6 @@ const AppointmentFormModal = ({
                       className={inputClass}
                     />
                   </div>
-
                   {isEdit && (
                     <div className="md:col-span-1">
                       <label className={labelClass}>Trạng thái</label>
@@ -336,7 +352,6 @@ const AppointmentFormModal = ({
 
               {/* GRID: KHÁCH HÀNG & THÚ CƯNG */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                {/* SECTION 2: KHÁCH HÀNG */}
                 <section className="space-y-6">
                   <div className="flex items-center gap-3">
                     <span className="material-symbols-outlined text-primary bg-teal-50 p-1.5 rounded-lg text-xl">
@@ -386,8 +401,6 @@ const AppointmentFormModal = ({
                     </div>
                   </div>
                 </section>
-
-                {/* SECTION 3: THÚ CƯNG */}
                 <section className="space-y-6">
                   <div className="flex items-center gap-3">
                     <span className="material-symbols-outlined text-orange-500 bg-orange-50 p-1.5 rounded-lg text-xl">
@@ -464,7 +477,7 @@ const AppointmentFormModal = ({
               </div>
             </div>
 
-            {/* --- FOOTER --- */}
+            {/* FOOTER */}
             <div className="p-8 border-t border-slate-100 flex justify-end items-center gap-6 bg-slate-50/30 shrink-0">
               <button
                 onClick={onClose}

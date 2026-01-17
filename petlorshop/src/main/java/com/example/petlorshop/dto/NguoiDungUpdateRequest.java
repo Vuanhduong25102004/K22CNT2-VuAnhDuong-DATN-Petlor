@@ -12,8 +12,8 @@ import lombok.Setter;
 public class NguoiDungUpdateRequest {
     private String hoTen;
     private String email;
-    private String password; // Optional: chỉ cập nhật nếu có giá trị
+    private String password;
     private String soDienThoai;
     private String diaChi;
-    private String role; // Sửa thành String
+    private String role;
 }
