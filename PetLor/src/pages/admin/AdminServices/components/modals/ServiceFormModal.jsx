@@ -247,11 +247,7 @@ const ServiceFormModal = ({
                         <label className="block w-full cursor-pointer">
                           <div className="flex items-center gap-3">
                             <span
-                              onClick={() =>
-                                document
-                                  .getElementById("service-img-upload")
-                                  .click()
-                              }
+                              /* ĐÃ XÓA SỰ KIỆN onClick Ở ĐÂY */
                               className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 cursor-pointer shadow-sm transition-colors"
                             >
                               Chọn tệp...

@@ -1,44 +1,51 @@
-import React from "react"; // Xóa import useState, useEffect, axios, authService
+import React from "react";
 import useEscapeKey from "../../../hooks/useEscapeKey";
-import { UserAvatar } from "./utils"; // Import Component mới từ file utils
+import { UserAvatar } from "./utils";
 
 const AdminHeader = ({ user, title }) => {
-  // Không cần logic fetch ảnh ở đây nữa
-
   return (
-    <header className="sticky top-0 z-10 flex items-center justify-between whitespace-nowrap border-b border-gray-200 bg-white px-6 py-3">
+    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-8">
       {/* Phần tiêu đề */}
-      <div className="flex items-center gap-8">
-        <h2 className="text-lg font-bold leading-tight tracking-[-0.015em] text-gray-900">
+      <div className="flex items-center gap-4">
+        <h2 className="text-sm font-medium text-slate-500">
           {title || "Pet Lor Dashboard"}
         </h2>
       </div>
-      {/* Phần các nút chức năng bên phải */}
-      <div className="flex items-center gap-4">
-        {/* Thanh tìm kiếm */}
-        <label className="!h-10 flex min-w-40 max-w-64 flex-col">
-          <div className="flex h-full w-full flex-1 items-stretch rounded-lg">
-            <div className="flex items-center justify-center rounded-l-lg border-r-0 border-none bg-gray-100 pl-4 text-gray-500">
-              <span className="material-symbols-outlined">search</span>
-            </div>
-            <input
-              className="flex h-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg rounded-l-none border-l-0 border-none bg-gray-100 px-4 pl-2 text-base font-normal leading-normal text-gray-900 placeholder:text-gray-500 focus:border-none focus:outline-0 focus:ring-0"
-              placeholder="Tìm kiếm..."
-            />
-          </div>
-        </label>
-        {/* Nút thông báo */}
-        <button className="flex h-10 w-10 max-w-[480px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg bg-gray-100 text-sm font-bold leading-normal tracking-[0.015em] text-gray-900 transition-colors hover:bg-gray-200">
-          <span className="material-symbols-outlined">notifications</span>
-        </button>
-        {/* Thông tin người dùng và ảnh đại diện */}
-        <div className="flex items-center">
-          {/* 👇 Thay thế thẻ img cũ bằng UserAvatar */}
-          <UserAvatar user={user} className="h-8 w-8" />
 
-          <span className="ml-2 hidden text-sm font-medium text-gray-700 md:block">
-            {user?.hoTen || "Admin"}
+      {/* Phần các nút chức năng bên phải */}
+      <div className="flex items-center gap-6">
+        {/* Thanh tìm kiếm */}
+        <div className="relative">
+          <span className="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+            search
           </span>
+          <input
+            className="w-64 rounded-full border border-slate-200 bg-slate-50 py-1.5 pl-10 pr-4 text-sm focus:border-primary focus:ring-primary"
+            placeholder="Tìm kiếm..."
+            type="text"
+          />
+        </div>
+
+        {/* Nút thông báo */}
+        <button className="relative rounded-full p-2 text-slate-500 hover:bg-slate-100">
+          <span className="material-symbols-rounded">notifications</span>
+          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full border-2 border-white bg-red-500"></span>
+        </button>
+
+        {/* Thông tin người dùng và ảnh đại diện */}
+        <div className="flex items-center gap-3 border-l border-slate-200 pl-4">
+          <div className="hidden text-right md:block">
+            <p className="text-sm font-semibold text-gray-900">
+              {user?.hoTen || "Admin"}
+            </p>
+            <p className="text-xs text-slate-500">Administrator</p>
+          </div>
+
+          {/* Component UserAvatar thay thế cho thẻ img */}
+          <UserAvatar
+            user={user}
+            className="h-10 w-10 rounded-full border-2 border-slate-200"
+          />
         </div>
       </div>
     </header>

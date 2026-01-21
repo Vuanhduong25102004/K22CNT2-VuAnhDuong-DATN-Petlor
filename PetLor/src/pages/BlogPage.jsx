@@ -1,68 +1,59 @@
 import React, { useEffect } from "react";
-// 1. Import AOS
 import AOS from "aos";
 import "aos/dist/aos.css";
 
-// Dữ liệu bài viết mới nhất
+// Dữ liệu mẫu cho bài viết
 const recentArticles = [
   {
-    title: "5 mẹo huấn luyện mèo đi vệ sinh đúng chỗ",
-    author: "Jane Doe",
-    time: "3 giờ trước",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDJDe-Fc03oujRDxzfhE2e0_6ua-wKaYbEik04_Zmma5ydBKsyiJK50xsYgwUI_R4yOWvpS88M1v1tmmtWIECCEtuKLm4pd0lLNZswoA4-N7jzETlzCxCNTH6rOAKBvkdbIg9USfwNAtZPXMQ-NYE-dQsF7-x4adyFVsNk_HgK3-NlYVQyxQuQK8AwSrTJ_eA7-JD79Yn4VXXVfuD0NyZNt01rITJZgMb-p7vZ-NGW2ausSwLVp_cu1rX5i_0jWA4XsSnnRwcgBM3Wc",
+    title: "Lịch tiêm phòng đầy đủ cho mèo trong năm 2024",
+    desc: "Cập nhật những thay đổi mới nhất về phác đồ tiêm vaccine 4 bệnh cơ bản cho mèo và những lưu ý trước khi tiêm.",
+    date: "15 Tháng 5, 2024",
+    readTime: "5 phút đọc",
+    category: "Sức khỏe",
+    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAgEFjauwy_GNl54zK9RLRUWigecWZ6lzch52KOCovg1DHvhJjGLIbtpoRR2vOrHdrg0najDQWUDgJ9mWIaqUmAfxg5hFsz6ExRuOO6IyVPgrgnzmuecu9bvG6eXjOP6Mv_yj-YScjPhI9OhZ9zOZhN4xLE9-x1WNyHs_RlOSRhxLc5cz1HSA4fYr1APT2l5MMjbgM92S5BX6AZHKHbN1WgtDRwYLZ3_yv89-KZJpOnaPXvn5tFLQmIntVj2z6cy4uob3-OwT5A0NI",
   },
   {
-    title: "Dấu hiệu nhận biết thú cưng bị stress",
-    author: "Dr. Thú Y",
-    time: "1 ngày trước",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCfF4FuwTpz0kuzEow2KiuQ0DR_zkAPZhpCWaC6dwxCC9IvwbXPxDL7_yJJ0pxs8aaDF4iANur7fxRM-9b5Z4c2lZmwjQqRCTNdzZbWMdNtpTTjA12xMV2NZg13RAs7sXAShBAtRcD6VhVh0d9go7pCf-zroVQysDs5YpEIkd457Uc_tWMsvgwBC9ob_LwECxtbwbWVv6god0S6uHVmmxMfI0eMNqwWzRWd4uijnjglq8D_Ls3b4WDvIkYteeiLgusKsiRNUwtJj77W",
+    title: "Top 5 đồ chơi giúp mèo con thông minh và năng động hơn",
+    desc: "Đồ chơi không chỉ để giải trí, chúng còn là công cụ quan trọng giúp phát triển não bộ và bản năng săn mồi tự nhiên.",
+    date: "10 Tháng 5, 2024",
+    readTime: "7 phút đọc",
+    category: "Huấn luyện",
+    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDyLXK7AzVH26RrOe1AGCe_9exeYBwM09ls5yxE-_SqNHSRzf6Q-L2Quyq1Wl6Scb_yHQ_4pWwtuB8Mbc1TGdikvfgJLPM73bRcwSVPZHpZWA_qH8vQ8JqQd-72ZKPVh2va38WhoCxG1c-fPczsbt4GycYQrvM58rpJR9Jp_ZLSEWY4ka6rm_0f3FjeNKOPbjpqJutosAf8TvTy1_1yJ0uM-VPMonbUjWxUDs64mxL0c8mDYUwVttU03TfSbGCAhorH59ZpeEhvaLc",
   },
   {
-    title: "Review các loại thức ăn hạt tốt nhất năm 2024",
-    author: "PetLor Team",
-    time: "2 ngày trước",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDosikFGM5_X9HSmyfiH4Zt1-Q5n-iBDuUGNA_3Dzm-FvtBWboukxrKdvMsPxCBwekeqmM2diAcMSMi_oGlCBwyjVfkC9rr1PMIHc-JiXGxipVG5p14-FkYW0ENblu-IL45IkTei0AAtkm0GvZkM8wIxvQLsgLeNjoCEbTxwBlyflN75dpujRpRCpshatxiSchMnoSwVTnMLT-KTDJF6dpdE_huIaqieovh3MDD-TO4ghmAQ4whU3Bs8c4Tvgem1BbSvb03USeqBvJG",
+    title: "Tự tắm cho mèo tại nhà đúng cách không lo bị cào",
+    desc: "Việc tắm cho mèo có thể là một cơn ác mộng nếu bạn không biết kỹ thuật. Hãy cùng tìm hiểu các bước cơ bản.",
+    date: "02 Tháng 5, 2024",
+    readTime: "10 phút đọc",
+    category: "Chăm sóc",
+    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAgkhqO5Sz6n3jPe7L1K09dx8_9nT8GB4AtEFl6GQ5AhP9InELBL41J1k6Ze6hABsdkeWcMmfO5bp-lj9Py3F2x6oh-DO-YHpsSLewCvVPOS-eGtNLGA-RGxM42dpq4oSSs_3SE1pXPMKqCs5WHZ54nZIsSvaxTgyCdyWEh5QjRf3nVjHU4ogHuBlNJjisAhM6HeajTUixjkftD-UvpXdpyV-roIQEnbD-cwBXZk8Zca8IIPVZhZqu7CX5HLlCzsPcZOpLbKJNyWRY",
   },
   {
-    title: "Lịch tiêm phòng cần thiết cho chó con",
-    author: "Dr. Thú Y",
-    time: "5 ngày trước",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuA5ZbzLszltV20AJtNe_28rQB48ssnTVX6Ef_PQUfl2YxpF9pzHirlVbQNtHMJSl5ZjibzSe0qaIYoocj27nu44j7_AVJSmR7u0L2Ws5BIqkGF4l-VpKWGRmZDTyXnr2C81qBIPyLeEcdfGr-yEXofZWiWaRfqZ6lOOo2VR8Gh7ElTbmLXWSv5PXiOHNn_XtVWk_apyjrBJY8tOAQU6CTZxx1RdE5kMe6Q9viZPN8WxlPUjtbmrr1b-dh4MsBU4Ju5iEC-BJHJQuy3y",
+    title: "Chế độ ăn 'Raw Food' cho chó: Lợi ích và những rủi ro",
+    desc: "Nhiều chủ nuôi đang chuyển sang chế độ ăn thực phẩm thô. Hãy cùng nghe ý kiến từ các chuyên gia dinh dưỡng.",
+    date: "28 Tháng 4, 2024",
+    readTime: "6 phút đọc",
+    category: "Dinh dưỡng",
+    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDyLXK7AzVH26RrOe1AGCe_9exeYBwM09ls5yxE-_SqNHSRzf6Q-L2Quyq1Wl6Scb_yHQ_4pWwtuB8Mbc1TGdikvfgJLPM73bRcwSVPZHpZWA_qH8vQ8JqQd-72ZKPVh2va38WhoCxG1c-fPczsbt4GycYQrvM58rpJR9Jp_ZLSEWY4ka6rm_0f3FjeNKOPbjpqJutosAf8TvTy1_1yJ0uM-VPMonbUjWxUDs64mxL0c8mDYUwVttU03TfSbGCAhorH59ZpeEhvaLc",
   },
 ];
 
-// Dữ liệu chuyên mục
-const categories = [
-  { name: "Dinh dưỡng", count: 12 },
-  { name: "Huấn luyện", count: 8 },
-  { name: "Sức khỏe", count: 21 },
-  { name: "Mẹo chăm sóc", count: 15 },
-  { name: "Tin tức cộng đồng", count: 5 },
-];
-
-// Dữ liệu bài viết phổ biến
 const popularPosts = [
   {
-    title: "Những điều cần chuẩn bị khi đón một chú cún mới",
-    time: "1 tuần trước",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAyb21Fl9L1ZnPfUDkDfBGWnSqNaK-YuhPhQDaafB13Z0vEaX3_4A0BCzfHNdRzx5zNZcF6Oxd7MDUIgkqN74aUTSS0otyS2Ei8wir8KsSC_ycSn4LNVJQIGB0E2Z7NI9Y5AxGmZcYQI_h2ox-mcf8Y6AgEaQAIOat129Sa9gaCWTsivDb7rsEVVNs3ZFL49Ayw8rhd6uDmH-QRusqMCXBXou_YW0zAP2MHbrKPx6tVuR6EKyN05DTncNyOgN7A8WM3Jf8ljyIHW_HI",
+    title: "Cách xử lý khi mèo bị ngộ độc thực phẩm",
+    views: "12,402 lượt xem",
+    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBh5Ebb9RT5mHA_DCn6fMyCMrW1qz17Su5yfFQzX6s3EmdobnrNzJ7DESM7VL3ZXoAW-A5gLAsBIHhqgVs6cgMjAVN-X45Ym9-Ikh6qlCJqfWqVtyQ2aTZPobULp8mKEn6utHaDGYFERx8lbKLmmDt3bPwJmB3wbfKqah0MoUugsykzHgw3D_bdcmbuRQxzgbjiY2ws8kjhnnUt3RFMrJa4KBxPeyqvNmlgYNQU_gn5mwRC3RiaX_z1FxWu7FhdCd4EdzI22YCr8Wc",
   },
   {
-    title: "Chăm sóc lông cho mèo: Bí quyết để bộ lông luôn bóng mượt",
-    time: "2 tuần trước",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuC9SLajyQXY8M9QfSRzEuT_h4sbxKVhgCXoH40mNHmP_9x62oViWRTbQrMvuaUzES6k50OIOpGhdcue7RxJ3rETJaMMjGIy18ishOzCYS_-_YK4t-BKL8evtOv0RkHB-j-l0pxggpoQrKJfIKe18vOD3e77gdYJPH0NlL7Uli5j1LEjXgBy_ttDxk8BBHRHQ2l2zKBbO88--ysmO7_nAEDEWmmnBEwilg_7iq-_our820-eOODqrxQi_krRFyiRdYFjvQzlHRzS9UKI",
+    title: "Huấn luyện chó ngồi theo lệnh chỉ trong 1 tuần",
+    views: "8,950 lượt xem",
+    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAgkhqO5Sz6n3jPe7L1K09dx8_9nT8GB4AtEFl6GQ5AhP9InELBL41J1k6Ze6hABsdkeWcMmfO5bp-lj9Py3F2x6oh-DO-YHpsSLewCvVPOS-eGtNLGA-RGxM42dpq4oSSs_3SE1pXPMKqCs5WHZ54nZIsSvaxTgyCdyWEh5QjRf3nVjHU4ogHuBlNJjisAhM6HeajTUixjkftD-UvpXdpyV-roIQEnbD-cwBXZk8Zca8IIPVZhZqu7CX5HLlCzsPcZOpLbKJNyWRY",
   },
-];
-
-const tags = [
-  "Chó Poodle",
-  "Mèo Anh",
-  "Dinh dưỡng",
-  "Huấn luyện",
-  "Tiêm phòng",
-  "Spa thú cưng",
-  "Đồ chơi",
-  "Sức khỏe",
+  {
+    title: "Tại sao mèo lại thích ngủ chung với chủ?",
+    views: "7,321 lượt xem",
+    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAqLPSKl-nWV_zxTXmrM7NbrCkgiS3AlNL4UXNxJT3E0rMzB7s7YD2xFkH093hIfqaJFcI-CXA-llLQpuJx_sPtrxvAPnhmv712E5cvlbJxAaxGMStrzsYVIXUn4rh7-ymxxULecrhVFIJeO910kGoy7Tnq-tIIhqmhEacY5Y1-R9PDsQefg_G1wvIFwZkYU17UHEWGGgaSpqbgPdver2A8hJwtimTxV17txHRBerIxM8k29AcyRR1v3NYpHt70xu45wfrhmSNiUNk",
+  },
 ];
 
 const BlogPage = () => {
@@ -76,255 +67,296 @@ const BlogPage = () => {
         delay: 0,
         easing: "ease-out-cubic",
       });
-
       AOS.refresh();
     }, 100);
     return () => clearTimeout(aosInit);
   }, []);
 
   return (
-    <div className="w-full font-display bg-background-light text-text-main">
-      <main className="flex-1 px-4 sm:px-10 lg:px-20 py-10">
-        <div className="max-w-7xl mx-auto">
-          {/* Page Heading - Animation Fade Up */}
-          <div
-            className="flex flex-wrap justify-between gap-3 p-4 mt-6"
-            data-aos="fade-up"
-          >
-            <div className="flex min-w-72 flex-col gap-3">
-              <h1 className="text-4xl font-black leading-tight tracking-[-0.033em]">
-                Góc Chuyên Gia Thú Cưng
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 text-gray-900 font-sans mt-13">
+      {/* --- SECTION 1: FEATURED POST --- */}
+      <section className="mb-16" data-aos="fade-up">
+        <div className="relative group overflow-hidden rounded-[32px] bg-white shadow-xl border border-gray-100">
+          <div className="grid grid-cols-1 lg:grid-cols-2">
+            <div className="h-64 lg:h-[500px] overflow-hidden">
+              <img
+                alt="Featured Post"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                src="https://images.unsplash.com/photo-1511044568932-338cba0ad803?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              />
+            </div>
+            <div className="p-8 lg:p-12 flex flex-col justify-center">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">
+                  Nổi bật
+                </span>
+                <span className="text-gray-400 text-sm">24 Tháng 5, 2024</span>
+              </div>
+              <h1 className="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-6 leading-tight group-hover:text-primary transition-colors">
+                Bí quyết chăm sóc mèo con cho người mới bắt đầu: Hướng dẫn toàn
+                tập từ A-Z
               </h1>
-              <p className="text-text-muted text-base font-normal leading-normal">
-                Tất cả những gì bạn cần biết để chăm sóc tốt nhất cho người bạn
-                bốn chân của mình.
+              <p className="text-gray-600 text-lg mb-8 line-clamp-3">
+                Khám phá những kiến thức nền tảng quan trọng về dinh dưỡng, y tế
+                và tâm lý để giúp chú mèo con của bạn phát triển toàn diện và
+                hạnh phúc trong môi trường mới.
+              </p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <img
+                    alt="Author"
+                    className="w-10 h-10 rounded-full object-cover"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBh5Ebb9RT5mHA_DCn6fMyCMrW1qz17Su5yfFQzX6s3EmdobnrNzJ7DESM7VL3ZXoAW-A5gLAsBIHhqgVs6cgMjAVN-X45Ym9-Ikh6qlCJqfWqVtyQ2aTZPobULp8mKEn6utHaDGYFERx8lbKLmmDt3bPwJmB3wbfKqah0MoUugsykzHgw3D_bdcmbuRQxzgbjiY2ws8kjhnnUt3RFMrJa4KBxPeyqvNmlgYNQU_gn5mwRC3RiaX_z1FxWu7FhdCd4EdzI22YCr8Wc"
+                  />
+                  <span className="text-sm font-bold text-gray-900">
+                    BS. Nguyễn Minh
+                  </span>
+                </div>
+                <a
+                  className="flex items-center gap-2 text-primary font-bold hover:translate-x-1 transition-transform"
+                  href="#"
+                >
+                  Đọc bài viết{" "}
+                  <span className="material-symbols-outlined">
+                    arrow_forward
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- SECTION 2: FILTERS & SEARCH --- */}
+      <section
+        className="mb-12 flex flex-col md:flex-row items-center justify-between gap-8 border-b border-gray-100 pb-8"
+        data-aos="fade-up"
+        data-aos-delay="100"
+      >
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 w-full md:w-auto scrollbar-hide">
+          <button className="px-6 py-2.5 bg-primary text-white rounded-full font-bold whitespace-nowrap shadow-md shadow-primary/20">
+            Tất cả
+          </button>
+          {["Chăm sóc", "Dinh dưỡng", "Sức khỏe", "Huấn luyện"].map((cat) => (
+            <button
+              key={cat}
+              className="px-6 py-2.5 bg-white text-gray-600 rounded-full font-semibold border border-gray-100 hover:border-primary hover:text-primary transition-all whitespace-nowrap hover:shadow-sm"
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+        <div className="relative w-full md:w-80">
+          <input
+            className="w-full bg-white border border-gray-100 rounded-3xl py-3 pl-4 pr-12 focus:ring-2 focus:ring-primary/50 text-sm shadow-sm outline-none"
+            placeholder="Tìm kiếm bài viết..."
+            type="text"
+          />
+          <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
+            search
+          </span>
+        </div>
+      </section>
+
+      {/* --- SECTION 3: MAIN GRID (ARTICLES & SIDEBAR) --- */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        {/* LEFT COLUMN: ARTICLES */}
+        <div className="lg:col-span-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {recentArticles.map((article, index) => (
+              <article
+                key={index}
+                className="group bg-white rounded-3xl overflow-hidden border border-gray-100 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300 flex flex-col h-full"
+                data-aos="fade-up"
+                data-aos-delay={index * 100}
+              >
+                <div className="h-56 overflow-hidden relative shrink-0">
+                  <img
+                    alt={article.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    src={article.img}
+                  />
+                  <div className="absolute top-4 left-4">
+                    <span className="bg-white/90 backdrop-blur px-3 py-1 rounded-lg text-xs font-bold text-primary shadow-sm uppercase">
+                      {article.category}
+                    </span>
+                  </div>
+                </div>
+                <div className="p-6 flex flex-col flex-1">
+                  <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
+                    <span className="flex items-center gap-1">
+                      <span className="material-symbols-outlined text-sm">
+                        calendar_today
+                      </span>{" "}
+                      {article.date}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="material-symbols-outlined text-sm">
+                        schedule
+                      </span>{" "}
+                      {article.readTime}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold text-primary mb-3 leading-snug line-clamp-2 hover:underline cursor-pointer">
+                    {article.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm line-clamp-3 mb-6 leading-relaxed flex-1">
+                    {article.desc}
+                  </p>
+                  <a
+                    className="text-sm font-bold flex items-center gap-2 hover:text-primary transition-colors mt-auto"
+                    href="#"
+                  >
+                    Xem chi tiết{" "}
+                    <span className="material-symbols-outlined text-sm">
+                      chevron_right
+                    </span>
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          <div className="mt-16 flex justify-center gap-2" data-aos="fade-up">
+            <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-100 text-gray-500 hover:border-primary hover:text-primary transition-colors">
+              <span className="material-symbols-outlined">chevron_left</span>
+            </button>
+            <button className="w-12 h-12 flex items-center justify-center rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/30">
+              1
+            </button>
+            <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-100 text-gray-500 hover:border-primary hover:text-primary transition-colors font-bold">
+              2
+            </button>
+            <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-100 text-gray-500 hover:border-primary hover:text-primary transition-colors font-bold">
+              3
+            </button>
+            <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-100 text-gray-500 hover:border-primary hover:text-primary transition-colors">
+              <span className="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: SIDEBAR */}
+        <aside className="lg:col-span-4">
+          <div className="sticky top-28 space-y-10">
+            {/* Trending Widget */}
+            <div
+              className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm"
+              data-aos="fade-left"
+            >
+              <h3 className="text-2xl font-extrabold mb-8 text-gray-900 flex items-center gap-2">
+                <span className="w-1.5 h-6 bg-primary rounded-full"></span>
+                Xem nhiều nhất
+              </h3>
+              <div className="space-y-6">
+                {popularPosts.map((post, index) => (
+                  <a
+                    key={index}
+                    className="group flex gap-4 cursor-pointer"
+                    href="#"
+                  >
+                    <div className="flex-shrink-0 w-20 h-20 rounded-2xl overflow-hidden shadow-sm">
+                      <img
+                        alt="Trending"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                        src={post.img}
+                      />
+                    </div>
+                    <div className="flex flex-col justify-center">
+                      <h4 className="font-bold text-gray-900 leading-tight group-hover:text-primary transition-colors line-clamp-2">
+                        {post.title}
+                      </h4>
+                      <span className="text-xs text-gray-400 mt-2">
+                        {post.views}
+                      </span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Consultant Widget */}
+            <div
+              className="bg-emerald-50 p-8 rounded-3xl border border-emerald-100 relative overflow-hidden group"
+              data-aos="fade-left"
+              data-aos-delay="200"
+            >
+              {/* Icon trang trí nền mờ (Thêm vào để nhìn đỡ trống) */}
+              <span className="material-symbols-outlined absolute -bottom-8 -right-8 text-9xl text-emerald-500/10 -rotate-12 pointer-events-none select-none">
+                medical_services
+              </span>
+
+              <div className="relative z-10">
+                <h4 className="text-xl font-bold text-emerald-900 mb-2">
+                  Cần tư vấn sức khỏe?
+                </h4>
+                <p className="text-sm text-emerald-700 mb-6 leading-relaxed">
+                  Đội ngũ bác sĩ thú y của chúng tôi luôn sẵn sàng hỗ trợ bạn
+                  24/7 qua Zalo.
+                </p>
+                <button className="w-full py-3 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/25 hover:bg-primary/90 hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
+                  <span className="material-symbols-outlined text-lg">
+                    chat
+                  </span>
+                  Chat với bác sĩ ngay
+                </button>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      {/* --- SECTION 4: NEWSLETTER (NEWLY UPDATED) --- */}
+      <section
+        className="mt-24 relative overflow-hidden rounded-[48px] p-2 bg-white shadow-2xl border border-gray-100"
+        data-aos="fade-up"
+      >
+        <div className="absolute inset-4 border border-white/20 rounded-[40px] pointer-events-none z-20"></div>
+        <div className="relative h-[600px] w-full overflow-hidden rounded-[40px]">
+          <img
+            alt="Happy pet owners in park"
+            className="absolute inset-0 w-full h-full object-cover"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqLPSKl-nWV_zxTXmrM7NbrCkgiS3AlNL4UXNxJT3E0rMzB7s7YD2xFkH093hIfqaJFcI-CXA-llLQpuJx_sPtrxvAPnhmv712E5cvlbJxAaxGMStrzsYVIXUn4rh7-ymxxULecrhVFIJeO910kGoy7Tnq-tIIhqmhEacY5Y1-R9PDsQefg_G1wvIFwZkYU17UHEWGGgaSpqbgPdver2A8hJwtimTxV17txHRBerIxM8k29AcyRR1v3NYpHt70xu45wfrhmSNiUNk"
+          />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
+          <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6 max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/20 backdrop-blur-md text-white border border-white/20 text-xs font-bold w-fit mb-8 tracking-[0.2em] uppercase">
+              <span className="material-symbols-outlined text-sm">mail</span>
+              <span>Exclusive Updates</span>
+            </div>
+            <h2 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-tight">
+              Đăng ký nhận <span className="text-primary">bản tin PetLor</span>
+            </h2>
+            <p className="text-white/90 text-lg md:text-xl mb-12 leading-relaxed max-w-2xl font-medium">
+              Nhận ngay các mẹo chăm sóc thú cưng, tin tức mới nhất và ưu đãi
+              độc quyền hàng tuần qua email của bạn.
+            </p>
+            <div className="w-full max-w-md mx-auto relative">
+              <div className="flex flex-col sm:flex-row gap-3 p-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-[28px] shadow-2xl">
+                <div className="flex-grow flex items-center px-4 min-h-[60px]">
+                  <span className="material-symbols-outlined text-white/60 mr-3">
+                    alternate_email
+                  </span>
+                  <input
+                    className="w-full bg-transparent border-0 focus:ring-0 text-white placeholder:text-white/50 text-base outline-none"
+                    placeholder="Email của bạn..."
+                    type="email"
+                  />
+                </div>
+                <button className="bg-primary hover:bg-white hover:text-primary text-white font-extrabold px-8 py-4 sm:py-0 rounded-[20px] text-lg transition-all duration-300 flex items-center justify-center gap-2 whitespace-nowrap min-h-[60px]">
+                  Gửi ngay
+                  <span className="material-symbols-outlined">send</span>
+                </button>
+              </div>
+              <p className="text-white/40 text-xs mt-4">
+                Chúng tôi cam kết bảo mật thông tin và không gửi spam.
               </p>
             </div>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            {/* LEFT CONTENT (Main) */}
-            <div className="lg:col-span-8">
-              {/* Featured Post */}
-              <div className="p-4 mb-8" data-aos="fade-up" data-aos-delay="100">
-                <h2 className="text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3 pt-5">
-                  Bài viết nổi bật
-                </h2>
-                <div className="flex flex-col items-stretch justify-start rounded-lg shadow-sm bg-white overflow-hidden transition-all duration-300 hover:shadow-md">
-                  <div
-                    className="w-full bg-center bg-no-repeat aspect-video bg-cover"
-                    style={{
-                      backgroundImage: `url("https://lh3.googleusercontent.com/aida-public/AB6AXuDXuksCp9dnSahK2_niRoxlu45O-eLyOnnc_Rr6GdPlbn6FGX6GkTI53rJMZU4dYsuOXpDi4wE-u7hCCJfG0b5FJp0sTaxr6_i1NMriFiGdNscSsO7-b8XVSPblOGXApEeGw84Pub0-EsMBNFdovu2GdObIG7Lny2OXB32ebh9zCNP7v05gehJjEAF-KcCLtZ4nGIg8ogcoUMgmuDn6iGeM-7p3Uk36STJvCTuj6Hmzajak7YLGahVrg4ZsQKL-COc3XT_UCQ2hCoMk")`,
-                    }}
-                  ></div>
-                  <div className="flex w-full min-w-72 grow flex-col items-stretch justify-center gap-3 p-6">
-                    <p className="text-2xl font-bold leading-tight tracking-[-0.015em] cursor-pointer hover:text-primary transition-colors">
-                      Hướng dẫn toàn diện về dinh dưỡng cho chó Poodle
-                    </p>
-                    <p className="text-text-muted text-base font-normal leading-normal">
-                      Khám phá chế độ ăn uống lý tưởng, các loại thực phẩm nên
-                      và không nên cho chó Poodle để chúng luôn khỏe mạnh và
-                      năng động.
-                    </p>
-                    <div className="flex items-center justify-between mt-2">
-                      <p className="text-text-muted text-sm font-normal leading-normal">
-                        Bởi Dr. Thú Y | 1 giờ trước
-                      </p>
-
-                      <button
-                        className="relative group/btn flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-primary text-[#111813] text-sm font-bold shadow-sm transition-all duration-300 ease-out hover:scale-105
-  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-[#10B981] before:transition-all before:duration-300 before:ease-out hover:before:w-full"
-                      >
-                        <span className="relative z-10 truncate transition-colors duration-300 group-hover/btn:text-white">
-                          Đọc thêm
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Latest Articles Grid */}
-              <h2
-                className="text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5"
-                data-aos="fade-up"
-              >
-                Bài viết mới nhất
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {recentArticles.map((article, index) => (
-                  <div
-                    key={index}
-                    className="p-4"
-                    data-aos="fade-up"
-                    data-aos-delay={index * 100 + 100} // Bài viết xuất hiện lần lượt
-                  >
-                    <div className="flex flex-col items-stretch justify-start rounded-lg shadow-sm bg-white overflow-hidden h-full transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-                      <div
-                        className="w-full bg-center bg-no-repeat aspect-video bg-cover"
-                        style={{ backgroundImage: `url("${article.img}")` }}
-                      ></div>
-                      <div className="flex w-full min-w-72 grow flex-col items-stretch justify-between gap-1 p-4">
-                        <p className="text-lg font-bold leading-tight tracking-[-0.015em] hover:text-primary cursor-pointer transition-colors">
-                          {article.title}
-                        </p>
-                        <div className="flex flex-col gap-1 mt-2">
-                          <p className="text-text-muted text-sm font-normal leading-normal">
-                            Bởi {article.author} | {article.time}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Pagination - Fade Up */}
-              <div
-                className="flex justify-center items-center gap-2 mt-12 p-4"
-                data-aos="fade-up"
-                data-aos-delay="200"
-              >
-                <button className="flex items-center justify-center size-10 rounded-lg text-sm bg-white border border-gray-200 text-text-main hover:bg-gray-100 transition-colors">
-                  <span className="material-symbols-outlined text-lg">
-                    chevron_left
-                  </span>
-                </button>
-                <button className="flex items-center justify-center size-10 rounded-lg text-sm bg-primary text-[#111813] font-bold shadow-sm">
-                  1
-                </button>
-                <button className="flex items-center justify-center size-10 rounded-lg text-sm bg-white border border-gray-200 text-text-main hover:bg-gray-100 transition-colors">
-                  2
-                </button>
-                <button className="flex items-center justify-center size-10 rounded-lg text-sm bg-white border border-gray-200 text-text-main hover:bg-gray-100 transition-colors">
-                  3
-                </button>
-                <button className="flex items-center justify-center size-10 rounded-lg text-sm bg-white border border-gray-200 text-text-main hover:bg-gray-100 transition-colors">
-                  <span className="material-symbols-outlined text-lg">
-                    chevron_right
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            {/* RIGHT CONTENT (Sidebar) */}
-            <aside className="lg:col-span-4 space-y-8 p-4">
-              {/* Search Widget - Fade Left */}
-              <div className="py-3" data-aos="fade-left" data-aos-delay="100">
-                <h3 className="font-bold text-lg mb-4">Tìm kiếm bài viết</h3>
-                <label className="flex flex-col min-w-40 h-12 w-full">
-                  <div className="flex w-full flex-1 items-stretch rounded-3xl h-full overflow-hidden border border-gray-200 bg-white">
-                    <div className="text-text-muted flex items-center justify-center pl-4">
-                      <span className="material-symbols-outlined">search</span>
-                    </div>
-                    <input
-                      className="flex w-full min-w-0 flex-1 resize-none border-none bg-transparent h-full placeholder:text-text-muted px-4 pl-2 text-base font-normal focus:outline-none focus:ring-0"
-                      placeholder="Tìm kiếm..."
-                    />
-                  </div>
-                </label>
-              </div>
-
-              {/* Categories Widget - Fade Left */}
-              <div data-aos="fade-left" data-aos-delay="200">
-                <h3 className="font-bold text-lg mb-4">Chuyên mục</h3>
-                <ul className="space-y-3">
-                  {categories.map((cat, index) => (
-                    <li key={index}>
-                      <a
-                        className="flex justify-between items-center text-text-muted hover:text-primary transition-colors group"
-                        href="#"
-                      >
-                        <span className="group-hover:translate-x-1 transition-transform">
-                          {cat.name}
-                        </span>
-                        <span className="text-xs font-mono bg-primary/20 text-[#111813] px-2 py-1 rounded font-bold">
-                          {cat.count}
-                        </span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Popular Posts Widget - Fade Left */}
-              <div data-aos="fade-left" data-aos-delay="300">
-                <h3 className="font-bold text-lg mb-4">Bài viết phổ biến</h3>
-                <div className="space-y-4 ">
-                  {popularPosts.map((post, index) => (
-                    <div
-                      key={index}
-                      className="flex items-start gap-4 group cursor-pointer transition-all duration-300 ease-out hover:scale-105"
-                    >
-                      <div
-                        className="w-20 h-20 bg-center bg-no-repeat bg-cover rounded-lg flex-shrink-0 transition-transform group-hover:scale-105"
-                        style={{ backgroundImage: `url("${post.img}")` }}
-                      ></div>
-                      <div>
-                        <p className="font-bold text-sm leading-snug group-hover:text-primary transition-colors">
-                          {post.title}
-                        </p>
-                        <p className="text-xs text-text-muted mt-1">
-                          {post.time}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Tags Widget - Fade Left (MỚI THÊM) */}
-              <div data-aos="fade-left" data-aos-delay="350">
-                <h3 className="font-bold text-lg mb-4">Từ khóa nổi bật</h3>
-                <div className="flex flex-wrap gap-2">
-                  {tags.map((tag, index) => (
-                    <a
-                      key={index}
-                      href="#"
-                      className="px-3 py-1.5 bg-white border border-gray-200 rounded-3xl text-sm text-text-muted hover:text-primary hover:border-primary transition-colors"
-                    >
-                      {tag}
-                    </a>
-                  ))}
-                </div>
-              </div>
-
-              {/* Newsletter Widget - Fade Left */}
-              <div
-                className="p-6 rounded-lg bg-[#e8fdf0] border border-[#d1fae5] text-center"
-                data-aos="fade-left"
-                data-aos-delay="400"
-              >
-                <h4 className="font-bold text-lg mb-2 text-[#111813]">
-                  Đăng ký nhận tin
-                </h4>
-                <p className="text-sm text-text-muted mb-4">
-                  Nhận những mẹo và tin tức mới nhất về chăm sóc thú cưng thẳng
-                  vào hộp thư của bạn.
-                </p>
-                <div className="flex flex-col gap-2">
-                  <input
-                    className="w-full rounded-lg border border-gray-200 bg-white p-2 text-sm placeholder:text-text-muted focus:ring-1 focus:ring-primary outline-none"
-                    placeholder="Email của bạn"
-                    type="email"
-                  />
-
-                  <button
-                    className="relative group/btn flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-[#111813] text-sm font-bold shadow-sm transition-all duration-300 ease-out hover:scale-105
-  before:absolute before:left-0 before:top-0 before:h-full before:w-0 before:bg-[#10B981] before:transition-all before:duration-300 before:ease-out hover:before:w-full"
-                  >
-                    <span className="relative z-10 transition-colors duration-300 group-hover/btn:text-white">
-                      Đăng ký
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </aside>
-          </div>
-        </div>
-      </main>
-    </div>
+      </section>
+    </main>
   );
 };
 

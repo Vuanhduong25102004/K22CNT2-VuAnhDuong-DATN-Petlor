@@ -239,12 +239,7 @@ const ProductFormModal = ({
                           />
                           {/* Custom File Input Hack for better styling */}
                           <div className="flex items-center gap-3">
-                            <span
-                              onClick={() =>
-                                document.getElementById("file-upload").click()
-                              }
-                              className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 cursor-pointer shadow-sm transition-colors"
-                            >
+                            <span className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 cursor-pointer shadow-sm transition-colors">
                               Chọn tệp...
                             </span>
                             <span className="text-xs text-slate-400 italic truncate max-w-[150px]">
