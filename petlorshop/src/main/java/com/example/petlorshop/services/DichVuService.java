@@ -8,11 +8,15 @@ import com.example.petlorshop.repositories.DanhMucDichVuRepository;
 import com.example.petlorshop.repositories.DichVuRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class DichVuService {
@@ -26,7 +30,35 @@ public class DichVuService {
     @Autowired
     private FileStorageService fileStorageService;
 
-    public Page<DichVuResponse> getAllDichVu(Pageable pageable) {
+    public Page<DichVuResponse> getAllDichVu(Pageable pageable, String keyword, Integer categoryId) {
+        if (StringUtils.hasText(keyword)) {
+            List<DichVu> allMatches = dichVuRepository.searchByKeyword(keyword);
+            
+            String lowerKeyword = keyword.toLowerCase();
+            List<DichVuResponse> filteredList = allMatches.stream()
+                    .filter(dv -> (dv.getTenDichVu() != null && dv.getTenDichVu().toLowerCase().contains(lowerKeyword)) || 
+                                  (dv.getMoTa() != null && dv.getMoTa().toLowerCase().contains(lowerKeyword)))
+                    // Lọc thêm theo danh mục nếu có
+                    .filter(dv -> categoryId == null || (dv.getDanhMucDichVu() != null && dv.getDanhMucDichVu().getDanhMucDvId().equals(categoryId)))
+                    .map(this::convertToResponse)
+                    .collect(Collectors.toList());
+
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), filteredList.size());
+            
+            if (start > filteredList.size()) {
+                return new PageImpl<>(List.of(), pageable, filteredList.size());
+            }
+            
+            List<DichVuResponse> pageContent = filteredList.subList(start, end);
+            return new PageImpl<>(pageContent, pageable, filteredList.size());
+        }
+
+        if (categoryId != null) {
+            return dichVuRepository.findByDanhMucDichVu_DanhMucDvId(categoryId, pageable)
+                    .map(this::convertToResponse);
+        }
+
         return dichVuRepository.findAll(pageable)
                 .map(this::convertToResponse);
     }

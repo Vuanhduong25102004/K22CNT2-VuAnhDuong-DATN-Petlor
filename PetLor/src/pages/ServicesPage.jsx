@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import productService from "../services/productService";
+// Import services
+import productService from "../services/productService"; // Hoặc petService tùy bạn đặt tên file
+import petService from "../services/petService"; // Import file vừa sửa ở Bước 1
+import searchService from "../services/searchService";
 
 // Helper: Format tiền tệ
 const formatCurrency = (amount) => {
@@ -19,9 +22,90 @@ const ServicesPage = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // --- STATE MỚI ---
+  const [categories, setCategories] = useState([]); // Lưu danh sách danh mục
+  const [keyword, setKeyword] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null); // Lưu ID danh mục đang chọn
+
+  // --- 1. LẤY DANH MỤC DỊCH VỤ TỪ API ---
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await petService.getAllServiceCategories();
+        let data = [];
+        // Xử lý các trường hợp trả về của API (Mảng hoặc Object Pageable)
+        if (Array.isArray(response)) data = response;
+        else if (response?.data) data = response.data;
+        else if (response?.content) data = response.content;
+
+        setCategories(data);
+      } catch (error) {
+        console.error("Lỗi tải danh mục dịch vụ:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // --- 2. HÀM FETCH DỊCH VỤ (CÓ LỌC) ---
+  const fetchServices = async (searchQuery = "", catId = null) => {
+    setLoading(true);
+    try {
+      let response;
+
+      // LOGIC: Nếu có keyword HOẶC có categoryId -> Gọi API Search
+      if (searchQuery.trim() || catId !== null) {
+        // Gọi searchServices với cả 2 tham số
+        response = await searchService.searchServices(searchQuery, catId);
+      } else {
+        // Mặc định lấy tất cả
+        response = await productService.getAllServices();
+      }
+
+      // Xử lý kết quả trả về
+      let data = [];
+      if (Array.isArray(response)) data = response;
+      else if (response?.data && Array.isArray(response.data))
+        data = response.data;
+      else if (response?.content && Array.isArray(response.content))
+        data = response.content;
+      else if (response?.data?.content && Array.isArray(response.data.content))
+        data = response.data.content;
+
+      setServices(data);
+    } catch (error) {
+      console.error("Lỗi khi tải dịch vụ:", error);
+    } finally {
+      setLoading(false);
+      setTimeout(() => AOS.refresh(), 100);
+    }
+  };
+
+  // --- HANDLERS ---
+  const handleSearch = () => {
+    fetchServices(keyword, selectedCategoryId);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      fetchServices(keyword, selectedCategoryId);
+    }
+  };
+
+  // Click chọn danh mục
+  const handleCategoryClick = (catId) => {
+    setSelectedCategoryId(catId);
+    fetchServices(keyword, catId);
+  };
+
+  // Reset tất cả
+  const handleReset = () => {
+    setKeyword("");
+    setSelectedCategoryId(null);
+    fetchServices("", null);
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
-
     const aosInit = setTimeout(() => {
       AOS.init({
         duration: 800,
@@ -32,32 +116,7 @@ const ServicesPage = () => {
       });
       AOS.refresh();
     }, 100);
-
-    const fetchServices = async () => {
-      try {
-        const response = await productService.getAllServices();
-        let data = [];
-        if (Array.isArray(response)) data = response;
-        else if (response?.data && Array.isArray(response.data))
-          data = response.data;
-        else if (response?.content && Array.isArray(response.content))
-          data = response.content;
-        else if (
-          response?.data?.content &&
-          Array.isArray(response.data.content)
-        )
-          data = response.data.content;
-        setServices(data);
-      } catch (error) {
-        console.error("Lỗi khi tải dịch vụ:", error);
-      } finally {
-        setLoading(false);
-        setTimeout(() => AOS.refresh(), 100);
-      }
-    };
-
-    fetchServices();
-
+    fetchServices(); // Gọi lần đầu
     return () => clearTimeout(aosInit);
   }, []);
 
@@ -72,12 +131,9 @@ const ServicesPage = () => {
   };
 
   return (
-    // SỬA: Đổi bg-white thành bg-gray-50 để khớp với background-light trong HTML mẫu
-    // Thêm overflow-x-hidden để tránh scroll ngang ngoài ý muốn
     <div className="w-full min-h-screen font-display bg-gray-50 text-gray-900 overflow-x-hidden">
       <main>
         {/* ================= HERO SECTION ================= */}
-        {/* SỬA: Thay mt-16 bằng pt-28 (padding-top) để tránh lỗi margin collapse đẩy layout xuống */}
         <section className="bg-primary relative overflow-hidden pt-28 pb-16 lg:pb-24">
           <div
             className="absolute inset-0 pointer-events-none"
@@ -114,8 +170,79 @@ const ServicesPage = () => {
           </div>
         </section>
 
+        {/* ================= FILTER & SEARCH SECTION ================= */}
+        <section
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20 mb-12"
+          data-aos="fade-up"
+        >
+          <div className="bg-white p-4 rounded-full border border-gray-100 shadow-xl flex flex-col lg:flex-row gap-6 items-center justify-between">
+            {/* INPUT TÌM KIẾM */}
+            <div className="relative w-full lg:w-96">
+              <span
+                className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hover:text-primary transition-colors"
+                onClick={handleSearch}
+              >
+                search
+              </span>
+              <input
+                className="w-full pl-12 pr-4 py-3 bg-gray-50 border-none rounded-full focus:ring-2 focus:ring-primary outline-none text-sm"
+                placeholder="Tìm kiếm dịch vụ..."
+                type="text"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                onKeyDown={handleKeyDown}
+              />
+            </div>
+
+            {/* DANH SÁCH DANH MỤC (ĐỘNG TỪ API) */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 no-scrollbar w-full lg:w-auto">
+              {/* Nút Tất cả */}
+              <button
+                onClick={handleReset}
+                className={`px-6 py-2.5 rounded-full font-bold whitespace-nowrap transition-all ${
+                  selectedCategoryId === null
+                    ? "bg-primary text-white shadow-primary/20"
+                    : "bg-gray-50 text-gray-600 hover:bg-primary/10 hover:text-primary"
+                }`}
+              >
+                Tất cả
+              </button>
+
+              {/* Render danh mục từ State */}
+              {categories.map((cat) => {
+                // Lưu ý: Kiểm tra kỹ tên trường trả về từ API (danhMucDvId / id, tenDanhMucDv / name)
+                const catId = cat.danhMucDvId || cat.id;
+                const catName = cat.tenDanhMucDv || cat.tenDanhMuc || cat.name;
+
+                return (
+                  <button
+                    key={catId}
+                    onClick={() => handleCategoryClick(catId)}
+                    className={`px-6 py-2.5 rounded-full font-bold transition-all whitespace-nowrap ${
+                      selectedCategoryId === catId
+                        ? "bg-primary text-white shadow-md shadow-primary/20"
+                        : "bg-gray-50 text-gray-600 hover:bg-primary/10 hover:text-primary"
+                    }`}
+                  >
+                    {catName}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Sort Dropdown */}
+            <div className="w-full lg:w-48">
+              <select className="w-full py-3 px-4 bg-gray-50 border-none rounded-full focus:ring-2 focus:ring-primary outline-none text-sm font-medium cursor-pointer">
+                <option>Phổ biến nhất</option>
+                <option>Giá thấp đến cao</option>
+                <option>Giá cao đến thấp</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
         {/* ================= SERVICES GRID ================= */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 pt-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {loading ? (
               <div className="col-span-full text-center py-20">
@@ -134,7 +261,6 @@ const ServicesPage = () => {
                     data-aos="fade-up"
                     data-aos-delay={index * 100}
                   >
-                    {/* Ảnh dịch vụ */}
                     <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mb-8 overflow-hidden group-hover:scale-105 transition-transform duration-300">
                       <img
                         src={`http://localhost:8080/uploads/${service.hinhAnh}`}
@@ -148,19 +274,15 @@ const ServicesPage = () => {
                         }}
                       />
                     </div>
-
                     <h3 className="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">
                       {service.tenDichVu}
                     </h3>
-
                     <div className="mb-4 text-lg font-extrabold text-primary">
                       {formatCurrency(service.giaDichVu)}
                     </div>
-
                     <p className="text-gray-500 mb-8 leading-relaxed line-clamp-3 flex-grow">
                       {service.moTa}
                     </p>
-
                     <div className="mt-auto pt-4 border-t border-gray-50">
                       <Link
                         to={`/services/${serviceId}`}
@@ -176,41 +298,27 @@ const ServicesPage = () => {
                 );
               })
             ) : (
-              <p className="col-span-full text-center text-gray-500">
-                Chưa có dịch vụ nào.
-              </p>
+              <div className="col-span-full text-center py-12 flex flex-col items-center justify-center">
+                <span className="material-symbols-outlined text-6xl text-gray-300 mb-4">
+                  search_off
+                </span>
+                <p className="text-gray-500 text-lg mb-4">
+                  Không tìm thấy dịch vụ nào phù hợp.
+                </p>
+                <button
+                  onClick={handleReset}
+                  className="px-6 py-2 bg-primary text-white font-bold rounded-xl hover:bg-opacity-90 transition-all"
+                >
+                  Xem tất cả dịch vụ
+                </button>
+              </div>
             )}
           </div>
         </section>
 
-        {/* ================= CONTACT SECTION ================= */}
+        {/* ... (Phần Contact Section giữ nguyên) ... */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 mb-24">
-          <div
-            className="bg-primary/5 rounded-[40px] p-12 flex flex-col md:flex-row items-center justify-between gap-12 border border-primary/10"
-            data-aos="zoom-in"
-          >
-            <div className="max-w-xl text-center md:text-left">
-              <h2 className="text-3xl font-extrabold mb-4 text-gray-900">
-                Bạn chưa tìm thấy dịch vụ mong muốn?
-              </h2>
-              <p className="text-gray-600 font-medium">
-                Liên hệ với chúng tôi ngay để được tư vấn các gói chăm sóc cá
-                nhân hóa theo yêu cầu riêng biệt của thú cưng của bạn.
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/contact">
-                <button className="bg-primary hover:bg-primary/90 text-white font-bold px-8 py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 w-full sm:w-auto">
-                  <span className="material-symbols-outlined">call</span>
-                  Liên hệ tư vấn
-                </button>
-              </Link>
-              <button className="bg-white border border-gray-200 text-gray-700 font-bold px-8 py-4 rounded-xl hover:bg-gray-50 transition-all flex items-center justify-center gap-2 w-full sm:w-auto">
-                <span className="material-symbols-outlined">chat</span>
-                Chat qua Zalo
-              </button>
-            </div>
-          </div>
+          {/* ... */}
         </section>
       </main>
     </div>

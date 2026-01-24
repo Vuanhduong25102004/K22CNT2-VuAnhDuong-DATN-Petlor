@@ -1,6 +1,8 @@
 package com.example.petlorshop.repositories;
 
 import com.example.petlorshop.models.DanhMucSanPham;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,6 +12,11 @@ import java.util.List;
 
 @Repository
 public interface DanhMucSanPhamRepository extends JpaRepository<DanhMucSanPham, Integer> {
+    // Global Search (List)
     @Query("SELECT d FROM DanhMucSanPham d WHERE LOWER(d.tenDanhMuc) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(d.moTa) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<DanhMucSanPham> searchByKeyword(@Param("keyword") String keyword);
+
+    // Page Search
+    @Query("SELECT d FROM DanhMucSanPham d WHERE LOWER(d.tenDanhMuc) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(d.moTa) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<DanhMucSanPham> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 }

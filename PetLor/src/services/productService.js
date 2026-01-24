@@ -54,6 +54,7 @@ const productService = {
 
   // --- DANH MỤC DỊCH VỤ ---
   getAllServiceCategories: () => apiClient.get('/danh-muc-dich-vu'),
+
 };
 
 export default productService;

@@ -19,8 +19,8 @@ public class PhieuNhapController {
     private PhieuNhapService phieuNhapService;
 
     @GetMapping
-    public ResponseEntity<Page<PhieuNhapResponse>> getAllPhieuNhap(Pageable pageable) {
-        return ResponseEntity.ok(phieuNhapService.getAllPhieuNhap(pageable));
+    public ResponseEntity<Page<PhieuNhapResponse>> getAllPhieuNhap(Pageable pageable, @RequestParam(required = false) String keyword) {
+        return ResponseEntity.ok(phieuNhapService.getAllPhieuNhap(pageable, keyword));
     }
 
     @GetMapping("/{id}")

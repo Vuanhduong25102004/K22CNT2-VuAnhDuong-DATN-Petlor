@@ -17,6 +17,7 @@ public class GlobalSearchDto {
     private List<SanPham> sanPhams;
     private List<DichVu> dichVus;
     private List<ThuCung> thuCungs;
+    private List<BaiViet> baiViets; // Thêm bài viết
 
     // Admin-only search results
     private List<NguoiDung> nguoiDungs;
@@ -27,9 +28,10 @@ public class GlobalSearchDto {
     private List<DanhMucDichVu> danhMucDichVus;
 
     // Constructor for public search
-    public GlobalSearchDto(List<SanPham> sanPhams, List<DichVu> dichVus, List<ThuCung> thuCungs) {
+    public GlobalSearchDto(List<SanPham> sanPhams, List<DichVu> dichVus, List<ThuCung> thuCungs, List<BaiViet> baiViets) {
         this.sanPhams = sanPhams;
         this.dichVus = dichVus;
         this.thuCungs = thuCungs;
+        this.baiViets = baiViets;
     }
 }

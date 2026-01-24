@@ -12,9 +12,11 @@ import com.example.petlorshop.repositories.SoTiemChungRepository;
 import com.example.petlorshop.repositories.ThuCungRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,7 +36,27 @@ public class SoTiemChungService {
     @Autowired
     private LichHenRepository lichHenRepository;
 
-    public Page<SoTiemChungResponse> getAllSoTiemChung(Pageable pageable) {
+    public Page<SoTiemChungResponse> getAllSoTiemChung(Pageable pageable, String keyword) {
+        if (StringUtils.hasText(keyword)) {
+            List<SoTiemChung> allMatches = soTiemChungRepository.searchByKeyword(keyword);
+            
+            String lowerKeyword = keyword.toLowerCase();
+            List<SoTiemChungResponse> filteredList = allMatches.stream()
+                    .filter(stc -> (stc.getTenVacXin() != null && stc.getTenVacXin().toLowerCase().contains(lowerKeyword)) || 
+                                   (stc.getGhiChu() != null && stc.getGhiChu().toLowerCase().contains(lowerKeyword)))
+                    .map(this::convertToResponse)
+                    .collect(Collectors.toList());
+
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), filteredList.size());
+            
+            if (start > filteredList.size()) {
+                return new PageImpl<>(List.of(), pageable, filteredList.size());
+            }
+            
+            List<SoTiemChungResponse> pageContent = filteredList.subList(start, end);
+            return new PageImpl<>(pageContent, pageable, filteredList.size());
+        }
         return soTiemChungRepository.findAll(pageable).map(this::convertToResponse);
     }
 

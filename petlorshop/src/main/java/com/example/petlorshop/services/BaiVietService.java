@@ -10,9 +10,11 @@ import com.example.petlorshop.repositories.DanhMucBaiVietRepository;
 import com.example.petlorshop.repositories.NhanVienRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -37,6 +39,29 @@ public class BaiVietService {
     // --- Danh Mục Bài Viết ---
     public List<DanhMucBaiViet> getAllDanhMuc() {
         return danhMucBaiVietRepository.findAll();
+    }
+
+    public Page<DanhMucBaiViet> getAllDanhMuc(Pageable pageable, String keyword) {
+        if (StringUtils.hasText(keyword)) {
+            List<DanhMucBaiViet> allMatches = danhMucBaiVietRepository.searchByKeyword(keyword);
+            
+            String lowerKeyword = keyword.toLowerCase();
+            List<DanhMucBaiViet> filteredList = allMatches.stream()
+                    .filter(dm -> (dm.getTenDanhMuc() != null && dm.getTenDanhMuc().toLowerCase().contains(lowerKeyword)) || 
+                                  (dm.getMoTa() != null && dm.getMoTa().toLowerCase().contains(lowerKeyword)))
+                    .collect(Collectors.toList());
+
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), filteredList.size());
+            
+            if (start > filteredList.size()) {
+                return new PageImpl<>(List.of(), pageable, filteredList.size());
+            }
+            
+            List<DanhMucBaiViet> pageContent = filteredList.subList(start, end);
+            return new PageImpl<>(pageContent, pageable, filteredList.size());
+        }
+        return danhMucBaiVietRepository.findAll(pageable);
     }
 
     public Optional<DanhMucBaiViet> getDanhMucById(Integer id) {
@@ -72,7 +97,35 @@ public class BaiVietService {
     }
 
     // --- Bài Viết ---
-    public Page<BaiVietResponse> getAllBaiViet(Pageable pageable) {
+    public Page<BaiVietResponse> getAllBaiViet(Pageable pageable, String keyword, Integer categoryId) {
+        if (StringUtils.hasText(keyword)) {
+            List<BaiViet> allMatches = baiVietRepository.searchByKeyword(keyword);
+            
+            String lowerKeyword = keyword.toLowerCase();
+            List<BaiVietResponse> filteredList = allMatches.stream()
+                    .filter(bv -> (bv.getTieuDe() != null && bv.getTieuDe().toLowerCase().contains(lowerKeyword)) || 
+                                  (bv.getNoiDung() != null && bv.getNoiDung().toLowerCase().contains(lowerKeyword)))
+                    // Lọc thêm theo danh mục nếu có
+                    .filter(bv -> categoryId == null || (bv.getDanhMucBaiViet() != null && bv.getDanhMucBaiViet().getDanhMucBvId().equals(categoryId)))
+                    .map(this::convertToResponse)
+                    .collect(Collectors.toList());
+
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), filteredList.size());
+            
+            if (start > filteredList.size()) {
+                return new PageImpl<>(List.of(), pageable, filteredList.size());
+            }
+            
+            List<BaiVietResponse> pageContent = filteredList.subList(start, end);
+            return new PageImpl<>(pageContent, pageable, filteredList.size());
+        }
+
+        if (categoryId != null) {
+            return baiVietRepository.findByDanhMucBaiViet_DanhMucBvId(categoryId, pageable)
+                    .map(this::convertToResponse);
+        }
+
         return baiVietRepository.findAll(pageable)
                 .map(this::convertToResponse);
     }

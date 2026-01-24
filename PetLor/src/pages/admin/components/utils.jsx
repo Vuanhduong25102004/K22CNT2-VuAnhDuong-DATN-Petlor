@@ -160,19 +160,28 @@ export const getImageUrl = (imagePath, fallbackText = "Image") => {
   return `${API_BASE_URL}/uploads${cleanPath}`;
 };
 
-// --- 3. Tạo FormData cho Bài viết (ĐÃ SỬA CHO KHỚP BACKEND) ---
-// --- 3. Tạo FormData cho Bài viết (ĐÃ SỬA CHUẨN KEY BACKEND) ---
+// --- 3. Tạo FormData cho Bài viết ---
 export const createPostFormData = (data, imageFile) => {
   const formData = new FormData();
 
+  // Chuẩn bị object JSON khớp 100% với Backend DTO
   const postData = {
     tieuDe: data.tieuDe,
     slug: data.slug || generateSlug(data.tieuDe),
     noiDung: data.noiDung,
-    userId: Number(data.userId),
-    danhMucBvId: Number(data.danhMucBvId), // Đổi tên trường tại đây
+
+    // --- SỬA Ở ĐÂY ---
+    // Backend cần "nhanVienId", nhưng dữ liệu từ form có thể là "userId" hoặc "nhanVienId"
+    // Ta ưu tiên lấy data.nhanVienId, nếu không có thì lấy data.userId
+    nhanVienId: Number(data.nhanVienId || data.userId),
+    // ----------------
+
+    danhMucBvId: Number(data.danhMucBvId),
     trangThai: data.trangThai || "CONG_KHAI",
   };
+
+  // Log kiểm tra lần cuối trước khi gói vào Blob (Có thể xóa sau khi chạy ổn)
+  console.log("🔍 Utils - JSON payload final:", postData);
 
   const jsonBlob = new Blob([JSON.stringify(postData)], {
     type: "application/json",

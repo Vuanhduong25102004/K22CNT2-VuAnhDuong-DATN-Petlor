@@ -20,8 +20,8 @@ public class KhuyenMaiController {
 
     // --- CRUD APIs ---
     @GetMapping
-    public Page<KhuyenMai> getAllKhuyenMai(Pageable pageable) {
-        return khuyenMaiService.getAllKhuyenMai(pageable);
+    public Page<KhuyenMai> getAllKhuyenMai(Pageable pageable, @RequestParam(required = false) String keyword) {
+        return khuyenMaiService.getAllKhuyenMai(pageable, keyword);
     }
 
     @GetMapping("/{id}")

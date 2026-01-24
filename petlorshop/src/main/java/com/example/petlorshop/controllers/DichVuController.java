@@ -27,8 +27,10 @@ public class DichVuController {
     private ObjectMapper objectMapper;
 
     @GetMapping
-    public Page<DichVuResponse> getAllDichVu(Pageable pageable) {
-        return dichVuService.getAllDichVu(pageable);
+    public Page<DichVuResponse> getAllDichVu(Pageable pageable, 
+                                             @RequestParam(required = false) String keyword,
+                                             @RequestParam(required = false) Integer categoryId) {
+        return dichVuService.getAllDichVu(pageable, keyword, categoryId);
     }
 
     @GetMapping("/{id}")

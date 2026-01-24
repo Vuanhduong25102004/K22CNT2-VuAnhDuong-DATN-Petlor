@@ -28,8 +28,10 @@ public class SanPhamController {
     private ObjectMapper objectMapper;
 
     @GetMapping
-    public Page<SanPhamResponse> getAllSanPham(Pageable pageable) {
-        return sanPhamService.getAllSanPham(pageable);
+    public Page<SanPhamResponse> getAllSanPham(Pageable pageable, 
+                                               @RequestParam(required = false) String keyword,
+                                               @RequestParam(required = false) Integer categoryId) {
+        return sanPhamService.getAllSanPham(pageable, keyword, categoryId);
     }
 
     @GetMapping("/{id}")

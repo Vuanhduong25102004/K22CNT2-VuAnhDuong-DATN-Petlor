@@ -1,6 +1,8 @@
 package com.example.petlorshop.repositories;
 
 import com.example.petlorshop.models.NguoiDung;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,6 +17,11 @@ public interface NguoiDungRepository extends JpaRepository<NguoiDung, Integer> {
 
     Optional<NguoiDung> findBySoDienThoai(String soDienThoai);
 
+    // Global Search (List)
     @Query("SELECT u FROM NguoiDung u WHERE LOWER(u.hoTen) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR u.soDienThoai LIKE CONCAT('%', :keyword, '%')")
     List<NguoiDung> searchByKeyword(@Param("keyword") String keyword);
+
+    // Page Search
+    @Query("SELECT u FROM NguoiDung u WHERE LOWER(u.hoTen) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR u.soDienThoai LIKE CONCAT('%', :keyword, '%')")
+    Page<NguoiDung> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 }

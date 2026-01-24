@@ -19,8 +19,8 @@ public class NhaCungCapController {
     private NhaCungCapService nhaCungCapService;
 
     @GetMapping
-    public ResponseEntity<Page<NhaCungCapResponse>> getAllNhaCungCap(Pageable pageable) {
-        return ResponseEntity.ok(nhaCungCapService.getAllNhaCungCap(pageable));
+    public ResponseEntity<Page<NhaCungCapResponse>> getAllNhaCungCap(Pageable pageable, @RequestParam(required = false) String keyword) {
+        return ResponseEntity.ok(nhaCungCapService.getAllNhaCungCap(pageable, keyword));
     }
 
     @GetMapping("/{id}")

@@ -4,6 +4,8 @@ import com.example.petlorshop.dto.DanhMucSanPhamRequest;
 import com.example.petlorshop.models.DanhMucSanPham;
 import com.example.petlorshop.services.DanhMucSanPhamService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,9 +19,16 @@ public class DanhMucSanPhamController {
     @Autowired
     private DanhMucSanPhamService danhMucSanPhamService;
 
-    @GetMapping
-    public List<DanhMucSanPham> getAllDanhMucSanPham() {
+    // API cũ (List) - Giữ lại để tương thích nếu cần, hoặc có thể bỏ
+    @GetMapping("/list")
+    public List<DanhMucSanPham> getAllDanhMucSanPhamList() {
         return danhMucSanPhamService.getAllDanhMucSanPham();
+    }
+
+    // API mới (Page + Search)
+    @GetMapping
+    public Page<DanhMucSanPham> getAllDanhMucSanPham(Pageable pageable, @RequestParam(required = false) String keyword) {
+        return danhMucSanPhamService.getAllDanhMucSanPham(pageable, keyword);
     }
 
     @GetMapping("/{id}")

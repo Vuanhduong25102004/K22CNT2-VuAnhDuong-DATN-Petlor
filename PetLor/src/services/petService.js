@@ -75,6 +75,16 @@ const petService = {
   },
   
   deleteService: (id) => apiClient.delete(`/dich-vu/${id}`),
+
+  getAllServiceCategories: () => {
+    return apiClient.get('/danh-muc-dich-vu');
+  },
+
+  getPetsByPhone: (phone) => {
+  return apiClient.get('/thu-cung/by-phone', {
+    params: { phone }
+  });
+},
 };
 
 export default petService;

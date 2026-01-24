@@ -41,8 +41,8 @@ public class NhanVienController {
     }
 
     @GetMapping
-    public Page<NhanVienResponse> getAllNhanVien(Pageable pageable) {
-        return nhanVienService.getAllNhanVien(pageable);
+    public Page<NhanVienResponse> getAllNhanVien(Pageable pageable, @RequestParam(required = false) String keyword) {
+        return nhanVienService.getAllNhanVien(pageable, keyword);
     }
 
     @GetMapping("/{id}")

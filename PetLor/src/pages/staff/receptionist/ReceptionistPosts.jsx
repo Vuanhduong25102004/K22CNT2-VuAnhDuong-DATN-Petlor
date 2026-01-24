@@ -265,18 +265,30 @@ const ReceptionistPosts = () => {
                       </td>
                       <td className="px-8 py-6">
                         <div className="flex items-center justify-end gap-3">
-                          <button className="px-4 py-2 bg-[#f9fbfb] border border-[#e9f1f0] text-xs font-bold rounded-xl hover:bg-white hover:border-[#2a9d90] hover:text-[#2a9d90] transition-all shadow-sm">
-                            Xem
-                          </button>
-                          <button
+                          <Link
+                            to={`/staff/receptionist/posts/view/${post.baiVietId || post.id}`}
+                          >
+                            <button className="px-4 py-2 bg-[#f9fbfb] border border-[#e9f1f0] text-xs font-bold rounded-xl hover:bg-white hover:border-[#2a9d90] hover:text-[#2a9d90] transition-all shadow-sm">
+                              Xem
+                            </button>
+                          </Link>
+
+                          {/* --- NÚT CHỈNH SỬA (ĐÃ SỬA) --- */}
+                          <Link
+                            to={`/staff/receptionist/posts/edit/${post.baiVietId || post.id}`}
                             className="size-9 flex items-center justify-center text-[#2a9d90] bg-[#2a9d90]/5 hover:bg-[#2a9d90]/10 rounded-xl transition-colors"
                             title="Chỉnh sửa"
                           >
                             <span className="material-symbols-outlined text-[20px]">
                               edit
                             </span>
-                          </button>
+                          </Link>
+
+                          {/* --- NÚT XÓA (GIỮ NGUYÊN) --- */}
                           <button
+                            onClick={() =>
+                              handleDelete(post.baiVietId || post.id)
+                            }
                             className="size-9 flex items-center justify-center text-red-500 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
                             title="Xóa"
                           >

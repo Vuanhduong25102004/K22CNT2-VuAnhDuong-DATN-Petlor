@@ -71,9 +71,6 @@ const CategoryTable = ({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end space-x-2">
-                      {/* Nút Xem chi tiết (Tạm ẩn nếu chưa cần thiết) */}
-                      {/* <button onClick={() => onViewDetail(cat)} ... ><span ...>visibility</span></button> */}
-
                       <button
                         title="Chỉnh sửa"
                         className="text-gray-400 hover:text-blue-500 transition-colors"

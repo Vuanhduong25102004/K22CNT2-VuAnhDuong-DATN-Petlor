@@ -91,6 +91,8 @@ public class SecurityConfig {
 
                         // API cho Lễ tân xem lịch hẹn hôm nay
                         .requestMatchers("/api/lich-hen/today").hasAnyAuthority(receptionist, admin)
+                        // API đặt lịch cho Lễ tân
+                        .requestMatchers(HttpMethod.POST, "/api/lich-hen/receptionist").hasAnyAuthority(receptionist, admin)
 
                         // Quản lý blog cho Admin và Lễ tân
                         .requestMatchers(HttpMethod.POST, "/api/bai-viet/**").hasAnyAuthority(admin, receptionist)

@@ -54,8 +54,8 @@ public class NguoiDungController {
     }
 
     @GetMapping
-    public Page<NguoiDungResponse> getAllNguoiDung(Pageable pageable) {
-        return nguoiDungService.getAllNguoiDung(pageable).map(this::toNguoiDungResponse);
+    public Page<NguoiDungResponse> getAllNguoiDung(Pageable pageable, @RequestParam(required = false) String keyword) {
+        return nguoiDungService.getAllNguoiDung(pageable, keyword).map(this::toNguoiDungResponse);
     }
 
     @GetMapping("/{id}")

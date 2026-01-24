@@ -7,8 +7,10 @@ import com.example.petlorshop.repositories.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -117,7 +119,28 @@ public class PhieuNhapService {
         phieuNhapRepository.delete(phieuNhap); // Hibernate sẽ tự gọi SQL update da_xoa = true
     }
 
-    public Page<PhieuNhapResponse> getAllPhieuNhap(Pageable pageable) {
+    public Page<PhieuNhapResponse> getAllPhieuNhap(Pageable pageable, String keyword) {
+        if (StringUtils.hasText(keyword)) {
+            List<PhieuNhap> allMatches = phieuNhapRepository.searchByKeyword(keyword);
+            
+            String lowerKeyword = keyword.toLowerCase();
+            List<PhieuNhapResponse> filteredList = allMatches.stream()
+                    .filter(pn -> (pn.getGhiChu() != null && pn.getGhiChu().toLowerCase().contains(lowerKeyword)) ||
+                                  (pn.getNhaCungCap() != null && pn.getNhaCungCap().getTenNcc().toLowerCase().contains(lowerKeyword)) ||
+                                  (pn.getNhanVien() != null && pn.getNhanVien().getHoTen().toLowerCase().contains(lowerKeyword)))
+                    .map(this::convertToResponse)
+                    .collect(Collectors.toList());
+
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), filteredList.size());
+            
+            if (start > filteredList.size()) {
+                return new PageImpl<>(List.of(), pageable, filteredList.size());
+            }
+            
+            List<PhieuNhapResponse> pageContent = filteredList.subList(start, end);
+            return new PageImpl<>(pageContent, pageable, filteredList.size());
+        }
         return phieuNhapRepository.findAll(pageable)
                 .map(this::convertToResponse);
     }

@@ -55,6 +55,10 @@ const bookingService = {
   getTodayAppointments: () => {
     return apiClient.get('/lich-hen/today');
   },
+
+  createReceptionistBooking: (data) => {
+    return apiClient.post('/lich-hen/receptionist', data);
+  },
 };
 
 export default bookingService;

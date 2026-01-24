@@ -1,6 +1,8 @@
 package com.example.petlorshop.repositories;
 
 import com.example.petlorshop.models.LichHen;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,8 +29,13 @@ public interface LichHenRepository extends JpaRepository<LichHen, Integer> {
     @Query("SELECT lh FROM LichHen lh WHERE lh.thoiGianBatDau BETWEEN :start AND :end ORDER BY lh.thoiGianBatDau")
     List<LichHen> findAllByDateRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
+    // Global Search (List)
     @Query("SELECT l FROM LichHen l WHERE LOWER(l.ghiChu) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<LichHen> searchByKeyword(@Param("keyword") String keyword);
+
+    // Page Search
+    @Query("SELECT l FROM LichHen l WHERE LOWER(l.ghiChu) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<LichHen> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     List<LichHen> findByNguoiDung_Email(String email);
     

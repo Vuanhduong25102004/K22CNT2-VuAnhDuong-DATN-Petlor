@@ -4,13 +4,17 @@ import com.example.petlorshop.models.KhuyenMai;
 import com.example.petlorshop.repositories.KhuyenMaiRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class KhuyenMaiService {
@@ -19,7 +23,26 @@ public class KhuyenMaiService {
     private KhuyenMaiRepository khuyenMaiRepository;
 
     @Transactional(readOnly = true)
-    public Page<KhuyenMai> getAllKhuyenMai(Pageable pageable) {
+    public Page<KhuyenMai> getAllKhuyenMai(Pageable pageable, String keyword) {
+        if (StringUtils.hasText(keyword)) {
+            List<KhuyenMai> allMatches = khuyenMaiRepository.searchByKeyword(keyword);
+            
+            String lowerKeyword = keyword.toLowerCase();
+            List<KhuyenMai> filteredList = allMatches.stream()
+                    .filter(km -> (km.getMaCode() != null && km.getMaCode().toLowerCase().contains(lowerKeyword)) ||
+                                  (km.getMoTa() != null && km.getMoTa().toLowerCase().contains(lowerKeyword)))
+                    .collect(Collectors.toList());
+
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), filteredList.size());
+            
+            if (start > filteredList.size()) {
+                return new PageImpl<>(List.of(), pageable, filteredList.size());
+            }
+            
+            List<KhuyenMai> pageContent = filteredList.subList(start, end);
+            return new PageImpl<>(pageContent, pageable, filteredList.size());
+        }
         return khuyenMaiRepository.findAll(pageable);
     }
 

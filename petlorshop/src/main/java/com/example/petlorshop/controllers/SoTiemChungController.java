@@ -19,8 +19,8 @@ public class SoTiemChungController {
     private SoTiemChungService soTiemChungService;
 
     @GetMapping
-    public ResponseEntity<Page<SoTiemChungResponse>> getAllSoTiemChung(Pageable pageable) {
-        return ResponseEntity.ok(soTiemChungService.getAllSoTiemChung(pageable));
+    public ResponseEntity<Page<SoTiemChungResponse>> getAllSoTiemChung(Pageable pageable, @RequestParam(required = false) String keyword) {
+        return ResponseEntity.ok(soTiemChungService.getAllSoTiemChung(pageable, keyword));
     }
 
     @GetMapping("/thu-cung/{thuCungId}")

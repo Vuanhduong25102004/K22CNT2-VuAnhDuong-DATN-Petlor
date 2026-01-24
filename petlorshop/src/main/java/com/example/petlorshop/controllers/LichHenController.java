@@ -27,8 +27,8 @@ public class LichHenController {
     private LichHenService lichHenService;
 
     @GetMapping
-    public Page<LichHenResponse> getAllLichHen(Pageable pageable) {
-        return lichHenService.getAllLichHen(pageable);
+    public Page<LichHenResponse> getAllLichHen(Pageable pageable, @RequestParam(required = false) String keyword) {
+        return lichHenService.getAllLichHen(pageable, keyword);
     }
 
     @GetMapping("/{id}")
@@ -102,6 +102,17 @@ public class LichHenController {
     public ResponseEntity<LichHenResponse> createLichHen(@RequestBody LichHenRequest request) {
         LichHenResponse createdLichHen = lichHenService.createLichHen(request);
         return new ResponseEntity<>(createdLichHen, HttpStatus.CREATED);
+    }
+    
+    @PostMapping("/receptionist")
+    public ResponseEntity<?> createReceptionistAppointment(@RequestBody LichHenRequest request) {
+        try {
+            LichHenResponse createdLichHen = lichHenService.createReceptionistAppointment(request);
+            return new ResponseEntity<>(createdLichHen, HttpStatus.CREATED);
+        } catch (Exception e) {
+            e.printStackTrace(); // In lỗi ra console server để debug
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
     
     @PostMapping("/guest")

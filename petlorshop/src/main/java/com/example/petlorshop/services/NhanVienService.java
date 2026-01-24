@@ -13,6 +13,7 @@ import com.example.petlorshop.repositories.NhanVienRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class NhanVienService {
@@ -185,7 +187,30 @@ public class NhanVienService {
         return convertToResponse(updatedNhanVien);
     }
 
-    public Page<NhanVienResponse> getAllNhanVien(Pageable pageable) {
+    public Page<NhanVienResponse> getAllNhanVien(Pageable pageable, String keyword) {
+        if (StringUtils.hasText(keyword)) {
+            List<NhanVien> allMatches = nhanVienRepository.searchByKeyword(keyword);
+            
+            String lowerKeyword = keyword.toLowerCase();
+            List<NhanVienResponse> filteredList = allMatches.stream()
+                    .filter(nv -> (nv.getHoTen() != null && nv.getHoTen().toLowerCase().contains(lowerKeyword)) || 
+                                  (nv.getChucVu() != null && nv.getChucVu().toLowerCase().contains(lowerKeyword)) ||
+                                  (nv.getSoDienThoai() != null && nv.getSoDienThoai().contains(lowerKeyword)) ||
+                                  (nv.getEmail() != null && nv.getEmail().toLowerCase().contains(lowerKeyword)) ||
+                                  (nv.getChuyenKhoa() != null && nv.getChuyenKhoa().toLowerCase().contains(lowerKeyword)))
+                    .map(this::convertToResponse)
+                    .collect(Collectors.toList());
+
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), filteredList.size());
+            
+            if (start > filteredList.size()) {
+                return new PageImpl<>(List.of(), pageable, filteredList.size());
+            }
+            
+            List<NhanVienResponse> pageContent = filteredList.subList(start, end);
+            return new PageImpl<>(pageContent, pageable, filteredList.size());
+        }
         return nhanVienRepository.findAll(pageable).map(this::convertToResponse);
     }
 

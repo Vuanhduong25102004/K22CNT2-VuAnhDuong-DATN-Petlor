@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
-import bookingService from "../../../services/bookingService"; // Đảm bảo đúng đường dẫn import
-import { renderReceptionistStatusBadge } from "../../../utils/formatters"; // Import hàm badge bạn đã có
+import bookingService from "../../../services/bookingService";
+import { renderReceptionistStatusBadge } from "../../../utils/formatters";
+import { Link } from "react-router-dom";
 
 const ReceptionistAppointment = () => {
   const [appointments, setAppointments] = useState([]);
@@ -186,12 +187,14 @@ const ReceptionistAppointment = () => {
                 ))}
               </div>
 
-              <button className="bg-[#2a9d90] text-white px-5 py-3 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-[#2a9d90]/20 hover:bg-[#23857a] transition-all">
-                <span className="material-symbols-outlined text-[20px]">
-                  add_circle
-                </span>
-                Thêm mới
-              </button>
+              <Link to="create">
+                <button className="bg-[#2a9d90] text-white px-5 py-3 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-[#2a9d90]/20 hover:bg-[#23857a] transition-all">
+                  <span className="material-symbols-outlined text-[20px]">
+                    add_circle
+                  </span>
+                  Thêm mới
+                </button>
+              </Link>
             </div>
           </div>
 

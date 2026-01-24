@@ -59,8 +59,10 @@ import ReceptionistDashboard from "../pages/staff/receptionist/ReceptionistDashb
 import ReceptionistAppointment from "../pages/staff/receptionist/ReceptionistAppointment";
 import ReceptionistPosts from "../pages/staff/receptionist/ReceptionistPosts";
 import ReceptionistPrescription from "../pages/staff/receptionist/ReceptionistPrescription";
-import CreatePost from "../pages/staff/receptionist/components/CreatePost";
+import PostForm from "../pages/staff/receptionist/components/PostForm";
 import CreatePrescription from "../pages/staff/receptionist/components/CreatePrescription";
+import ReceptionistPostDetail from "../pages/staff/receptionist/ReceptionistPostDetail";
+import BookingForm from "../pages/staff/receptionist/components/BookingForm";
 
 import SpaDashboard from "../pages/staff/spa/SpaDashboard";
 import SpaSchedule from "../pages/staff/spa/SpaSchedule";
@@ -147,12 +149,21 @@ const AppRoutes = () => {
             path="receptionist/booking"
             element={<ReceptionistAppointment />}
           />
+          <Route path="receptionist/booking/create" element={<BookingForm />} />
           <Route path="receptionist/posts" element={<ReceptionistPosts />} />
           <Route
             path="receptionist/prescriptions"
             element={<ReceptionistPrescription />}
           />
-          <Route path="receptionist/posts/create" element={<CreatePost />} />
+          <Route path="receptionist/posts/create" element={<PostForm />} />
+          <Route
+            path="/staff/receptionist/posts/view/:id"
+            element={<ReceptionistPostDetail />}
+          />
+          <Route
+            path="/staff/receptionist/posts/edit/:id"
+            element={<PostForm />}
+          />
           <Route
             path="receptionist/prescriptions/create"
             element={<CreatePrescription />}

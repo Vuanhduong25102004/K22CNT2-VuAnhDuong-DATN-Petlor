@@ -2,9 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
+// Import Services
 import productService from "../services/productService";
+import searchService from "../services/searchService";
 import { useCart } from "../context/CartContext";
 
+// Helper format giá
 const formatPrice = (price) => {
   if (price === null || price === undefined) return "";
   if (typeof price === "number") {
@@ -17,11 +20,121 @@ const formatPrice = (price) => {
 };
 
 const ProductsPage = () => {
+  // --- STATE QUẢN LÝ DỮ LIỆU ---
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // --- STATE LỌC & TÌM KIẾM ---
+  const [categories, setCategories] = useState([]); // Danh sách danh mục lấy từ API
+  const [keyword, setKeyword] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null); // ID danh mục đang chọn
+
   const { addToCart } = useCart();
 
+  // --- 1. LẤY DANH MỤC SẢN PHẨM TỪ API ---
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await productService.getAllCategories();
+        let data = [];
+
+        // Xử lý các định dạng dữ liệu trả về khác nhau của API (Mảng, Pageable, Wrapper)
+        if (Array.isArray(response)) {
+          data = response;
+        } else if (response?.data && Array.isArray(response.data)) {
+          data = response.data;
+        } else if (response?.content && Array.isArray(response.content)) {
+          data = response.content;
+        }
+
+        setCategories(data);
+      } catch (error) {
+        console.error("Lỗi tải danh mục sản phẩm:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // --- 2. HÀM TẢI SẢN PHẨM (KẾT HỢP TÌM KIẾM & LỌC) ---
+  const fetchProducts = async (searchQuery = "", catId = null) => {
+    setLoading(true);
+    try {
+      let response;
+
+      // LOGIC: Nếu có keyword HOẶC có categoryId -> Gọi API Search
+      if (searchQuery.trim() || catId !== null) {
+        // Gọi searchProducts với cả 2 tham số
+        response = await searchService.searchProducts(searchQuery, catId);
+      } else {
+        // Mặc định lấy tất cả sản phẩm
+        response = await productService.getAllProducts();
+      }
+
+      // Xử lý dữ liệu trả về
+      let data = [];
+      if (Array.isArray(response)) data = response;
+      else if (response?.data && Array.isArray(response.data))
+        data = response.data;
+      else if (response?.content && Array.isArray(response.content))
+        data = response.content;
+      else if (response?.data?.content && Array.isArray(response.data.content))
+        data = response.data.content;
+
+      // Map dữ liệu về dạng chuẩn để hiển thị
+      const mappedProducts = data.map((product) => ({
+        ...product,
+        id: product.sanPhamId || product.id,
+        name: product.tenSanPham || product.name,
+        price: product.gia || product.price,
+        image: product.hinhAnh
+          ? `http://localhost:8080/uploads/${product.hinhAnh}`
+          : product.image,
+        category: product.tenDanhMuc || product.category || "Sản phẩm",
+      }));
+
+      setProducts(mappedProducts);
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+    } finally {
+      setLoading(false);
+      setTimeout(() => {
+        AOS.refresh();
+      }, 100);
+    }
+  };
+
+  // Gọi lần đầu khi vào trang
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  // --- HANDLERS XỬ LÝ SỰ KIỆN ---
+
+  // 1. Tìm kiếm
+  const handleSearch = () => {
+    fetchProducts(keyword, selectedCategoryId);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      fetchProducts(keyword, selectedCategoryId);
+    }
+  };
+
+  // 2. Click chọn danh mục
+  const handleCategoryClick = (catId) => {
+    setSelectedCategoryId(catId);
+    fetchProducts(keyword, catId); // Gọi lọc ngay lập tức
+  };
+
+  // 3. Reset (Nút Tất cả)
+  const handleReset = () => {
+    setKeyword("");
+    setSelectedCategoryId(null);
+    fetchProducts("", null);
+  };
+
+  // Init AOS
   useEffect(() => {
     window.scrollTo(0, 0);
     const aosInit = setTimeout(() => {
@@ -37,47 +150,7 @@ const ProductsPage = () => {
     return () => clearTimeout(aosInit);
   }, []);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await productService.getAllProducts();
-        let data = [];
-        if (Array.isArray(response)) data = response;
-        else if (response?.data && Array.isArray(response.data))
-          data = response.data;
-        else if (response?.content && Array.isArray(response.content))
-          data = response.content;
-        else if (
-          response?.data?.content &&
-          Array.isArray(response.data.content)
-        )
-          data = response.data.content;
-
-        const mappedProducts = data.map((product) => ({
-          ...product,
-          id: product.sanPhamId || product.id,
-          name: product.tenSanPham || product.name,
-          price: product.gia || product.price,
-          image: product.hinhAnh
-            ? `http://localhost:8080/uploads/${product.hinhAnh}`
-            : product.image,
-          category: product.tenDanhMuc || product.category || "Sản phẩm",
-        }));
-
-        setProducts(mappedProducts);
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
-      } finally {
-        setLoading(false);
-        setTimeout(() => {
-          AOS.refresh();
-        }, 100);
-      }
-    };
-    fetchProducts();
-  }, []);
-
-  // Style cho background pattern (giả lập class .hero-pattern-subtle)
+  // Style Background
   const heroPatternStyle = {
     backgroundImage: "radial-gradient(#0FB478 0.5px, transparent 0.5px)",
     backgroundSize: "24px 24px",
@@ -87,7 +160,7 @@ const ProductsPage = () => {
   return (
     <div className="w-full min-h-screen font-display bg-gray-50 text-gray-900 overflow-x-hidden transition-colors duration-300">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-16">
-        {/* --- HERO SECTION MỚI --- */}
+        {/* --- HERO SECTION --- */}
         <section
           className="relative min-h-[480px] lg:h-[520px] rounded-3xl overflow-hidden mb-12 bg-white border border-gray-100 flex flex-col lg:flex-row"
           data-aos="fade-up"
@@ -171,30 +244,58 @@ const ProductsPage = () => {
         {/* --- FILTER & SEARCH SECTION --- */}
         <section className="mb-12" data-aos="fade-up">
           <div className="bg-white p-4 rounded-full border border-gray-100 shadow-sm flex flex-col lg:flex-row gap-6 items-center justify-between">
+            {/* INPUT TÌM KIẾM */}
             <div className="relative w-full lg:w-96">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+              <span
+                className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hover:text-primary transition-colors"
+                onClick={handleSearch}
+              >
                 search
               </span>
               <input
                 className="w-full pl-12 pr-4 py-3 bg-gray-50 border-none rounded-full focus:ring-2 focus:ring-primary outline-none text-sm"
                 placeholder="Tìm kiếm sản phẩm..."
                 type="text"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                onKeyDown={handleKeyDown}
               />
             </div>
 
-            {/* Category Buttons */}
+            {/* DANH SÁCH DANH MỤC (ĐỘNG TỪ API) */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 no-scrollbar w-full lg:w-auto">
-              <button className="px-6 py-2.5 bg-primary text-white font-bold rounded-full whitespace-nowrap shadow-md shadow-primary/20">
+              {/* Nút Tất cả */}
+              <button
+                onClick={handleReset}
+                className={`px-6 py-2.5 rounded-full font-bold whitespace-nowrap transition-all ${
+                  selectedCategoryId === null
+                    ? "bg-primary text-white shadow-primary/20"
+                    : "bg-gray-50 text-gray-600 hover:bg-primary/10 hover:text-primary"
+                }`}
+              >
                 Tất cả
               </button>
-              {["Thức ăn", "Đồ chơi", "Phụ kiện", "Vệ sinh"].map((cat) => (
-                <button
-                  key={cat}
-                  className="px-6 py-2.5 bg-gray-50 text-gray-600 hover:bg-primary/10 hover:text-primary font-bold rounded-full transition-all whitespace-nowrap"
-                >
-                  {cat}
-                </button>
-              ))}
+
+              {/* Render danh sách danh mục từ API */}
+              {categories.map((cat) => {
+                // Xử lý lấy ID và Tên tùy theo dữ liệu trả về từ API (danhMucId/id, tenDanhMuc/name)
+                const catId = cat.danhMucId || cat.id;
+                const catName = cat.tenDanhMuc || cat.name;
+
+                return (
+                  <button
+                    key={catId}
+                    onClick={() => handleCategoryClick(catId)}
+                    className={`px-6 py-2.5 rounded-full font-bold transition-all whitespace-nowrap ${
+                      selectedCategoryId === catId
+                        ? "bg-primary text-white shadow-md shadow-primary/20"
+                        : "bg-gray-50 text-gray-600 hover:bg-primary/10 hover:text-primary"
+                    }`}
+                  >
+                    {catName}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Sort Dropdown */}
@@ -240,7 +341,7 @@ const ProductsPage = () => {
                         }}
                       />
                     </Link>
-                    {/* Badge mẫu (có thể custom logic) */}
+                    {/* Badge mẫu */}
                     <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider shadow-sm">
                       NEW
                     </div>
@@ -271,30 +372,44 @@ const ProductsPage = () => {
                 </div>
               ))
             ) : (
-              <p className="col-span-full text-center py-10 text-gray-500">
-                Không có sản phẩm nào.
-              </p>
+              // XỬ LÝ KHI KHÔNG CÓ KẾT QUẢ TÌM KIẾM
+              <div className="col-span-full text-center py-12 flex flex-col items-center justify-center">
+                <span className="material-symbols-outlined text-6xl text-gray-300 mb-4">
+                  search_off
+                </span>
+                <p className="text-gray-500 text-lg mb-4">
+                  Không tìm thấy sản phẩm nào phù hợp.
+                </p>
+                <button
+                  onClick={handleReset}
+                  className="px-6 py-2 bg-primary text-white font-bold rounded-xl hover:bg-opacity-90 transition-all"
+                >
+                  Xem tất cả sản phẩm
+                </button>
+              </div>
             )}
           </div>
 
-          {/* Pagination */}
-          <div className="mt-16 flex justify-center gap-2" data-aos="fade-up">
-            <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-200 text-gray-400 hover:border-primary hover:text-primary transition-all">
-              <span className="material-symbols-outlined">chevron_left</span>
-            </button>
-            <button className="w-12 h-12 flex items-center justify-center rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/30">
-              1
-            </button>
-            <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-200 text-gray-600 hover:border-primary hover:text-primary transition-all font-bold">
-              2
-            </button>
-            <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-200 text-gray-600 hover:border-primary hover:text-primary transition-all font-bold">
-              3
-            </button>
-            <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-200 text-gray-400 hover:border-primary hover:text-primary transition-all">
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
-          </div>
+          {/* Pagination - Chỉ hiện khi có sản phẩm */}
+          {products.length > 0 && (
+            <div className="mt-16 flex justify-center gap-2" data-aos="fade-up">
+              <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-200 text-gray-400 hover:border-primary hover:text-primary transition-all">
+                <span className="material-symbols-outlined">chevron_left</span>
+              </button>
+              <button className="w-12 h-12 flex items-center justify-center rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/30">
+                1
+              </button>
+              <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-200 text-gray-600 hover:border-primary hover:text-primary transition-all font-bold">
+                2
+              </button>
+              <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-200 text-gray-600 hover:border-primary hover:text-primary transition-all font-bold">
+                3
+              </button>
+              <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-200 text-gray-400 hover:border-primary hover:text-primary transition-all">
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
+            </div>
+          )}
         </section>
 
         {/* --- NEWSLETTER SECTION --- */}

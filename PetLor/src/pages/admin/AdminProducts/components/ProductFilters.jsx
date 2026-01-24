@@ -8,26 +8,21 @@ const ProductFilters = ({
   setFilterCategory,
   filterStock,
   setFilterStock,
-  categories,
+  categories, // Dữ liệu này có thể có trường 'name' hoặc 'tenDanhMuc'
   setCurrentPage,
   onOpenAddModal,
   placeholder,
 }) => {
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm || "");
 
-  // Đồng bộ local state khi prop thay đổi (ví dụ: khi reset filter từ bên ngoài)
+  // ... (Giữ nguyên các useEffect cũ) ...
   useEffect(() => {
     setLocalSearchTerm(searchTerm || "");
   }, [searchTerm]);
 
-  // Debounce: Chỉ cập nhật searchTerm (và gọi API ở cha) sau khi ngừng gõ 500ms
   useEffect(() => {
     const timer = setTimeout(() => {
       if (localSearchTerm !== searchTerm) {
-        console.log(
-          "ProductFilters: Gửi từ khóa tìm kiếm lên cha ->",
-          localSearchTerm
-        );
         setSearchTerm(localSearchTerm);
         if (setCurrentPage) setCurrentPage(1);
       }
@@ -39,7 +34,7 @@ const ProductFilters = ({
     <div className="bg-white shadow-sm rounded-xl border border-gray-200 p-6 mt-6">
       <div className="flex flex-col md:flex-row justify-between md:items-center space-y-4 md:space-y-0">
         <div className="flex-1 flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-          {/* Search */}
+          {/* Search Input (Giữ nguyên) */}
           <div className="relative rounded-md shadow-sm max-w-xs">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <span className="material-symbols-outlined text-gray-400">
@@ -55,36 +50,49 @@ const ProductFilters = ({
             />
           </div>
 
-          {/* Lọc theo danh mục */}
+          {/* --- SỬA LẠI PHẦN LỌC DANH MỤC --- */}
           <div className="relative inline-block text-left">
             <select
               className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md h-10"
               value={filterCategory}
               onChange={(e) => {
                 setFilterCategory(e.target.value);
-                setCurrentPage(1);
+                if (setCurrentPage) setCurrentPage(1);
               }}
             >
               <option value="">Tất cả danh mục</option>
-              {categories.map((cat) => (
-                <option
-                  key={cat.id || cat.danhMucId}
-                  value={cat.id || cat.danhMucId}
-                >
-                  {cat.tenDanhMuc}
-                </option>
-              ))}
+              {categories && categories.length > 0 ? (
+                categories.map((cat) => {
+                  // 1. Xử lý ID: Lấy id hoặc danhMucId
+                  const catId = cat.id || cat.danhMucId || cat.danhMucDvId; // Thêm danhMucDvId phòng hờ
+
+                  // 2. Xử lý Tên: Lấy name hoặc tenDanhMuc hoặc tenDanhMucDv
+                  const catName =
+                    cat.name ||
+                    cat.tenDanhMuc ||
+                    cat.tenDanhMucDv ||
+                    "Không tên";
+
+                  return (
+                    <option key={catId} value={catId}>
+                      {catName}
+                    </option>
+                  );
+                })
+              ) : (
+                <option disabled>Đang tải danh mục...</option>
+              )}
             </select>
           </div>
 
-          {/* Lọc theo trạng thái kho */}
+          {/* Lọc theo trạng thái kho (Giữ nguyên) */}
           <div className="relative inline-block text-left">
             <select
               className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md h-10"
               value={filterStock}
               onChange={(e) => {
                 setFilterStock(e.target.value);
-                setCurrentPage(1);
+                if (setCurrentPage) setCurrentPage(1);
               }}
             >
               <option value="">Tất cả trạng thái kho</option>
@@ -95,7 +103,7 @@ const ProductFilters = ({
           </div>
         </div>
 
-        {/* Các nút hành động */}
+        {/* Các nút hành động (Giữ nguyên) */}
         <div className="flex space-x-3">
           <button
             className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
@@ -112,7 +120,7 @@ const ProductFilters = ({
             onClick={onOpenAddModal}
           >
             <span className="material-symbols-outlined text-sm mr-2">add</span>
-            Thêm Sản phẩm
+            Thêm Mới
           </button>
         </div>
       </div>

@@ -6,10 +6,14 @@ import com.example.petlorshop.models.NhaCungCap;
 import com.example.petlorshop.repositories.NhaCungCapRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class NhaCungCapService {
@@ -17,7 +21,28 @@ public class NhaCungCapService {
     @Autowired
     private NhaCungCapRepository nhaCungCapRepository;
 
-    public Page<NhaCungCapResponse> getAllNhaCungCap(Pageable pageable) {
+    public Page<NhaCungCapResponse> getAllNhaCungCap(Pageable pageable, String keyword) {
+        if (StringUtils.hasText(keyword)) {
+            List<NhaCungCap> allMatches = nhaCungCapRepository.searchByKeyword(keyword);
+            
+            String lowerKeyword = keyword.toLowerCase();
+            List<NhaCungCapResponse> filteredList = allMatches.stream()
+                    .filter(ncc -> (ncc.getTenNcc() != null && ncc.getTenNcc().toLowerCase().contains(lowerKeyword)) || 
+                                   (ncc.getEmail() != null && ncc.getEmail().toLowerCase().contains(lowerKeyword)) ||
+                                   (ncc.getSoDienThoai() != null && ncc.getSoDienThoai().contains(lowerKeyword)))
+                    .map(this::convertToResponse)
+                    .collect(Collectors.toList());
+
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), filteredList.size());
+            
+            if (start > filteredList.size()) {
+                return new PageImpl<>(List.of(), pageable, filteredList.size());
+            }
+            
+            List<NhaCungCapResponse> pageContent = filteredList.subList(start, end);
+            return new PageImpl<>(pageContent, pageable, filteredList.size());
+        }
         return nhaCungCapRepository.findAll(pageable)
                 .map(this::convertToResponse);
     }

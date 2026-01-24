@@ -37,7 +37,10 @@ public class LichHenService {
     private static final LocalTime OPENING_TIME = LocalTime.of(8, 0);
     private static final LocalTime CLOSING_TIME = LocalTime.of(18, 0);
 
-    public Page<LichHenResponse> getAllLichHen(Pageable pageable) {
+    public Page<LichHenResponse> getAllLichHen(Pageable pageable, String keyword) {
+        if (StringUtils.hasText(keyword)) {
+            return lichHenRepository.searchByKeyword(keyword, pageable).map(this::convertToResponse);
+        }
         return lichHenRepository.findAll(pageable).map(this::convertToResponse);
     }
 
@@ -140,6 +143,47 @@ public class LichHenService {
         LichHen savedLichHen = lichHenRepository.save(lichHen);
         return convertToResponse(savedLichHen);
     }
+
+    @Transactional
+    public LichHenResponse createReceptionistAppointment(LichHenRequest request) {
+        validateBusinessHours(request.getThoiGianBatDau());
+
+        NguoiDung nguoiDung = findOrCreateUser(request);
+        ThuCung thuCung = findOrCreatePet(request, nguoiDung);
+        DichVu dichVu = dichVuRepository.findById(request.getDichVuId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy dịch vụ với ID: " + request.getDichVuId()));
+
+        int thoiLuongPhut = dichVu.getThoiLuongUocTinh() != null ? dichVu.getThoiLuongUocTinh() : 60;
+        LocalDateTime thoiGianKetThuc = request.getThoiGianBatDau().plusMinutes(thoiLuongPhut);
+        
+        if (thoiGianKetThuc.toLocalTime().isAfter(CLOSING_TIME)) {
+            throw new RuntimeException("Dịch vụ dự kiến kết thúc lúc " + thoiGianKetThuc.toLocalTime() + ", vượt quá giờ đóng cửa (" + CLOSING_TIME + ").");
+        }
+
+        NhanVien assignedNhanVien = findAvailableStaff(request, dichVu, request.getThoiGianBatDau(), thoiGianKetThuc);
+
+        LichHen lichHen = new LichHen();
+        lichHen.setThoiGianBatDau(request.getThoiGianBatDau());
+        lichHen.setThoiGianKetThuc(thoiGianKetThuc);
+        lichHen.setGhiChu(request.getGhiChuKhachHang());
+        lichHen.setNguoiDung(nguoiDung);
+        
+        lichHen.setTenKhachHang(nguoiDung.getHoTen());
+        lichHen.setSdtKhachHang(nguoiDung.getSoDienThoai());
+        lichHen.setEmailKhachHang(nguoiDung.getEmail());
+        
+        lichHen.setDichVu(dichVu);
+        lichHen.setThuCung(thuCung);
+        lichHen.setNhanVien(assignedNhanVien);
+        
+        // Sửa lại: Mặc định là CHỜ XÁC NHẬN
+        lichHen.setTrangThai(LichHen.TrangThai.CHO_XAC_NHAN);
+        
+        lichHen.setLoaiLichHen(request.getLoaiLichHen() != null ? request.getLoaiLichHen() : LichHen.LoaiLichHen.THUONG_LE);
+
+        LichHen savedLichHen = lichHenRepository.save(lichHen);
+        return convertToResponse(savedLichHen);
+    }
     
     @Transactional
     public LichHenResponse createGuestAppointment(GuestAppointmentRequest request) {
@@ -227,6 +271,13 @@ public class LichHenService {
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy thú cưng với ID: " + request.getThuCungId()));
         }
         if (StringUtils.hasText(request.getTenThuCung())) {
+            // Logic mới: Tìm xem chủ này đã có con thú cưng tên này chưa
+            List<ThuCung> existingPets = thuCungRepository.findByNguoiDung_UserIdAndTenThuCungIgnoreCase(owner.getUserId(), request.getTenThuCung());
+            if (!existingPets.isEmpty()) {
+                return existingPets.get(0); // Dùng lại con đầu tiên tìm thấy
+            }
+
+            // Nếu chưa có -> Tạo mới
             ThuCung newPet = new ThuCung();
             newPet.setTenThuCung(request.getTenThuCung());
             newPet.setChungLoai(request.getChungLoai());

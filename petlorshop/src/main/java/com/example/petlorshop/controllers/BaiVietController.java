@@ -28,9 +28,16 @@ public class BaiVietController {
     private ObjectMapper objectMapper; // Dùng để parse JSON thủ công
 
     // --- Danh Mục ---
-    @GetMapping("/danh-muc")
-    public ResponseEntity<List<DanhMucBaiViet>> getAllDanhMuc() {
+    // API cũ (List)
+    @GetMapping("/danh-muc/list")
+    public ResponseEntity<List<DanhMucBaiViet>> getAllDanhMucList() {
         return ResponseEntity.ok(baiVietService.getAllDanhMuc());
+    }
+
+    // API mới (Page + Search)
+    @GetMapping("/danh-muc")
+    public ResponseEntity<Page<DanhMucBaiViet>> getAllDanhMuc(Pageable pageable, @RequestParam(required = false) String keyword) {
+        return ResponseEntity.ok(baiVietService.getAllDanhMuc(pageable, keyword));
     }
 
     @GetMapping("/danh-muc/{id}")
@@ -58,8 +65,11 @@ public class BaiVietController {
 
     // --- Bài Viết ---
     @GetMapping
-    public ResponseEntity<Page<BaiVietResponse>> getAllBaiViet(Pageable pageable) {
-        return ResponseEntity.ok(baiVietService.getAllBaiViet(pageable));
+    public ResponseEntity<Page<BaiVietResponse>> getAllBaiViet(Pageable pageable, 
+                                                               @RequestParam(required = false) String keyword,
+                                                               @RequestParam(required = false) Integer categoryId) {
+        System.out.println("DEBUG: getAllBaiViet - keyword: " + keyword + ", categoryId: " + categoryId);
+        return ResponseEntity.ok(baiVietService.getAllBaiViet(pageable, keyword, categoryId));
     }
 
     @GetMapping("/cong-khai")

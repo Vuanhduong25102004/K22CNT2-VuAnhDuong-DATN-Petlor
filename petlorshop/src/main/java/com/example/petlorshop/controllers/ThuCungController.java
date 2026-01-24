@@ -52,8 +52,8 @@ public class ThuCungController {
     }
 
     @GetMapping
-    public Page<ThuCungResponse> getAllThuCung(Pageable pageable) {
-        return thuCungService.getAllThuCung(pageable).map(this::toThuCungResponse);
+    public Page<ThuCungResponse> getAllThuCung(Pageable pageable, @RequestParam(required = false) String keyword) {
+        return thuCungService.getAllThuCung(pageable, keyword).map(this::toThuCungResponse);
     }
 
     @GetMapping("/{id}")
@@ -132,5 +132,15 @@ public class ThuCungController {
     public ResponseEntity<HoSoBenhAnResponse> getHoSoBenhAn(@PathVariable Integer id) {
         HoSoBenhAnResponse hoSo = thuCungService.getHoSoBenhAn(id);
         return ResponseEntity.ok(hoSo);
+    }
+
+    // API tìm thú cưng theo SĐT chủ sở hữu (Dành cho Lễ tân)
+    @GetMapping("/by-phone")
+    public ResponseEntity<List<ThuCungResponse>> getPetsByOwnerPhone(@RequestParam String phone) {
+        List<ThuCung> pets = thuCungService.getPetsByOwnerPhone(phone);
+        List<ThuCungResponse> response = pets.stream()
+                .map(this::toThuCungResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
     }
 }

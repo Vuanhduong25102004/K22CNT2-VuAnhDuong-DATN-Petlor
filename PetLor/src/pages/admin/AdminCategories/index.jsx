@@ -8,19 +8,24 @@ import categoryService from "../../../services/categoryService";
 // Components
 import CategoryStats from "./components/CategoryStats";
 import CategoryTable from "./components/CategoryTable";
-import CategoryDetailModal from "./components/modals/CategoryDetailModal";
 import CategoryFormModal from "./components/modals/CategoryFormModal";
+
+// --- IMPORT MODAL DÙNG CHUNG ---
+// Bạn hãy kiểm tra lại đường dẫn import này cho đúng với cấu trúc thư mục của bạn
+import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 
 const AdminCategories = () => {
   const { type } = useParams();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Modal State
+  // Modal State cho Form (Thêm/Sửa)
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  // --- STATE CHO MODAL XÓA ---
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
 
   // Config
   const config = {
@@ -43,31 +48,28 @@ const AdminCategories = () => {
 
   const currentConfig = config[type] || config.products;
 
-  // --- FETCH DATA (QUAN TRỌNG: ĐÃ THÊM LOGIC CHUẨN HÓA) ---
+  // --- FETCH DATA ---
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const data = await categoryService.getAll({
+      const response = await categoryService.getAll({
         type: currentConfig.apiType,
       });
 
-      // LOGIC CHUẨN HÓA DỮ LIỆU QUAN TRỌNG:
-      const normalizedData = Array.isArray(data)
-        ? data.map((item) => ({
-            ...item, // Giữ lại toàn bộ dữ liệu gốc
+      // Logic chuẩn hóa dữ liệu (như đã làm ở bước trước)
+      let rawData = [];
+      if (Array.isArray(response)) rawData = response;
+      else if (response && Array.isArray(response.content))
+        rawData = response.content;
+      else if (response && Array.isArray(response.data))
+        rawData = response.data;
 
-            // 1. Chuẩn hóa ID: Kiểm tra kỹ các trường ID của từng loại
-            // Dịch vụ dùng 'danhMucDvId', Bài viết dùng 'danhMucBvId', Sản phẩm dùng 'danhMucId'
-            id:
-              item.danhMucDvId || item.danhMucBvId || item.danhMucId || item.id,
-
-            // 2. Chuẩn hóa Tên: Dịch vụ dùng 'tenDanhMucDv'
-            name: item.tenDanhMucDv || item.tenDanhMuc || item.name,
-
-            // 3. Chuẩn hóa Mô tả
-            description: item.moTa || item.description || "",
-          }))
-        : [];
+      const normalizedData = rawData.map((item) => ({
+        ...item,
+        id: item.danhMucDvId || item.danhMucBvId || item.danhMucId || item.id,
+        name: item.tenDanhMucDv || item.tenDanhMuc || item.name,
+        description: item.moTa || item.description || "",
+      }));
 
       setCategories(normalizedData);
     } catch (error) {
@@ -95,17 +97,30 @@ const AdminCategories = () => {
     setIsFormModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm(`Bạn có chắc muốn xóa danh mục này?`)) {
-      try {
-        await categoryService.delete(id, currentConfig.apiType);
-        toast.success("Xóa thành công!");
-        // Cập nhật state (loại bỏ item vừa xóa)
-        setCategories((prev) => prev.filter((item) => item.id !== id));
-      } catch (error) {
-        console.error("Lỗi xóa:", error);
-        toast.error("Xóa thất bại!");
-      }
+  // 1. Mở Modal Xóa
+  const openDeleteModal = (id) => {
+    setCategoryToDelete(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  // 2. Xử lý khi bấm nút "Xóa" trong Modal
+  const handleConfirmDelete = async () => {
+    if (!categoryToDelete) return;
+
+    try {
+      await categoryService.delete(categoryToDelete, currentConfig.apiType);
+      toast.success("Xóa thành công!");
+      // Cập nhật state UI: Loại bỏ mục vừa xóa
+      setCategories((prev) =>
+        prev.filter((item) => item.id !== categoryToDelete),
+      );
+    } catch (error) {
+      console.error("Lỗi xóa:", error);
+      toast.error("Xóa thất bại! Có thể danh mục này đang chứa dữ liệu.");
+    } finally {
+      // Đóng modal và reset ID
+      setIsDeleteModalOpen(false);
+      setCategoryToDelete(null);
     }
   };
 
@@ -119,6 +134,7 @@ const AdminCategories = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-slate-800">
           {currentConfig.title}
@@ -140,13 +156,13 @@ const AdminCategories = () => {
 
       {/* Table */}
       <CategoryTable
-        data={categories} // Dữ liệu đã được chuẩn hóa (có id, name, description)
+        data={categories}
         loading={loading}
         onEdit={handleEdit}
-        onDelete={handleDelete}
+        onDelete={openDeleteModal} // Truyền hàm mở modal vào đây
       />
 
-      {/* Modal Form */}
+      {/* Modal Form (Thêm/Sửa) */}
       {isFormModalOpen && (
         <CategoryFormModal
           isOpen={isFormModalOpen}
@@ -157,6 +173,17 @@ const AdminCategories = () => {
           placeholder={currentConfig.placeholder}
         />
       )}
+
+      {/* --- MODAL XÁC NHẬN XÓA (DÙNG CHUNG) --- */}
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Xóa danh mục?"
+        message="Bạn có chắc chắn muốn xóa danh mục này? Các sản phẩm/bài viết thuộc danh mục này có thể bị ảnh hưởng."
+        confirmText="Xóa ngay"
+        cancelText="Hủy bỏ"
+      />
     </div>
   );
 };

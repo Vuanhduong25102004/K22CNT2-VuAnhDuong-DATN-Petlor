@@ -8,15 +8,18 @@ import postService from "../../../../services/postService";
 import {
   getImageUrl,
   createPostFormData,
-  generateSlug, // Import thêm hàm này từ utils
+  generateSlug,
 } from "../../../admin/components/utils";
 
-const CreatePost = () => {
+const PostForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+
+  // Xác định chế độ: Nếu có id trên URL thì là Edit, ngược lại là Create
   const isEdit = !!id;
 
   const storedUserId = localStorage.getItem("userId");
+
   // --- STATE ---
   const [formData, setFormData] = useState({
     tieuDe: "",
@@ -43,43 +46,73 @@ const CreatePost = () => {
     ],
   };
 
-  // --- LOAD DATA ---
+  // =========================================================================
+  // --- LOAD DATA (ĐOẠN CODE ĐÃ SỬA NẰM Ở ĐÂY) ---
+  // =========================================================================
   useEffect(() => {
-    const fetchCats = async () => {
+    const loadData = async () => {
+      // 1. Khai báo biến lưu danh mục tạm
+      let fetchedCategories = [];
+
+      // --- BƯỚC A: Lấy danh sách chuyên mục trước ---
       try {
-        const res = await postService.getAllPostCategories();
-        setCategories(Array.isArray(res) ? res : res.content || []);
+        const resCats = await postService.getAllPostCategories();
+        fetchedCategories = Array.isArray(resCats)
+          ? resCats
+          : resCats.content || [];
+        setCategories(fetchedCategories);
       } catch (err) {
         console.error("Lỗi danh mục:", err);
+        return;
       }
-    };
-    fetchCats();
-
-    if (isEdit) {
-      const fetchDetail = async () => {
+      if (isEdit) {
         try {
-          const res = await postService.getPostById(id);
+          const resPost = await postService.getPostById(id);
+          const foundCat = fetchedCategories.find(
+            (cat) => cat.tenDanhMuc === resPost.tenDanhMuc,
+          );
+
+          // Lấy ID tìm được, nếu không thấy thì để rỗng
+          const foundCatId = foundCat
+            ? foundCat.danhMucBvId || foundCat.id
+            : "";
           setFormData({
-            tieuDe: res.tieuDe,
-            slug: res.slug,
-            danhMucBvId: res.danhMucBvId || res.danhMucBvId,
-            noiDung: res.noiDung,
-            trangThai: res.trangThai,
-            userId: res.userId || (storedUserId ? Number(storedUserId) : 1),
+            tieuDe: resPost.tieuDe || "",
+            slug: resPost.slug || "",
+
+            // Điền ID đã tìm được vào đây
+            danhMucBvId: foundCatId,
+
+            noiDung: resPost.noiDung || "",
+            trangThai: resPost.trangThai || "CONG_KHAI",
+
+            // Xử lý ID nhân viên (Backend bạn đang thiếu trường này trả về, tạm lấy userId cũ)
+            userId:
+              resPost.nhanVienId ||
+              resPost.userId ||
+              (storedUserId ? Number(storedUserId) : 1),
           });
-          setPreviewUrl(getImageUrl(res.anhBia));
+
+          // Hiển thị ảnh bìa cũ
+          if (resPost.anhBia) {
+            setPreviewUrl(getImageUrl(resPost.anhBia));
+          }
         } catch (err) {
+          console.error(err);
           toast.error("Không tìm thấy bài viết");
           navigate("/staff/receptionist/posts");
         }
-      };
-      fetchDetail();
-    }
+      }
+    };
+
+    loadData();
   }, [isEdit, id, navigate, storedUserId]);
+  // =========================================================================
 
   // --- HANDLERS ---
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     if (name === "tieuDe" && !isEdit) {
       setFormData((prev) => ({
         ...prev,
@@ -104,83 +137,38 @@ const CreatePost = () => {
   };
 
   const handleSubmit = async () => {
-    // 1. Kiểm tra validation cơ bản
     if (!formData.tieuDe || !formData.noiDung || !formData.danhMucBvId) {
       toast.warning("Vui lòng điền đầy đủ thông tin!");
       return;
     }
 
-    console.log("===== BẮT ĐẦU QUÁ TRÌNH SUBMIT =====");
-    console.log("1. Dữ liệu gốc từ State (formData):", formData);
-
     setIsSubmitting(true);
     try {
-      // 2. Lấy userId động từ localStorage
       const currentUserId = localStorage.getItem("userId");
-      console.log("2. userId lấy từ LocalStorage:", currentUserId);
 
-      // 3. Chuẩn bị dữ liệu JSON (Ép kiểu Number và đồng nhất tên trường)
       const dataToSubmit = {
         ...formData,
         userId: Number(currentUserId) || Number(formData.userId) || 1,
-        danhMucBvId: Number(formData.danhMucBvId), // Chuyển "2" thành 2
+        danhMucBvId: Number(formData.danhMucBvId),
       };
 
-      console.log(
-        "3. Dữ liệu JSON sau khi ép kiểu (dataToSubmit):",
-        dataToSubmit,
-      );
-      console.log("   - Kiểu dữ liệu của userId:", typeof dataToSubmit.userId);
-      console.log(
-        "   - Kiểu dữ liệu của danhMucBvId:",
-        typeof dataToSubmit.danhMucBvId,
-      );
-
-      // 4. Đóng gói vào FormData (Key 1: 'data', Key 2: 'anhBia')
       const payload = createPostFormData(dataToSubmit, imageFile);
 
-      // 5. Kiểm tra nội dung bên trong FormData
-      console.log("4. Kiểm tra các Key/Value trong FormData thực tế:");
-      for (let pair of payload.entries()) {
-        if (pair[1] instanceof Blob) {
-          console.log(`   + Key [${pair[0]}]:`, {
-            type: pair[1].type,
-            size: pair[1].size + " bytes",
-            // Lưu ý: Không thể log trực tiếp nội dung JSON trong Blob dễ dàng
-          });
-        } else {
-          console.log(`   + Key [${pair[0]}]:`, pair[1]);
-        }
-      }
-
-      // 6. Gọi API dựa trên chế độ Create hoặc Edit
       if (isEdit) {
-        console.log("5. Chế độ: CẬP NHẬT bài viết ID:", id);
         await postService.updatePost(id, payload);
-        toast.success("Cập nhật thành công!");
+        toast.success("Cập nhật bài viết thành công!");
       } else {
-        console.log("5. Chế độ: TẠO MỚI bài viết");
         await postService.createPost(payload);
-        toast.success("Đăng bài thành công!");
+        toast.success("Đăng bài viết mới thành công!");
       }
 
       navigate("/staff/receptionist/posts");
     } catch (error) {
-      console.error("===== LỖI TỪ SERVER =====");
-      if (error.response) {
-        console.error("Status Code:", error.response.status);
-        console.error("Dữ liệu lỗi trả về:", error.response.data);
-        // Backend Spring Boot thường trả về lý do lỗi chi tiết trong error.response.data
-      } else {
-        console.error("Lỗi không xác định:", error.message);
-      }
-
-      const msg =
-        error.response?.data?.message || "Lỗi cấu trúc dữ liệu (400)!";
+      console.error("Lỗi submit:", error);
+      const msg = error.response?.data?.message || "Lỗi xử lý!";
       toast.error(msg);
     } finally {
       setIsSubmitting(false);
-      console.log("===== KẾT THÚC QUÁ TRÌNH SUBMIT =====");
     }
   };
 
@@ -203,7 +191,7 @@ const CreatePost = () => {
             />
           </div>
 
-          {/* Input Slug (Có thể ẩn hoặc hiện để sửa) */}
+          {/* Input Slug */}
           <div className="space-y-3">
             <label className="text-xs font-bold text-gray-500 ml-2">
               Slug (URL)
@@ -254,7 +242,7 @@ const CreatePost = () => {
                 </span>
               ) : (
                 <span className="material-symbols-outlined text-[20px]">
-                  send
+                  {isEdit ? "save" : "send"}
                 </span>
               )}
               {isEdit ? "Cập nhật" : "Đăng bài"}
@@ -386,4 +374,4 @@ const CreatePost = () => {
   );
 };
 
-export default CreatePost;
+export default PostForm;

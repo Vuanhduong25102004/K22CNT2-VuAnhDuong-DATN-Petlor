@@ -15,6 +15,7 @@ import com.example.petlorshop.repositories.ThuCungRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -47,7 +48,27 @@ public class ThuCungService {
     @Autowired
     private FileStorageService fileStorageService;
 
-    public Page<ThuCung> getAllThuCung(Pageable pageable) {
+    public Page<ThuCung> getAllThuCung(Pageable pageable, String keyword) {
+        if (StringUtils.hasText(keyword)) {
+            List<ThuCung> allMatches = thuCungRepository.searchByKeyword(keyword);
+            
+            String lowerKeyword = keyword.toLowerCase();
+            List<ThuCung> filteredList = allMatches.stream()
+                    .filter(t -> (t.getTenThuCung() != null && t.getTenThuCung().toLowerCase().contains(lowerKeyword)) || 
+                                 (t.getChungLoai() != null && t.getChungLoai().toLowerCase().contains(lowerKeyword)) ||
+                                 (t.getGiongLoai() != null && t.getGiongLoai().toLowerCase().contains(lowerKeyword)))
+                    .collect(Collectors.toList());
+
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), filteredList.size());
+            
+            if (start > filteredList.size()) {
+                return new PageImpl<>(List.of(), pageable, filteredList.size());
+            }
+            
+            List<ThuCung> pageContent = filteredList.subList(start, end);
+            return new PageImpl<>(pageContent, pageable, filteredList.size());
+        }
         return thuCungRepository.findAll(pageable);
     }
 
@@ -57,6 +78,10 @@ public class ThuCungService {
 
     public List<ThuCung> getMyPets(String email) {
         return thuCungRepository.findByNguoiDung_Email(email);
+    }
+
+    public List<ThuCung> getPetsByOwnerPhone(String phone) {
+        return thuCungRepository.findByOwnerPhone(phone);
     }
 
     public ThuCung getMyPetById(String email, Integer id) {

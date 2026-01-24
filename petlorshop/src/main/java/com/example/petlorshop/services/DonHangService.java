@@ -9,6 +9,7 @@ import com.example.petlorshop.repositories.SanPhamRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -38,9 +39,28 @@ public class DonHangService {
     @Autowired
     private OrderCalculationService orderCalculationService;
 
-    public Page<DonHangResponse> getAllDonHang(Pageable pageable) {
-        return donHangRepository.findAll(pageable)
-                .map(this::convertToResponse);
+    public Page<DonHangResponse> getAllDonHang(Pageable pageable, String keyword) {
+        if (StringUtils.hasText(keyword)) {
+            List<DonHang> allMatches = donHangRepository.searchByKeyword(keyword);
+            
+            String lowerKeyword = keyword.toLowerCase();
+            List<DonHangResponse> filteredList = allMatches.stream()
+                    .filter(d -> (d.getTrangThai() != null && d.getTrangThai().name().toLowerCase().contains(lowerKeyword)) || 
+                                 (d.getDiaChiGiaoHang() != null && d.getDiaChiGiaoHang().toLowerCase().contains(lowerKeyword)))
+                    .map(this::convertToResponse)
+                    .collect(Collectors.toList());
+
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), filteredList.size());
+            
+            if (start > filteredList.size()) {
+                return new PageImpl<>(List.of(), pageable, filteredList.size());
+            }
+            
+            List<DonHangResponse> pageContent = filteredList.subList(start, end);
+            return new PageImpl<>(pageContent, pageable, filteredList.size());
+        }
+        return donHangRepository.findAll(pageable).map(this::convertToResponse);
     }
 
     public Optional<DonHangResponse> getDonHangById(Integer id) {

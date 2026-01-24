@@ -4,6 +4,8 @@ import com.example.petlorshop.dto.DanhMucDichVuRequest;
 import com.example.petlorshop.models.DanhMucDichVu;
 import com.example.petlorshop.services.DanhMucDichVuService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,9 +18,16 @@ public class DanhMucDichVuController {
     @Autowired
     private DanhMucDichVuService danhMucDichVuService;
 
-    @GetMapping
-    public ResponseEntity<List<DanhMucDichVu>> getAll() {
+    // API cũ (List)
+    @GetMapping("/list")
+    public ResponseEntity<List<DanhMucDichVu>> getAllList() {
         return ResponseEntity.ok(danhMucDichVuService.getAllDanhMuc());
+    }
+
+    // API mới (Page + Search)
+    @GetMapping
+    public ResponseEntity<Page<DanhMucDichVu>> getAll(Pageable pageable, @RequestParam(required = false) String keyword) {
+        return ResponseEntity.ok(danhMucDichVuService.getAllDanhMuc(pageable, keyword));
     }
 
     @GetMapping("/{id}")

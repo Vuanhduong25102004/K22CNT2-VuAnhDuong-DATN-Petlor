@@ -1,20 +1,32 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { Link } from "react-router-dom";
 import blogService from "../services/blogService";
+import searchService from "../services/searchService";
 
-// Cấu hình đường dẫn ảnh (Backend Spring Boot)
+// Cấu hình đường dẫn ảnh
 const IMAGE_BASE_URL = "http://localhost:8080/uploads/";
 
 const BlogPage = () => {
   // --- STATE QUẢN LÝ DỮ LIỆU ---
-  const [posts, setPosts] = useState([]);
-  const [featuredPost, setFeaturedPost] = useState(null); // Bài nổi bật (mới nhất)
-  const [recentPosts, setRecentPosts] = useState([]); // Danh sách bài bên dưới
+  const [posts, setPosts] = useState([]); // Dữ liệu chính (có sort/search)
+  const [trendingPosts, setTrendingPosts] = useState([]); // [MỚI] Dữ liệu Sidebar (độc lập, không sort)
+
+  const [featuredPost, setFeaturedPost] = useState(null);
+  const [recentPosts, setRecentPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // --- HELPER 1: Format ngày tháng ---
+  // --- STATE DANH MỤC & TÌM KIẾM ---
+  const [categories, setCategories] = useState([]);
+  const [keyword, setKeyword] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+
+  // --- STATE CUSTOM DROPDOWN ---
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // --- HELPER FUNCTIONS ---
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -25,47 +37,125 @@ const BlogPage = () => {
     });
   };
 
-  // --- HELPER 2: Loại bỏ thẻ HTML để lấy mô tả ngắn ---
   const stripHtml = (html) => {
     if (!html) return "";
     const doc = new DOMParser().parseFromString(html, "text/html");
     return doc.body.textContent || "";
   };
 
-  // --- HELPER 3: Xử lý link ảnh ---
   const getImageUrl = (filename) => {
     if (!filename) return "https://via.placeholder.com/800x600?text=No+Image";
     return `${IMAGE_BASE_URL}${filename}`;
   };
 
-  // --- FETCH DATA ---
+  // --- 1. FETCH CATEGORIES ---
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchCategories = async () => {
       try {
-        const data = await blogService.getPublicPosts();
+        const response = await blogService.getAllCategories();
+        let data = [];
+        if (Array.isArray(response)) data = response;
+        else if (response?.data) data = response.data;
+        else if (response?.content) data = response.content;
+        else if (response?.data?.content) data = response.data.content;
 
-        // Sắp xếp bài mới nhất lên đầu
-        const sortedData = Array.isArray(data)
-          ? data.sort((a, b) => new Date(b.ngayDang) - new Date(a.ngayDang))
-          : [];
-
-        setPosts(sortedData);
-
-        if (sortedData.length > 0) {
-          setFeaturedPost(sortedData[0]); // Bài đầu tiên là Featured
-          setRecentPosts(sortedData.slice(1)); // Các bài còn lại là Recent
-        }
+        const activeCategories = data.filter((cat) => cat.daXoa === false);
+        setCategories(activeCategories);
       } catch (error) {
-        console.error("Lỗi tải bài viết:", error);
-      } finally {
-        setLoading(false);
+        console.error("Lỗi tải danh mục:", error);
       }
     };
-
-    fetchData();
+    fetchCategories();
   }, []);
 
-  // --- AOS ANIMATION ---
+  // --- [MỚI] FETCH TRENDING POSTS (LOGIC RIÊNG CHO SIDEBAR) ---
+  // Chỉ gọi 1 lần khi load trang, không phụ thuộc vào search/filter
+  useEffect(() => {
+    const fetchTrending = async () => {
+      try {
+        const data = await blogService.getPublicPosts();
+        const list = Array.isArray(data) ? data : [];
+        // Lấy 3 bài đầu tiên theo thứ tự API trả về (Không sort lại)
+        setTrendingPosts(list.slice(0, 3));
+      } catch (error) {
+        console.error("Lỗi tải bài viết nổi bật:", error);
+      }
+    };
+    fetchTrending();
+  }, []);
+
+  // --- 2. FETCH POSTS (LOGIC CŨ CHO MAIN GRID) ---
+  // Vẫn giữ logic sắp xếp theo ngày cho danh sách chính
+  const fetchPosts = async (searchQuery = "", catId = null) => {
+    setLoading(true);
+    try {
+      let data;
+      // LOGIC: Gọi API Search hoặc Get All
+      if (searchQuery.trim() || catId !== null) {
+        const response = await searchService.searchPosts(searchQuery, catId);
+        if (Array.isArray(response)) data = response;
+        else if (response?.data) data = response.data;
+        else if (response?.content) data = response.content;
+        else data = [];
+      } else {
+        data = await blogService.getPublicPosts();
+      }
+
+      // [GIỮ NGUYÊN LOGIC CŨ]: Sắp xếp giảm dần theo ngày đăng cho Main Grid
+      const sortedData = Array.isArray(data)
+        ? data.sort((a, b) => new Date(b.ngayDang) - new Date(a.ngayDang))
+        : [];
+
+      setPosts(sortedData);
+
+      if (sortedData.length > 0) {
+        setFeaturedPost(sortedData[0]);
+        setRecentPosts(sortedData.slice(1));
+      } else {
+        setFeaturedPost(null);
+        setRecentPosts([]);
+      }
+    } catch (error) {
+      console.error("Lỗi tải bài viết:", error);
+    } finally {
+      setLoading(false);
+      setTimeout(() => AOS.refresh(), 100);
+    }
+  };
+
+  // --- HANDLERS ---
+  const handleSearchClick = () => fetchPosts(keyword, selectedCategoryId);
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") fetchPosts(keyword, selectedCategoryId);
+  };
+
+  const handleSelectCategory = (catId) => {
+    setSelectedCategoryId(catId);
+    fetchPosts(keyword, catId);
+    setIsDropdownOpen(false);
+  };
+
+  const handleReset = () => {
+    setKeyword("");
+    setSelectedCategoryId(null);
+    fetchPosts("", null);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
   useEffect(() => {
     window.scrollTo(0, 0);
     const aosInit = setTimeout(() => {
@@ -73,144 +163,196 @@ const BlogPage = () => {
         duration: 800,
         once: true,
         offset: 50,
-        delay: 0,
         easing: "ease-out-cubic",
       });
       AOS.refresh();
     }, 100);
     return () => clearTimeout(aosInit);
-  }, [loading]); // Refresh khi loading xong
+  }, []);
 
-  // --- LOADING STATE ---
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-600"></div>
-      </div>
-    );
-  }
+  const getSelectedCategoryName = () => {
+    if (selectedCategoryId === null) return "Tất cả";
+    const cat = categories.find((c) => c.danhMucBvId === selectedCategoryId);
+    return cat ? cat.tenDanhMuc : "Tất cả";
+  };
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 text-gray-900 font-sans mt-13">
-      {/* --- SECTION 1: FEATURED POST (DYNAMIC DATA) --- */}
-      {featuredPost && (
-        <section className="mb-16" data-aos="fade-up">
-          <div className="relative group overflow-hidden rounded-[32px] bg-white shadow-xl border border-gray-100">
-            <div className="grid grid-cols-1 lg:grid-cols-2">
-              <div className="h-64 lg:h-[500px] overflow-hidden">
-                <img
-                  alt={featuredPost.tieuDe}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  src={getImageUrl(featuredPost.anhBia)}
-                  onError={(e) => {
-                    e.target.src =
-                      "https://via.placeholder.com/800x600?text=Error";
-                  }}
-                />
-              </div>
-              <div className="p-8 lg:p-12 flex flex-col justify-center">
-                <div className="flex items-center gap-3 mb-6">
-                  <span className="bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">
-                    Mới nhất
-                  </span>
-                  <span className="text-gray-400 text-sm">
-                    {formatDate(featuredPost.ngayDang)}
-                  </span>
-                </div>
-                <h1 className="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-6 leading-tight group-hover:text-primary transition-colors">
-                  {featuredPost.tieuDe}
-                </h1>
-                <p className="text-gray-600 text-lg mb-8 line-clamp-3">
-                  {stripHtml(featuredPost.noiDung)}
-                </p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {/* Avatar giả lập từ tên tác giả */}
-                    <div className="w-10 h-10 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center font-bold">
-                      {featuredPost.tenTacGia
-                        ? featuredPost.tenTacGia.charAt(0)
-                        : "A"}
-                    </div>
-                    <span className="text-sm font-bold text-gray-900">
-                      {featuredPost.tenTacGia}
-                    </span>
-                  </div>
-                  <Link
-                    className="flex items-center gap-2 text-primary font-bold hover:translate-x-1 transition-transform"
-                    to={`/blog/${featuredPost.slug}`}
-                  >
-                    Đọc bài viết{" "}
-                    <span className="material-symbols-outlined">
-                      arrow_forward
-                    </span>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* --- SECTION 2: FILTERS & SEARCH (STATIC - GIỮ NGUYÊN CSS) --- */}
-      <section
-        className="mb-12 flex flex-col md:flex-row items-center justify-between gap-8 border-b border-gray-100 pb-8"
-        data-aos="fade-up"
-        data-aos-delay="100"
+      {/* --- SECTION 1: FEATURED POST --- */}
+      <div
+        className={`transition-opacity duration-300 ${loading ? "opacity-50 pointer-events-none" : "opacity-100"}`}
       >
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 w-full md:w-auto scrollbar-hide">
-          <button className="px-6 py-2.5 bg-primary text-white rounded-full font-bold whitespace-nowrap shadow-md shadow-primary/20">
-            Tất cả
-          </button>
-          {/* Bạn có thể map danh mục thật nếu muốn, hiện tại giữ nguyên danh mục cứng */}
-          {[
-            "Kiến thức nuôi chó",
-            "Kiến thức nuôi mèo",
-            "Dinh dưỡng",
-            "Khuyến mãi",
-          ].map((cat) => (
-            <button
-              key={cat}
-              className="px-6 py-2.5 bg-white text-gray-600 rounded-full font-semibold border border-gray-100 hover:border-primary hover:text-primary transition-all whitespace-nowrap hover:shadow-sm"
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-        <div className="relative w-full md:w-80">
-          <input
-            className="w-full bg-white border border-gray-100 rounded-3xl py-3 pl-4 pr-12 focus:ring-2 focus:ring-primary/50 text-sm shadow-sm outline-none"
-            placeholder="Tìm kiếm bài viết..."
-            type="text"
-          />
-          <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-            search
-          </span>
-        </div>
-      </section>
-
-      {/* --- SECTION 3: MAIN GRID (ARTICLES & SIDEBAR) --- */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        {/* LEFT COLUMN: ARTICLES (DYNAMIC MAP) */}
-        <div className="lg:col-span-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {recentPosts.length > 0 ? (
-              recentPosts.map((article, index) => (
-                <article
-                  key={article.baiVietId}
-                  className="group bg-white rounded-3xl overflow-hidden border border-gray-100 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300 flex flex-col h-full"
-                  data-aos="fade-up"
-                  data-aos-delay={index * 100} // Giữ hiệu ứng AOS
-                >
-                  <div className="h-56 overflow-hidden relative shrink-0">
+        {featuredPost && (
+          <section className="mb-16" data-aos="fade-up">
+            <div className="relative group overflow-hidden rounded-[32px] bg-white shadow-xl border border-gray-100">
+              <div className="grid grid-cols-1 lg:grid-cols-2">
+                <div className="h-64 lg:h-[500px] overflow-hidden">
+                  <Link to={`/blog/${featuredPost.slug}`}>
                     <img
-                      alt={article.tieuDe}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      src={getImageUrl(article.anhBia)}
+                      alt={featuredPost.tieuDe}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      src={getImageUrl(featuredPost.anhBia)}
                       onError={(e) => {
                         e.target.src =
                           "https://via.placeholder.com/800x600?text=Error";
                       }}
                     />
+                  </Link>
+                </div>
+                <div className="p-8 lg:p-12 flex flex-col justify-center">
+                  <div className="flex items-center gap-3 mb-6">
+                    <span className="bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">
+                      Mới nhất
+                    </span>
+                    <span className="text-gray-400 text-sm">
+                      {formatDate(featuredPost.ngayDang)}
+                    </span>
+                  </div>
+                  <h1 className="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-6 leading-tight group-hover:text-primary transition-colors">
+                    <Link to={`/blog/${featuredPost.slug}`}>
+                      {featuredPost.tieuDe}
+                    </Link>
+                  </h1>
+                  <p className="text-gray-600 text-lg mb-8 line-clamp-3">
+                    {stripHtml(featuredPost.noiDung)}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center font-bold">
+                        {featuredPost.tenTacGia
+                          ? featuredPost.tenTacGia.charAt(0)
+                          : "A"}
+                      </div>
+                      <span className="text-sm font-bold text-gray-900">
+                        {featuredPost.tenTacGia}
+                      </span>
+                    </div>
+                    <Link
+                      className="flex items-center gap-2 text-primary font-bold hover:translate-x-1 transition-transform"
+                      to={`/blog/${featuredPost.slug}`}
+                    >
+                      Đọc bài viết{" "}
+                      <span className="material-symbols-outlined">
+                        arrow_forward
+                      </span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+      </div>
+
+      {/* --- SECTION 2: FILTERS & SEARCH --- */}
+      <section
+        className="mb-12 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8 border-b border-gray-100 pb-8 relative z-50"
+        data-aos="fade-up"
+        data-aos-delay="100"
+      >
+        <div className="relative w-full md:w-72" ref={dropdownRef}>
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="w-full bg-white border border-gray-100 rounded-3xl py-3 pl-6 pr-10 text-left text-sm font-semibold text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center justify-between transition-all hover:border-primary/50"
+          >
+            <span className="truncate">{getSelectedCategoryName()}</span>
+            <span
+              className={`material-symbols-outlined text-gray-400 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`}
+            >
+              expand_more
+            </span>
+          </button>
+
+          {isDropdownOpen && (
+            <div className="absolute top-full left-0 z-50 mt-2 w-full bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden max-h-60 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
+              <ul className="py-1">
+                <li>
+                  <button
+                    onClick={() => handleSelectCategory(null)}
+                    className={`w-full text-left px-6 py-3 text-sm font-medium transition-colors hover:bg-primary/5 hover:text-primary flex items-center justify-between group ${selectedCategoryId === null ? "bg-primary/10 text-primary" : "text-gray-600"}`}
+                  >
+                    Tất cả
+                    {selectedCategoryId === null && (
+                      <span className="material-symbols-outlined text-base">
+                        check
+                      </span>
+                    )}
+                  </button>
+                </li>
+                {categories.map((cat) => (
+                  <li key={cat.danhMucBvId}>
+                    <button
+                      onClick={() => handleSelectCategory(cat.danhMucBvId)}
+                      className={`w-full text-left px-6 py-3 text-sm font-medium transition-colors hover:bg-primary/5 hover:text-primary flex items-center justify-between group ${selectedCategoryId === cat.danhMucBvId ? "bg-primary/10 text-primary" : "text-gray-600"}`}
+                    >
+                      {cat.tenDanhMuc}
+                      {selectedCategoryId === cat.danhMucBvId && (
+                        <span className="material-symbols-outlined text-base">
+                          check
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        <div className="relative w-full md:w-80">
+          <input
+            className="w-full bg-white border border-gray-100 rounded-3xl py-3 pl-4 pr-12 focus:ring-2 focus:ring-primary/50 text-sm shadow-sm outline-none transition-all focus:shadow-md"
+            placeholder="Tìm kiếm bài viết..."
+            type="text"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+          {loading ? (
+            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            <span
+              className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hover:text-primary hover:scale-110 transition-transform"
+              onClick={handleSearchClick}
+            >
+              search
+            </span>
+          )}
+        </div>
+      </section>
+
+      {/* --- SECTION 3: MAIN GRID (Z-INDEX 0) --- */}
+      <div
+        className={`grid grid-cols-1 lg:grid-cols-12 gap-12 transition-opacity duration-300 relative z-0 ${loading ? "opacity-50 pointer-events-none" : "opacity-100"}`}
+      >
+        {/* LEFT COLUMN: ARTICLES (Thay đổi theo Search/Filter) */}
+        <div className="lg:col-span-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {recentPosts.length > 0 ? (
+              recentPosts.map((article, index) => (
+                <article
+                  key={article.baiVietId || index}
+                  className="group bg-white rounded-3xl overflow-hidden border border-gray-100 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300 flex flex-col h-full"
+                  data-aos="fade-up"
+                  data-aos-delay={index * 100}
+                >
+                  <div className="h-56 overflow-hidden relative shrink-0">
+                    <Link
+                      to={`/blog/${article.slug}`}
+                      className="block h-full w-full"
+                    >
+                      <img
+                        alt={article.tieuDe}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        src={getImageUrl(article.anhBia)}
+                        onError={(e) => {
+                          e.target.src =
+                            "https://via.placeholder.com/800x600?text=Error";
+                        }}
+                      />
+                    </Link>
                     <div className="absolute top-4 left-4">
                       <span className="bg-white/90 backdrop-blur px-3 py-1 rounded-lg text-xs font-bold text-primary shadow-sm uppercase">
                         {article.tenDanhMuc}
@@ -252,43 +394,52 @@ const BlogPage = () => {
               ))
             ) : (
               <div className="col-span-2 text-center text-gray-500 py-10">
-                Chưa có bài viết nào khác.
+                {!loading && (
+                  <>
+                    {posts.length === 0 ? (
+                      <p>Không tìm thấy bài viết nào phù hợp.</p>
+                    ) : (
+                      <p>Chưa có bài viết nào khác.</p>
+                    )}
+                  </>
+                )}
               </div>
             )}
           </div>
 
-          {/* Pagination (Static UI - Giữ nguyên) */}
-          <div className="mt-16 flex justify-center gap-2" data-aos="fade-up">
-            <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-100 text-gray-500 hover:border-primary hover:text-primary transition-colors">
-              <span className="material-symbols-outlined">chevron_left</span>
-            </button>
-            <button className="w-12 h-12 flex items-center justify-center rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/30">
-              1
-            </button>
-            <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-100 text-gray-500 hover:border-primary hover:text-primary transition-colors font-bold">
-              2
-            </button>
-            <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-100 text-gray-500 hover:border-primary hover:text-primary transition-colors">
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
-          </div>
+          {/* Pagination */}
+          {recentPosts.length > 0 && (
+            <div className="mt-16 flex justify-center gap-2" data-aos="fade-up">
+              <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-100 text-gray-500 hover:border-primary hover:text-primary transition-colors">
+                <span className="material-symbols-outlined">chevron_left</span>
+              </button>
+              <button className="w-12 h-12 flex items-center justify-center rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/30">
+                1
+              </button>
+              <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-100 text-gray-500 hover:border-primary hover:text-primary transition-colors font-bold">
+                2
+              </button>
+              <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-100 text-gray-500 hover:border-primary hover:text-primary transition-colors">
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* RIGHT COLUMN: SIDEBAR */}
+        {/* RIGHT COLUMN: SIDEBAR (ĐỘC LẬP, KHÔNG SORT) */}
         <aside className="lg:col-span-4">
           <div className="sticky top-28 space-y-10">
-            {/* Trending Widget (LẤY DATA TẠM TỪ STATE POSTS) */}
             <div
               className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm"
               data-aos="fade-left"
             >
               <h3 className="text-2xl font-extrabold mb-8 text-gray-900 flex items-center gap-2">
-                <span className="w-1.5 h-6 bg-primary rounded-full"></span>
-                Xem nhiều nhất
+                <span className="w-1.5 h-6 bg-primary rounded-full"></span> Xem
+                nhiều nhất
               </h3>
               <div className="space-y-6">
-                {/* Lấy 3 bài đầu tiên làm demo cho sidebar */}
-                {posts.slice(0, 3).map((post, index) => (
+                {/* Dùng trendingPosts thay vì posts để không bị ảnh hưởng bởi search */}
+                {trendingPosts.map((post, index) => (
                   <Link
                     key={post.baiVietId || index}
                     className="group flex gap-4 cursor-pointer"
@@ -314,7 +465,6 @@ const BlogPage = () => {
               </div>
             </div>
 
-            {/* Consultant Widget (Static - Giữ nguyên) */}
             <div
               className="bg-emerald-50 p-8 rounded-3xl border border-emerald-100 relative overflow-hidden group"
               data-aos="fade-left"
@@ -323,7 +473,6 @@ const BlogPage = () => {
               <span className="material-symbols-outlined absolute -bottom-8 -right-8 text-9xl text-emerald-500/10 -rotate-12 pointer-events-none select-none">
                 medical_services
               </span>
-
               <div className="relative z-10">
                 <h4 className="text-xl font-bold text-emerald-900 mb-2">
                   Cần tư vấn sức khỏe?
@@ -344,7 +493,7 @@ const BlogPage = () => {
         </aside>
       </div>
 
-      {/* --- SECTION 4: NEWSLETTER (Static - Giữ nguyên) --- */}
+      {/* --- SECTION 4: NEWSLETTER --- */}
       <section
         className="mt-24 relative overflow-hidden rounded-[48px] p-2 bg-white shadow-2xl border border-gray-100"
         data-aos="fade-up"
@@ -359,7 +508,7 @@ const BlogPage = () => {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
           <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6 max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/20 backdrop-blur-md text-white border border-white/20 text-xs font-bold w-fit mb-8 tracking-[0.2em] uppercase">
-              <span className="material-symbols-outlined text-sm">mail</span>
+              <span className="material-symbols-outlined text-sm">mail</span>{" "}
               <span>Exclusive Updates</span>
             </div>
             <h2 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-tight">
@@ -382,7 +531,7 @@ const BlogPage = () => {
                   />
                 </div>
                 <button className="bg-primary hover:bg-white hover:text-primary text-white font-extrabold px-8 py-4 sm:py-0 rounded-[20px] text-lg transition-all duration-300 flex items-center justify-center gap-2 whitespace-nowrap min-h-[60px]">
-                  Gửi ngay
+                  Gửi ngay{" "}
                   <span className="material-symbols-outlined">send</span>
                 </button>
               </div>

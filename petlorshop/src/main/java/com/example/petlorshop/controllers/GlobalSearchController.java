@@ -17,16 +17,8 @@ public class GlobalSearchController {
     private GlobalSearchService globalSearchService;
 
     @GetMapping("/search")
-    public ResponseEntity<GlobalSearchDto> searchAll(@RequestParam String keyword) {
-        System.out.println("Public Search Keyword received: " + keyword);
-        GlobalSearchDto results = globalSearchService.searchAll(keyword);
-        return ResponseEntity.ok(results);
-    }
-
-    @GetMapping("/admin/search")
-    public ResponseEntity<GlobalSearchDto> searchAllForAdmin(@RequestParam String keyword) {
-        System.out.println("Admin Search Keyword received: " + keyword);
-        GlobalSearchDto results = globalSearchService.searchAllForAdmin(keyword);
+    public ResponseEntity<GlobalSearchDto> search(@RequestParam String keyword) {
+        GlobalSearchDto results = globalSearchService.search(keyword);
         return ResponseEntity.ok(results);
     }
 }

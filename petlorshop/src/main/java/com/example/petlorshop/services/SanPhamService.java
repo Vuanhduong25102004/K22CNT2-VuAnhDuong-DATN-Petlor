@@ -10,12 +10,16 @@ import com.example.petlorshop.repositories.SanPhamRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class SanPhamService {
@@ -38,7 +42,37 @@ public class SanPhamService {
     }
 
     @Transactional(readOnly = true)
-    public Page<SanPhamResponse> getAllSanPham(Pageable pageable) {
+    public Page<SanPhamResponse> getAllSanPham(Pageable pageable, String keyword, Integer categoryId) {
+        // Trường hợp 1: Có keyword (Ưu tiên tìm kiếm trước, sau đó lọc danh mục nếu có)
+        if (StringUtils.hasText(keyword)) {
+            List<SanPham> allMatches = sanPhamRepository.searchByKeyword(keyword);
+            
+            String lowerKeyword = keyword.toLowerCase();
+            List<SanPhamResponse> filteredList = allMatches.stream()
+                    .filter(sp -> sp.getTenSanPham().toLowerCase().contains(lowerKeyword))
+                    // Lọc thêm theo danh mục nếu có
+                    .filter(sp -> categoryId == null || (sp.getDanhMucSanPham() != null && sp.getDanhMucSanPham().getDanhMucId().equals(categoryId)))
+                    .map(this::convertToResponse)
+                    .collect(Collectors.toList());
+
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), filteredList.size());
+            
+            if (start > filteredList.size()) {
+                return new PageImpl<>(List.of(), pageable, filteredList.size());
+            }
+            
+            List<SanPhamResponse> pageContent = filteredList.subList(start, end);
+            return new PageImpl<>(pageContent, pageable, filteredList.size());
+        }
+        
+        // Trường hợp 2: Không có keyword, chỉ có categoryId
+        if (categoryId != null) {
+            return sanPhamRepository.findByDanhMucSanPham_DanhMucId(categoryId, pageable)
+                    .map(this::convertToResponse);
+        }
+
+        // Trường hợp 3: Không có gì cả -> Lấy tất cả
         return sanPhamRepository.findAll(pageable)
                 .map(this::convertToResponse);
     }

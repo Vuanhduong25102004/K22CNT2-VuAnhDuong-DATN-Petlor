@@ -27,8 +27,8 @@ public class DonHangController {
     private DonHangService donHangService;
 
     @GetMapping
-    public Page<DonHangResponse> getAllDonHang(Pageable pageable) {
-        return donHangService.getAllDonHang(pageable);
+    public Page<DonHangResponse> getAllDonHang(Pageable pageable, @RequestParam(required = false) String keyword) {
+        return donHangService.getAllDonHang(pageable, keyword);
     }
 
     @GetMapping("/{id}")

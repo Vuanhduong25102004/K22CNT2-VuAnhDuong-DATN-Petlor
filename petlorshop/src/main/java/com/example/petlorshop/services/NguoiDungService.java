@@ -11,6 +11,7 @@ import com.example.petlorshop.repositories.NhanVienRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class NguoiDungService {
@@ -118,7 +120,27 @@ public class NguoiDungService {
         }
     }
 
-    public Page<NguoiDung> getAllNguoiDung(Pageable pageable) {
+    public Page<NguoiDung> getAllNguoiDung(Pageable pageable, String keyword) {
+        if (StringUtils.hasText(keyword)) {
+            List<NguoiDung> allMatches = nguoiDungRepository.searchByKeyword(keyword);
+            
+            String lowerKeyword = keyword.toLowerCase();
+            List<NguoiDung> filteredList = allMatches.stream()
+                    .filter(u -> (u.getHoTen() != null && u.getHoTen().toLowerCase().contains(lowerKeyword)) || 
+                                 (u.getEmail() != null && u.getEmail().toLowerCase().contains(lowerKeyword)) ||
+                                 (u.getSoDienThoai() != null && u.getSoDienThoai().contains(lowerKeyword)))
+                    .collect(Collectors.toList());
+
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), filteredList.size());
+            
+            if (start > filteredList.size()) {
+                return new PageImpl<>(List.of(), pageable, filteredList.size());
+            }
+            
+            List<NguoiDung> pageContent = filteredList.subList(start, end);
+            return new PageImpl<>(pageContent, pageable, filteredList.size());
+        }
         return nguoiDungRepository.findAll(pageable);
     }
 
