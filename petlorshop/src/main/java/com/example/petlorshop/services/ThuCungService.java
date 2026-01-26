@@ -3,15 +3,8 @@ package com.example.petlorshop.services;
 import com.example.petlorshop.dto.HoSoBenhAnResponse;
 import com.example.petlorshop.dto.ThuCungRequest;
 import com.example.petlorshop.dto.ThuCungUpdateRequest;
-import com.example.petlorshop.models.LichHen;
-import com.example.petlorshop.models.NguoiDung;
-import com.example.petlorshop.models.Role;
-import com.example.petlorshop.models.SoTiemChung;
-import com.example.petlorshop.models.ThuCung;
-import com.example.petlorshop.repositories.LichHenRepository;
-import com.example.petlorshop.repositories.NguoiDungRepository;
-import com.example.petlorshop.repositories.SoTiemChungRepository;
-import com.example.petlorshop.repositories.ThuCungRepository;
+import com.example.petlorshop.models.*;
+import com.example.petlorshop.repositories.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -41,6 +34,9 @@ public class ThuCungService {
     
     @Autowired
     private SoTiemChungRepository soTiemChungRepository;
+
+    @Autowired
+    private DonThuocRepository donThuocRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -228,8 +224,8 @@ public class ThuCungService {
         ThuCung thuCung = thuCungRepository.findById(thuCungId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy thú cưng với ID: " + thuCungId));
         
-        // Lấy lịch sử khám bệnh (Lịch hẹn đã hoàn thành)
-        List<LichHen> lichSuKhamRaw = lichHenRepository.findAll().stream() // Cần tối ưu query sau này
+        // 1. Lịch sử khám bệnh
+        List<LichHen> lichSuKhamRaw = lichHenRepository.findAll().stream()
                 .filter(lh -> lh.getThuCung() != null && lh.getThuCung().getThuCungId().equals(thuCungId))
                 .filter(lh -> lh.getTrangThai() == LichHen.TrangThai.DA_HOAN_THANH)
                 .collect(Collectors.toList());
@@ -240,12 +236,12 @@ public class ThuCungService {
                         lh.getThoiGianBatDau(),
                         lh.getDichVu().getTenDichVu(),
                         lh.getNhanVien() != null ? lh.getNhanVien().getHoTen() : "Không rõ",
-                        lh.getGhiChu(), // Tạm dùng ghi chú làm chẩn đoán
-                        null // Kết luận chưa có trường riêng
+                        lh.getGhiChu(),
+                        null
                 ))
                 .collect(Collectors.toList());
         
-        // Lấy lịch sử tiêm chủng
+        // 2. Lịch sử tiêm chủng
         List<SoTiemChung> lichSuTiemChungRaw = soTiemChungRepository.findByThuCung_ThuCungId(thuCungId);
         
         List<HoSoBenhAnResponse.LichSuTiemChung> lichSuTiemChung = lichSuTiemChungRaw.stream()
@@ -258,6 +254,30 @@ public class ThuCungService {
                         stc.getGhiChu()
                 ))
                 .collect(Collectors.toList());
+
+        // 3. Lịch sử đơn thuốc
+        List<DonThuoc> lichSuDonThuocRaw = donThuocRepository.findByThuCung_ThuCungId(thuCungId);
+
+        List<HoSoBenhAnResponse.LichSuDonThuoc> lichSuDonThuoc = lichSuDonThuocRaw.stream()
+                .map(dt -> {
+                    List<HoSoBenhAnResponse.ChiTietThuoc> chiTietThuoc = dt.getChiTietDonThuocList().stream()
+                            .map(ct -> new HoSoBenhAnResponse.ChiTietThuoc(
+                                    ct.getThuoc().getTenSanPham(),
+                                    ct.getSoLuong(),
+                                    ct.getLieuDung()
+                            ))
+                            .collect(Collectors.toList());
+
+                    return new HoSoBenhAnResponse.LichSuDonThuoc(
+                            dt.getDonThuocId(),
+                            dt.getNgayKe(),
+                            dt.getBacSi() != null ? dt.getBacSi().getHoTen() : "Không rõ",
+                            dt.getChanDoan(),
+                            dt.getLoiDan(),
+                            chiTietThuoc
+                    );
+                })
+                .collect(Collectors.toList());
         
         return new HoSoBenhAnResponse(
                 thuCung.getThuCungId(),
@@ -268,9 +288,10 @@ public class ThuCungService {
                 thuCung.getGioiTinh(),
                 thuCung.getCanNang(),
                 thuCung.getGhiChuSucKhoe(),
-                thuCung.getHinhAnh(), // Thêm hình ảnh vào response
+                thuCung.getHinhAnh(),
                 lichSuKham,
-                lichSuTiemChung
+                lichSuTiemChung,
+                lichSuDonThuoc // Thêm danh sách đơn thuốc vào response
         );
     }
 }

@@ -12,6 +12,9 @@ const AppointmentList = ({
 }) => {
   const isSpa = type === "SPA";
 
+  // --- CẤU HÌNH ĐƯỜNG DẪN ẢNH ---
+  const IMAGE_BASE_URL = "http://localhost:8080/uploads/";
+
   // --- HELPERS ---
   const formatTime = (isoString) =>
     isoString
@@ -32,17 +35,41 @@ const AppointmentList = ({
     return "bg-[#007A7A]/10 text-[#007A7A]";
   };
 
+  // --- SORT LOGIC ---
+  const sortAppointments = (list) => {
+    return list.sort((a, b) => {
+      // Sắp xếp theo ID giảm dần (Mới nhất lên đầu)
+      return b.lichHenId - a.lichHenId;
+    });
+  };
+
   // --- FILTER LOGIC ---
-  const displayedList = appointments.filter((apt) => {
-    if (activeTab === "CHO_DUYET")
-      return apt.trangThaiLichHen === "CHO_XAC_NHAN";
-    if (activeTab === "DA_XAC_NHAN")
-      return apt.trangThaiLichHen === "DA_XAC_NHAN";
-    if (activeTab === "KHAN_CAP") return apt.loaiLichHen?.includes("Khẩn");
-    if (activeTab === "DA_XONG")
-      return ["DA_HOAN_THANH", "DA_HUY"].includes(apt.trangThaiLichHen);
-    return true;
-  });
+  const getFilteredList = () => {
+    let filtered = [];
+    if (activeTab === "CHO_DUYET") {
+      filtered = appointments.filter(
+        (apt) => apt.trangThaiLichHen === "CHO_XAC_NHAN",
+      );
+    } else if (activeTab === "DA_XAC_NHAN") {
+      filtered = appointments.filter(
+        (apt) => apt.trangThaiLichHen === "DA_XAC_NHAN",
+      );
+    } else if (activeTab === "KHAN_CAP") {
+      filtered = appointments.filter((apt) =>
+        apt.loaiLichHen?.includes("Khẩn"),
+      );
+    } else if (activeTab === "DA_XONG") {
+      filtered = appointments.filter((apt) =>
+        ["DA_HOAN_THANH", "DA_HUY"].includes(apt.trangThaiLichHen),
+      );
+    } else {
+      filtered = appointments;
+    }
+
+    return sortAppointments(filtered);
+  };
+
+  const displayedList = getFilteredList();
 
   // --- COUNTS LOGIC ---
   const counts = {
@@ -51,7 +78,6 @@ const AppointmentList = ({
     confirmed: appointments.filter((a) => a.trangThaiLichHen === "DA_XAC_NHAN")
       .length,
     urgent: appointments.filter((a) => a.loaiLichHen?.includes("Khẩn")).length,
-    // THÊM: Đếm số lượng lịch sử (Đã hoàn thành hoặc đã hủy)
     history: appointments.filter((a) =>
       ["DA_HOAN_THANH", "DA_HUY"].includes(a.trangThaiLichHen),
     ).length,
@@ -83,13 +109,13 @@ const AppointmentList = ({
         )}
         <TabButton
           label="LỊCH SỬ"
-          count={counts.history} // THÊM: Truyền count vào đây
+          count={counts.history}
           isActive={activeTab === "DA_XONG"}
           onClick={() => onTabChange("DA_XONG")}
         />
       </div>
 
-      {/* LIST ITEMS (Phần này giữ nguyên CSS cũ của bạn) */}
+      {/* LIST ITEMS */}
       <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-4">
         {loading ? (
           <div className="text-center py-10 text-gray-400 text-sm">
@@ -146,14 +172,38 @@ const AppointmentList = ({
                 </div>
 
                 <div className="flex items-center justify-between border-t border-gray-50 pt-4 mt-2">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-gray-300 text-lg">
-                      person
-                    </span>
-                    <span className="text-xs font-semibold text-gray-500">
+                  <div className="flex items-center gap-3">
+                    {/* --- HIỂN THỊ ẢNH KHÁCH HÀNG (MỚI) --- */}
+                    <div className="size-8 rounded-full overflow-hidden border border-gray-200 bg-gray-50 shrink-0 relative">
+                      {apt.anhKhachHang ? (
+                        <img
+                          src={`${IMAGE_BASE_URL}${apt.anhKhachHang}`}
+                          alt={apt.tenKhachHang}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = "none"; // Ẩn ảnh lỗi
+                            e.target.nextSibling.style.display = "flex"; // Hiện icon fallback
+                          }}
+                        />
+                      ) : null}
+
+                      {/* Fallback Icon (Ẩn nếu có ảnh) */}
+                      <div
+                        className="w-full h-full flex items-center justify-center text-gray-300 absolute inset-0 bg-gray-50"
+                        style={{ display: apt.anhKhachHang ? "none" : "flex" }}
+                      >
+                        <span className="material-symbols-outlined text-lg">
+                          person
+                        </span>
+                      </div>
+                    </div>
+                    {/* ------------------------------------------ */}
+
+                    <span className="text-xs font-semibold text-gray-500 truncate max-w-[150px]">
                       {apt.tenKhachHang}
                     </span>
                   </div>
+
                   <div className="px-3 py-1 bg-gray-50 rounded-lg text-[10px] font-bold text-gray-400 uppercase">
                     HS #{apt.lichHenId}
                   </div>
@@ -176,7 +226,6 @@ const TabButton = ({ label, count, isActive, onClick }) => (
         : "border-transparent text-gray-400 hover:text-gray-600"
     }`}
   >
-    {/* count > 0 để tránh hiện (0) nếu danh sách trống, bạn có thể xóa nếu muốn hiện (0) */}
     {label} {count !== undefined && count > 0 && `(${count})`}
   </button>
 );

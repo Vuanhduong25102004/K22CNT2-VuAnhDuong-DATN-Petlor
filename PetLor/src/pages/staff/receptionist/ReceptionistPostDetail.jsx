@@ -22,6 +22,7 @@ const ReceptionistPostDetail = () => {
     trangThai: "",
     anhBia: "",
     tacGia: "",
+    anhTacGia: "", // <--- THÊM TRƯỜNG NÀY
     ngayDang: "",
   });
 
@@ -47,6 +48,7 @@ const ReceptionistPostDetail = () => {
           trangThai: res.trangThai,
           anhBia: res.anhBia,
           tacGia: res.tenTacGia || "Admin",
+          anhTacGia: res.anhTacGia, // <--- LẤY ẢNH TÁC GIẢ TỪ API
           ngayDang: res.ngayDang,
         });
       } catch (err) {
@@ -159,19 +161,43 @@ const ReceptionistPostDetail = () => {
 
             {/* Tác giả & Ngày đăng */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+              {/* CẬP NHẬT: Hiển thị Avatar Tác giả */}
+              <div className="space-y-2 col-span-2 sm:col-span-1">
                 <label className="text-xs font-black text-[#588d87] uppercase tracking-widest ml-1">
                   Tác giả
                 </label>
-                <div className="text-sm font-bold text-[#101918] px-2">
-                  {postData.tacGia}
+                <div className="flex items-center gap-2 px-2">
+                  <div className="size-8 rounded-full overflow-hidden border border-[#e9f1f0] bg-gray-100 flex items-center justify-center shrink-0">
+                    {postData.anhTacGia ? (
+                      <img
+                        src={getImageUrl(postData.anhTacGia)}
+                        alt={postData.tacGia}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = "none"; // Ẩn ảnh lỗi
+                          e.target.nextSibling.style.display = "block"; // Hiện icon fallback
+                        }}
+                      />
+                    ) : null}
+                    {/* Icon fallback (hiện khi không có ảnh hoặc ảnh lỗi) */}
+                    <span
+                      className="material-symbols-outlined text-gray-400 text-[18px]"
+                      style={{ display: postData.anhTacGia ? "none" : "block" }}
+                    >
+                      person
+                    </span>
+                  </div>
+                  <div className="text-sm font-bold text-[#101918] truncate">
+                    {postData.tacGia}
+                  </div>
                 </div>
               </div>
-              <div className="space-y-2">
+
+              <div className="space-y-2 col-span-2 sm:col-span-1">
                 <label className="text-xs font-black text-[#588d87] uppercase tracking-widest ml-1">
                   Ngày đăng
                 </label>
-                <div className="text-sm font-bold text-[#101918] px-2">
+                <div className="text-sm font-bold text-[#101918] px-2 flex items-center h-8">
                   {postData.ngayDang
                     ? new Date(postData.ngayDang).toLocaleDateString("vi-VN")
                     : "---"}

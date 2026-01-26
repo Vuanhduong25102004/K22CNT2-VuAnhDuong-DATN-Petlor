@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import postService from "../../../services/postService";
-import { getImageUrl, formatDate } from "../../admin/components/utils";
+import { formatDate } from "../../admin/components/utils"; // Bỏ getImageUrl vì tự xử lý
 
 const ReceptionistPosts = () => {
   // --- STATE ---
@@ -15,18 +15,20 @@ const ReceptionistPosts = () => {
   const [totalElements, setTotalElements] = useState(0);
   const ITEMS_PER_PAGE = 10;
 
+  // --- CẤU HÌNH ĐƯỜNG DẪN ẢNH ---
+  const IMAGE_BASE_URL = "http://localhost:8080/uploads/";
+
   // Stats Data
   const [stats, setStats] = useState({
     total: 0,
     published: 0,
-    views: "24.5K", // Demo
+    views: "24.5K",
   });
 
   // --- FETCH DATA ---
   const fetchPosts = async () => {
     setLoading(true);
     try {
-      // === QUAN TRỌNG: Spring Boot trang bắt đầu từ 0 ===
       const params = {
         page: currentPage - 1,
         limit: ITEMS_PER_PAGE,
@@ -34,21 +36,18 @@ const ReceptionistPosts = () => {
 
       const response = await postService.getAllPosts(params);
 
-      // Xử lý dữ liệu trả về từ Spring Boot Page<T>
       const content = response.content || [];
       setPosts(content);
       setTotalPages(response.totalPages || 1);
       setTotalElements(response.totalElements || 0);
 
-      // Cập nhật thống kê (Tạm tính trên client hoặc lấy từ API khác)
       setStats((prev) => ({
         ...prev,
         total: response.totalElements || 0,
-        published: response.totalElements, // Demo: Giả sử đang hiển thị hết
+        published: response.totalElements,
       }));
     } catch (error) {
       console.error("Lỗi tải dữ liệu:", error);
-      // toast.error("Không thể tải dữ liệu.");
     } finally {
       setLoading(false);
     }
@@ -137,21 +136,21 @@ const ReceptionistPosts = () => {
             <h3 className="text-xl font-extrabold text-[#101918] flex items-center gap-2">
               <span className="material-symbols-outlined text-[#2a9d90]">
                 list_alt
-              </span>
+              </span>{" "}
               Danh sách bài đăng
             </h3>
             <div className="flex gap-3">
               <button className="flex items-center gap-2 px-5 py-2.5 bg-[#f9fbfb] hover:bg-[#e9f1f0] text-[#588d87] text-sm font-bold rounded-xl transition-colors">
                 <span className="material-symbols-outlined text-[20px]">
                   filter_list
-                </span>
+                </span>{" "}
                 Bộ lọc
               </button>
               <Link to="/staff/receptionist/posts/create">
                 <button className="flex items-center gap-2 px-5 py-2.5 bg-[#2a9d90] text-white text-sm font-bold rounded-xl hover:bg-[#2a9d90]/90 transition-colors shadow-lg shadow-[#2a9d90]/20">
                   <span className="material-symbols-outlined text-[20px]">
                     add
-                  </span>
+                  </span>{" "}
                   Viết bài mới
                 </button>
               </Link>
@@ -201,26 +200,32 @@ const ReceptionistPosts = () => {
                       key={post.baiVietId || post.id}
                       className="hover:bg-[#f9fbfb] transition-colors group"
                     >
+                      {/* Cột 1: Bài viết (Ảnh bìa + Tiêu đề) */}
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-5">
-                          {/* Ảnh Thumbnail */}
+                          {/* Ảnh bìa */}
                           {post.anhBia ? (
                             <img
                               alt="Thumbnail"
                               className="w-20 h-14 rounded-xl object-cover border border-[#e9f1f0] shadow-sm"
-                              src={getImageUrl(post.anhBia)}
+                              src={`${IMAGE_BASE_URL}${post.anhBia}`} // SỬA: Dùng trực tiếp base url
                               onError={(e) => {
-                                e.target.src =
-                                  "https://via.placeholder.com/150?text=Err";
+                                e.target.style.display = "none"; // Ẩn ảnh lỗi
+                                e.target.nextSibling.style.display = "flex"; // Hiện placeholder
                               }}
                             />
-                          ) : (
-                            <div className="w-20 h-14 rounded-xl bg-gray-100 flex items-center justify-center border border-[#e9f1f0] text-gray-400">
-                              <span className="material-symbols-outlined text-[24px]">
-                                image
-                              </span>
-                            </div>
-                          )}
+                          ) : null}
+
+                          {/* Placeholder hiển thị khi không có ảnh hoặc ảnh lỗi */}
+                          <div
+                            className="w-20 h-14 rounded-xl bg-gray-100 flex items-center justify-center border border-[#e9f1f0] text-gray-400"
+                            style={{ display: post.anhBia ? "none" : "flex" }}
+                          >
+                            <span className="material-symbols-outlined text-[24px]">
+                              image
+                            </span>
+                          </div>
+
                           <div className="max-w-[280px]">
                             <p className="text-base font-bold text-[#101918] truncate group-hover:text-[#2a9d90] transition-colors">
                               {post.tieuDe}
@@ -231,24 +236,52 @@ const ReceptionistPosts = () => {
                           </div>
                         </div>
                       </td>
+
+                      {/* Cột 2: Chuyên mục */}
                       <td className="px-8 py-6">
                         <span className="px-3 py-1.5 text-[11px] font-black uppercase rounded-lg tracking-wide bg-blue-50 text-blue-600">
                           {post.tenDanhMuc || "Tổng hợp"}
                         </span>
                       </td>
+
+                      {/* Cột 3: Tác giả (Hiện ảnh Avatar) */}
                       <td className="px-8 py-6">
-                        <div className="flex items-center gap-2">
-                          <span className="material-symbols-outlined text-[#588d87] text-[18px]">
+                        <div className="flex items-center gap-3">
+                          {/* Avatar Tác giả */}
+                          {post.anhTacGia ? (
+                            <img
+                              src={`${IMAGE_BASE_URL}${post.anhTacGia}`}
+                              alt={post.tenTacGia}
+                              className="size-8 rounded-full object-cover border border-[#e9f1f0]"
+                              onError={(e) => {
+                                e.target.style.display = "none";
+                                e.target.nextSibling.style.display = "block";
+                              }}
+                            />
+                          ) : null}
+
+                          {/* Fallback Icon */}
+                          <span
+                            className="material-symbols-outlined text-[#588d87] text-[18px] bg-[#e9f1f0] rounded-full p-1"
+                            style={{
+                              display: post.anhTacGia ? "none" : "block",
+                            }}
+                          >
                             person
                           </span>
+
                           <span className="text-sm font-bold text-[#101918]">
                             {post.tenTacGia || "Admin"}
                           </span>
                         </div>
                       </td>
+
+                      {/* Cột 4: Ngày đăng */}
                       <td className="px-8 py-6 text-sm font-medium text-[#588d87]">
                         {formatDate(post.ngayDang).split(",")[0]}
                       </td>
+
+                      {/* Cột 5: Trạng thái */}
                       <td className="px-8 py-6">
                         <div
                           className={`flex items-center gap-2 ${post.trangThai === "CONG_KHAI" ? "text-[#2a9d90]" : "text-gray-400"}`}
@@ -263,6 +296,8 @@ const ReceptionistPosts = () => {
                           </span>
                         </div>
                       </td>
+
+                      {/* Cột 6: Thao tác */}
                       <td className="px-8 py-6">
                         <div className="flex items-center justify-end gap-3">
                           <Link
@@ -272,8 +307,6 @@ const ReceptionistPosts = () => {
                               Xem
                             </button>
                           </Link>
-
-                          {/* --- NÚT CHỈNH SỬA (ĐÃ SỬA) --- */}
                           <Link
                             to={`/staff/receptionist/posts/edit/${post.baiVietId || post.id}`}
                             className="size-9 flex items-center justify-center text-[#2a9d90] bg-[#2a9d90]/5 hover:bg-[#2a9d90]/10 rounded-xl transition-colors"
@@ -283,8 +316,6 @@ const ReceptionistPosts = () => {
                               edit
                             </span>
                           </Link>
-
-                          {/* --- NÚT XÓA (GIỮ NGUYÊN) --- */}
                           <button
                             onClick={() =>
                               handleDelete(post.baiVietId || post.id)
@@ -327,11 +358,9 @@ const ReceptionistPosts = () => {
                   chevron_left
                 </span>
               </button>
-
               <button className="size-10 rounded-xl bg-[#2a9d90] text-white text-sm font-bold shadow-md shadow-[#2a9d90]/20">
                 {currentPage}
               </button>
-
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}

@@ -2,16 +2,14 @@ package com.example.petlorshop.dto;
 
 import com.example.petlorshop.models.BaiViet;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class BaiVietResponse {
     private Integer baiVietId;
     private String tieuDe;
@@ -20,6 +18,7 @@ public class BaiVietResponse {
     private String anhBia;
     private LocalDateTime ngayDang;
     private String tenTacGia;
+    private String anhTacGia; // Thêm trường này
     private String tenDanhMuc;
     private BaiViet.TrangThaiBaiViet trangThai;
 }

@@ -127,4 +127,17 @@ public class DonHangController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    // API tạo đơn hàng từ đơn thuốc (Dành cho Lễ tân)
+    @PostMapping("/tu-don-thuoc/{donThuocId}")
+    public ResponseEntity<?> createOrderFromPrescription(@PathVariable Integer donThuocId) {
+        try {
+            DonHang createdDonHang = donHangService.createOrderFromPrescription(donThuocId);
+            return donHangService.getDonHangById(createdDonHang.getDonHangId())
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.internalServerError().build());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }

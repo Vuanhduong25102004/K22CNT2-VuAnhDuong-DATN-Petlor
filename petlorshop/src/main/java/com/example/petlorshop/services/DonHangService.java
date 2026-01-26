@@ -2,10 +2,7 @@ package com.example.petlorshop.services;
 
 import com.example.petlorshop.dto.*;
 import com.example.petlorshop.models.*;
-import com.example.petlorshop.repositories.DonHangRepository;
-import com.example.petlorshop.repositories.KhuyenMaiRepository;
-import com.example.petlorshop.repositories.NguoiDungRepository;
-import com.example.petlorshop.repositories.SanPhamRepository;
+import com.example.petlorshop.repositories.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -13,6 +10,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -38,6 +36,8 @@ public class DonHangService {
     private KhuyenMaiService khuyenMaiService;
     @Autowired
     private OrderCalculationService orderCalculationService;
+    @Autowired
+    private DonThuocRepository donThuocRepository;
 
     public Page<DonHangResponse> getAllDonHang(Pageable pageable, String keyword) {
         if (StringUtils.hasText(keyword)) {
@@ -222,6 +222,70 @@ public class DonHangService {
         if (calculationResult.getKhuyenMai() != null) {
             khuyenMaiService.suDungMaKhuyenMai(calculationResult.getKhuyenMai().getMaCode());
         }
+
+        return donHangRepository.save(donHang);
+    }
+
+    @Transactional
+    public DonHang createOrderFromPrescription(Integer donThuocId) {
+        DonThuoc donThuoc = donThuocRepository.findById(donThuocId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn thuốc với ID: " + donThuocId));
+
+        if (donThuoc.getTrangThai() != DonThuoc.TrangThaiDonThuoc.MOI_TAO) {
+            throw new RuntimeException("Đơn thuốc này đã được thanh toán hoặc đã hủy.");
+        }
+
+        LichHen lichHen = donThuoc.getLichHen();
+        NguoiDung nguoiDung = lichHen.getNguoiDung();
+
+        DonHang donHang = new DonHang();
+        donHang.setNguoiDung(nguoiDung);
+        
+        // Nếu là khách vãng lai (nguoiDung == null), lấy thông tin từ Lịch hẹn
+        if (nguoiDung == null) {
+            donHang.setHoTenNguoiNhan(lichHen.getTenKhachHang());
+            donHang.setEmailNguoiNhan(lichHen.getEmailKhachHang());
+        }
+        
+        // Địa chỉ giao hàng: Mặc định là "Tại quầy" hoặc lấy từ user
+        donHang.setDiaChiGiaoHang("Mua trực tiếp tại quầy (Theo đơn thuốc #" + donThuocId + ")");
+        donHang.setSoDienThoaiNhan(lichHen.getSdtKhachHang());
+        
+        // Phương thức thanh toán: Mặc định là Tiền mặt (hoặc có thể cho chọn sau)
+        donHang.setPhuongThucThanhToan(DonHang.PhuongThucThanhToan.COD); // Tạm coi là thanh toán tại quầy
+        donHang.setTrangThai(DonHang.TrangThaiDonHang.DA_GIAO); // Mua tại quầy -> Đã giao (Hoàn thành)
+        donHang.setTrangThaiThanhToan(DonHang.TrangThaiThanhToan.DA_THANH_TOAN); // Đã thanh toán
+        donHang.setNgayThanhToan(LocalDateTime.now());
+
+        // Chuyển đổi chi tiết đơn thuốc -> chi tiết đơn hàng
+        List<ChiTietDonHang> chiTietDonHangs = new ArrayList<>();
+        BigDecimal tongTienHang = BigDecimal.ZERO;
+
+        for (ChiTietDonThuoc ctThuoc : donThuoc.getChiTietDonThuocList()) {
+            ChiTietDonHang ctDonHang = new ChiTietDonHang();
+            ctDonHang.setDonHang(donHang);
+            ctDonHang.setSanPham(ctThuoc.getThuoc());
+            ctDonHang.setSoLuong(ctThuoc.getSoLuong());
+            ctDonHang.setDonGia(ctThuoc.getThuoc().getGia()); // Lấy giá hiện tại
+            
+            chiTietDonHangs.add(ctDonHang);
+            
+            BigDecimal thanhTien = ctDonHang.getDonGia().multiply(BigDecimal.valueOf(ctDonHang.getSoLuong()));
+            tongTienHang = tongTienHang.add(thanhTien);
+            
+            // Lưu ý: Tồn kho đã được trừ khi bác sĩ kê đơn (trong LichHenService), nên ở đây KHÔNG trừ nữa.
+            // Nếu muốn chắc chắn, có thể kiểm tra lại logic trừ kho.
+        }
+
+        donHang.setChiTietDonHangs(chiTietDonHangs);
+        donHang.setTongTienHang(tongTienHang);
+        donHang.setSoTienGiam(BigDecimal.ZERO);
+        donHang.setPhiVanChuyen(BigDecimal.ZERO);
+        donHang.setTongThanhToan(tongTienHang);
+
+        // Cập nhật trạng thái đơn thuốc
+        donThuoc.setTrangThai(DonThuoc.TrangThaiDonThuoc.DA_THANH_TOAN);
+        donThuocRepository.save(donThuoc);
 
         return donHangRepository.save(donHang);
     }

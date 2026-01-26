@@ -32,6 +32,8 @@ public class LichHenService {
     @Autowired private DichVuRepository dichVuRepository;
     @Autowired private NhanVienRepository nhanVienRepository;
     @Autowired private SoTiemChungRepository soTiemChungRepository;
+    @Autowired private DonThuocRepository donThuocRepository;
+    @Autowired private SanPhamRepository sanPhamRepository;
     @Autowired private PasswordEncoder passwordEncoder;
 
     private static final LocalTime OPENING_TIME = LocalTime.of(8, 0);
@@ -451,6 +453,45 @@ public class LichHenService {
             
             soTiemChungRepository.save(stc);
         }
+
+        // Xử lý kê đơn thuốc
+        if (request != null && request.isCoKeDon() && request.getDanhSachThuoc() != null && !request.getDanhSachThuoc().isEmpty()) {
+            if (lichHen.getThuCung() == null) {
+                throw new RuntimeException("Lịch hẹn này không có thông tin thú cưng để kê đơn.");
+            }
+
+            DonThuoc donThuoc = new DonThuoc();
+            donThuoc.setLichHen(lichHen);
+            donThuoc.setBacSi(lichHen.getNhanVien());
+            donThuoc.setThuCung(lichHen.getThuCung());
+            donThuoc.setChanDoan(request.getChanDoan());
+            donThuoc.setLoiDan(request.getLoiDan());
+            donThuoc.setTrangThai(DonThuoc.TrangThaiDonThuoc.MOI_TAO);
+
+            List<ChiTietDonThuoc> chiTietList = new ArrayList<>();
+            for (CompleteAppointmentRequest.ThuocKeDonDto item : request.getDanhSachThuoc()) {
+                SanPham thuoc = sanPhamRepository.findById(item.getThuocId())
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy thuốc với ID: " + item.getThuocId()));
+                
+                // Kiểm tra tồn kho (Tùy chọn: có thể cho phép kê âm hoặc chặn)
+                if (thuoc.getSoLuongTonKho() < item.getSoLuong()) {
+                    throw new RuntimeException("Thuốc " + thuoc.getTenSanPham() + " không đủ số lượng tồn kho (Còn: " + thuoc.getSoLuongTonKho() + ")");
+                }
+                
+                // Trừ tồn kho ngay lập tức (để tránh bán hết khi khách ra quầy)
+                thuoc.setSoLuongTonKho(thuoc.getSoLuongTonKho() - item.getSoLuong());
+                sanPhamRepository.save(thuoc);
+
+                ChiTietDonThuoc chiTiet = new ChiTietDonThuoc();
+                chiTiet.setDonThuoc(donThuoc);
+                chiTiet.setThuoc(thuoc);
+                chiTiet.setSoLuong(item.getSoLuong());
+                chiTiet.setLieuDung(item.getLieuDung());
+                chiTietList.add(chiTiet);
+            }
+            donThuoc.setChiTietDonThuocList(chiTietList);
+            donThuocRepository.save(donThuoc);
+        }
         
         LichHen savedLichHen = lichHenRepository.save(lichHen);
         return convertToResponse(savedLichHen);
@@ -560,9 +601,11 @@ public class LichHenService {
                 nguoiDung != null ? nguoiDung.getUserId() : null, 
                 tenKhachHang, // Tên hiển thị
                 sdtKhachHang, // SĐT hiển thị
+                nguoiDung != null ? nguoiDung.getAnhDaiDien() : null, // Thêm ảnh khách hàng
                 thuCung != null ? thuCung.getThuCungId() : null, thuCung != null ? thuCung.getTenThuCung() : null, thuCung != null ? thuCung.getGiongLoai() : null, thuCung != null ? thuCung.getHinhAnh() : null, // Đã sửa thành getHinhAnh()
                 dichVu != null ? dichVu.getDichVuId() : null, dichVu != null ? dichVu.getTenDichVu() : null, dichVu != null ? dichVu.getGiaDichVu() : null,
-                nhanVien != null ? nhanVien.getNhanVienId() : null, nhanVien != null ? nhanVien.getHoTen() : null
+                nhanVien != null ? nhanVien.getNhanVienId() : null, nhanVien != null ? nhanVien.getHoTen() : null,
+                nhanVien != null ? nhanVien.getAnhDaiDien() : null // Thêm ảnh nhân viên
         );
     }
 }

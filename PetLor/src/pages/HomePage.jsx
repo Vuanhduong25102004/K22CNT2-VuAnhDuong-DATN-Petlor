@@ -1,10 +1,22 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import { Link } from "react-router-dom";
+import productService from "../services/productService";
+import blogService from "../services/blogService"; // 1. Import Service Blog
 
 const Homepage = () => {
+  // State lưu dữ liệu
+  const [latestProducts, setLatestProducts] = useState([]);
+  const [latestBlogs, setLatestBlogs] = useState([]); // 2. State lưu bài viết
+
+  // Cấu hình đường dẫn ảnh
+  const IMAGE_BASE_URL = "http://localhost:8080/uploads/";
+
   useEffect(() => {
     window.scrollTo(0, 0);
+
+    // Init AOS
     const aosInit = setTimeout(() => {
       AOS.init({
         duration: 800,
@@ -15,12 +27,70 @@ const Homepage = () => {
       });
       AOS.refresh();
     }, 100);
+
+    // --- API: LẤY SẢN PHẨM ---
+    const fetchProducts = async () => {
+      try {
+        const response = await productService.getAllProducts({
+          page: 0,
+          size: 4,
+          sort: "sanPhamId,desc",
+          categoryId: 1,
+        });
+        if (response && response.content) {
+          setLatestProducts(response.content);
+        }
+      } catch (error) {
+        console.error("Lỗi tải sản phẩm:", error);
+      }
+    };
+
+    // --- API: LẤY BÀI VIẾT BLOG (MỚI) ---
+    const fetchBlogs = async () => {
+      try {
+        const response = await blogService.getPublicPosts();
+        // API trả về mảng trực tiếp (theo JSON bạn cung cấp)
+        // Chỉ lấy 3 bài đầu tiên để khớp với giao diện 3 cột
+        if (Array.isArray(response)) {
+          setLatestBlogs(response.slice(0, 3));
+        } else if (response.content) {
+          // Phòng trường hợp sau này API phân trang
+          setLatestBlogs(response.content.slice(0, 3));
+        }
+      } catch (error) {
+        console.error("Lỗi tải bài viết:", error);
+      }
+    };
+
+    fetchProducts();
+    fetchBlogs(); // Gọi hàm lấy bài viết
+
     return () => clearTimeout(aosInit);
   }, []);
+
+  // Helper format tiền tệ
+  const formatMoney = (amount) =>
+    new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+
+  // Helper format ngày tháng cho Blog
+  const formatDateBlog = (isoString) => {
+    if (!isoString) return "";
+    const date = new Date(isoString);
+    // Format: 21 Tháng 12, 2025
+    return date.toLocaleDateString("vi-VN", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
 
   return (
     <>
       <section className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 mt-22 mb-24">
+        {/* ... (HERO SECTION GIỮ NGUYÊN) ... */}
         <div
           className="relative min-h-[560px] rounded-[40px] overflow-hidden bg-white shadow-2xl shadow-gray-200/50 flex flex-col md:flex-row"
           data-aos="fade-up"
@@ -57,7 +127,6 @@ const Homepage = () => {
               </button>
             </div>
 
-            {/* Stats */}
             <div className="mt-12 flex items-center gap-8 border-t border-gray-100 pt-8">
               <div>
                 <div className="text-2xl font-bold text-gray-900">10k+</div>
@@ -70,7 +139,6 @@ const Homepage = () => {
             </div>
           </div>
 
-          {/* Right Image */}
           <div className="relative w-full md:w-1/2 min-h-[400px] md:min-h-full">
             <div className="absolute inset-0 md:inset-4 md:rounded-[32px] overflow-hidden">
               <img
@@ -81,7 +149,6 @@ const Homepage = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent md:hidden"></div>
             </div>
 
-            {/* Floating Badge */}
             <div className="absolute bottom-12 left-12 bg-white p-4 rounded-2xl shadow-2xl hidden lg:flex items-center gap-4 animate-bounce">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                 <span className="material-symbols-outlined text-primary">
@@ -101,11 +168,7 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* =========================================
-          NEW SECTIONS (LIGHT MODE ONLY)
-      ========================================= */}
-
-      {/* 1. DỊCH VỤ NỔI BẬT */}
+      {/* 1. DỊCH VỤ NỔI BẬT (Giữ nguyên) */}
       <section className="mb-24 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12" data-aos="fade-up">
           <h2 className="text-3xl font-extrabold text-gray-900 mb-4">
@@ -117,7 +180,6 @@ const Homepage = () => {
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Service 1 */}
           <div
             className="group bg-white p-8 rounded-[32px] border border-gray-100 hover:border-primary transition-all duration-300 shadow-sm hover:shadow-xl text-center"
             data-aos="fade-up"
@@ -140,8 +202,6 @@ const Homepage = () => {
               </span>
             </a>
           </div>
-
-          {/* Service 2 */}
           <div
             className="group bg-white p-8 rounded-[32px] border border-gray-100 hover:border-primary transition-all duration-300 shadow-sm hover:shadow-xl text-center"
             data-aos="fade-up"
@@ -166,8 +226,6 @@ const Homepage = () => {
               </span>
             </a>
           </div>
-
-          {/* Service 3 */}
           <div
             className="group bg-white p-8 rounded-[32px] border border-gray-100 hover:border-primary transition-all duration-300 shadow-sm hover:shadow-xl text-center"
             data-aos="fade-up"
@@ -192,8 +250,6 @@ const Homepage = () => {
               </span>
             </a>
           </div>
-
-          {/* Service 4 */}
           <div
             className="group bg-white p-8 rounded-[32px] border border-gray-100 hover:border-primary transition-all duration-300 shadow-sm hover:shadow-xl text-center"
             data-aos="fade-up"
@@ -219,7 +275,7 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* 2. SẢN PHẨM MỚI NHẤT */}
+      {/* 2. SẢN PHẨM MỚI NHẤT (Giữ nguyên logic API) */}
       <section className="mb-24 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
           className="flex items-center justify-between mb-10"
@@ -233,149 +289,69 @@ const Homepage = () => {
               Những món đồ chơi và thực phẩm chất lượng vừa cập bến.
             </p>
           </div>
-          <a
+          <Link
             className="bg-white border border-gray-200 px-6 py-3 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition-colors"
-            href="#"
+            to="/shop"
           >
             Xem tất cả
-          </a>
+          </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Product 1 */}
-          <div
-            className="group bg-white rounded-[24px] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 flex flex-col"
-            data-aos="fade-up"
-            data-aos-delay="100"
-          >
-            <div className="relative h-72 overflow-hidden bg-gray-50">
-              <img
-                alt="Royal Canin Puppy"
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2mBWz25RdlG1JpVfULSsFNZsUYKSzflIAjwLvHSVf4isUMQg8fPMckeFI8cu_3OjuDM6EdDSdrwH9UHS0KuuVUN70GcVBAZgdR03PcsAyrJZ2rliR03Sga3T0cVhKi2sBRbuTAYrST-Mv5nmfjB08Ij9NJSjiQyahKSbiLXRG4RT5Gj2VsNpFNOV-E2jNDQt1CXNDg-VH6BfR4WAqkOvytwfJNT10slsOCcp1CPpSNa7rNZejsC9vc0IdmVH5Q8fHAb015f-M6Ts"
-              />
-              <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
-                New
+          {latestProducts.map((product, index) => (
+            <div
+              key={product.sanPhamId}
+              className="group bg-white rounded-[24px] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 flex flex-col"
+              data-aos="fade-up"
+              data-aos-delay={(index + 1) * 100}
+            >
+              <div className="relative h-72 overflow-hidden bg-gray-50">
+                <img
+                  alt={product.tenSanPham}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  src={
+                    product.hinhAnh
+                      ? `${IMAGE_BASE_URL}${product.hinhAnh}`
+                      : "https://via.placeholder.com/300x300?text=No+Image"
+                  }
+                  onError={(e) => {
+                    e.target.src =
+                      "https://via.placeholder.com/300x300?text=No+Image";
+                  }}
+                />
+                <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
+                  New
+                </div>
+              </div>
+              <div className="p-6 flex flex-col flex-grow">
+                <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2 min-h-[56px]">
+                  {product.tenSanPham}
+                </h3>
+                <div className="text-primary font-extrabold text-xl mb-4">
+                  {formatMoney(product.gia)}
+                </div>
+                <button className="mt-auto w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 font-bold py-3.5 rounded-xl transition-all">
+                  <span className="material-symbols-outlined text-xl">
+                    shopping_cart
+                  </span>{" "}
+                  Thêm vào giỏ
+                </button>
               </div>
             </div>
-            <div className="p-6 flex flex-col flex-grow">
-              <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">
-                Royal Canin Puppy
-              </h3>
-              <div className="text-primary font-extrabold text-xl mb-4">
-                185.000 đ
-              </div>
-              <button className="mt-auto w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 font-bold py-3.5 rounded-xl transition-all">
-                <span className="material-symbols-outlined text-xl">
-                  shopping_cart
-                </span>
-                Thêm vào giỏ
-              </button>
+          ))}
+          {latestProducts.length === 0 && (
+            <div className="col-span-full text-center py-10 text-gray-400">
+              Đang tải sản phẩm...
             </div>
-          </div>
-
-          {/* Product 2 */}
-          <div
-            className="group bg-white rounded-[24px] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 flex flex-col"
-            data-aos="fade-up"
-            data-aos-delay="200"
-          >
-            <div className="relative h-72 overflow-hidden bg-gray-50">
-              <img
-                alt="Whiskas Cá Biển"
-                className="w-full h-full object-contain p-8 group-hover:scale-110 transition-transform duration-500"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvRb94YN-b1Ir5YETEy2Y_z9hpPRAbwmT0A7jw_j0P-bOBkPZCARM1Hzf08CaSF0K_cgcFmLqknApHchKyQSUvS1vEDhhIGFC0MjflsLeAbMOWkziYHun83WId0XfR_2uMA9kZl8OGox4CRZmbJXTf-j2n-qdbbya9yvuk5-obmwovmibENfA5YpVROCmpyWBVYmnLmUD-DA_QLgLnZZxDw-UtIeCl94gDQh3RbXwrg4IqMhYXeurq8rWRUxhcdJ_HUKH0VUHNvTE"
-              />
-              <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
-                New
-              </div>
-            </div>
-            <div className="p-6 flex flex-col flex-grow">
-              <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">
-                Whiskas Cá Biển 480g
-              </h3>
-              <div className="text-primary font-extrabold text-xl mb-4">
-                15.000 đ
-              </div>
-              <button className="mt-auto w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 font-bold py-3.5 rounded-xl transition-all">
-                <span className="material-symbols-outlined text-xl">
-                  shopping_cart
-                </span>
-                Thêm vào giỏ
-              </button>
-            </div>
-          </div>
-
-          {/* Product 3 */}
-          <div
-            className="group bg-white rounded-[24px] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 flex flex-col"
-            data-aos="fade-up"
-            data-aos-delay="300"
-          >
-            <div className="relative h-72 overflow-hidden bg-gray-50">
-              <img
-                alt="Vòng cổ chó"
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8taaj-PupF2Taii4OS4kyq7i2IknhEb_bjH23DfhHR4tfpu95Nq5XcKP0g9c25SHRzBoHghYIYeDOqBeDinW1Y_VT-q6XYZ0fi_XaBZkQHM4aOLSFDZmg-6lHIs1wgXZUrbz7nbpffd1g0HwSjvvN5zfOVj6caFXo6hfOXiaGWvSiUbYOXwKXyaEzhgj7n8Dhllsnvf7A2PpdJainCZkesYItK-XKuNimKzQV_BE6EeF47E5odwZOgqpYCpJH0b_zc5bNAtOqQQ4"
-              />
-              <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
-                New
-              </div>
-            </div>
-            <div className="p-6 flex flex-col flex-grow">
-              <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">
-                Vòng cổ Premium
-              </h3>
-              <div className="text-primary font-extrabold text-xl mb-4">
-                50.000 đ
-              </div>
-              <button className="mt-auto w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 font-bold py-3.5 rounded-xl transition-all">
-                <span className="material-symbols-outlined text-xl">
-                  shopping_cart
-                </span>
-                Thêm vào giỏ
-              </button>
-            </div>
-          </div>
-
-          {/* Product 4 */}
-          <div
-            className="group bg-white rounded-[24px] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 flex flex-col"
-            data-aos="fade-up"
-            data-aos-delay="400"
-          >
-            <div className="relative h-72 overflow-hidden bg-gray-50">
-              <img
-                alt="Bóng cao su"
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZRw-SvfOGkMjQrBgZ7b5_vNdJs4kr9yW-J9pW66e9CVeQz-WphWeZPbhUanBV01f0P3leuQUZxkG8QFOZhExf1fT3EurB_takFc8uOwaqESWfPRRUsaO1b62lCH8UeC0I0eHKQNE5oU87Boq0sFgmwq6Rc1m-uaNCH-xpt-5GuWlWkAuYTYLPRgETPOBKieoNhXHq8zZW1KY5po8QbtTptqACCe5HrG9xn8WdWpNqjO5QoFjNHZYJ4b37_-akAfFFRU5QpGxxbPU"
-              />
-              <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
-                New
-              </div>
-            </div>
-            <div className="p-6 flex flex-col flex-grow">
-              <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">
-                Bóng cao su bền bỉ
-              </h3>
-              <div className="text-primary font-extrabold text-xl mb-4">
-                40.000 đ
-              </div>
-              <button className="mt-auto w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-primary hover:text-white text-gray-700 font-bold py-3.5 rounded-xl transition-all">
-                <span className="material-symbols-outlined text-xl">
-                  shopping_cart
-                </span>
-                Thêm vào giỏ
-              </button>
-            </div>
-          </div>
+          )}
         </div>
       </section>
 
-      {/* 3. TẠI SAO CHỌN PETLOR */}
+      {/* 3. TẠI SAO CHỌN PETLOR (Giữ nguyên) */}
       <section
         className="mb-24 py-16 px-8 bg-white rounded-[40px] border border-gray-100 max-w-screen-xl mx-auto"
         data-aos="fade-up"
       >
+        {/* ... (Nội dung section này giữ nguyên như cũ) ... */}
         <div className="text-center mb-16">
           <h2 className="text-3xl font-extrabold text-gray-900 mb-4">
             Tại sao chọn PetLor?
@@ -437,7 +413,7 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* 4. TIN TỨC & BLOG */}
+      {/* 4. TIN TỨC & BLOG (ĐÃ KẾT NỐI API) */}
       <section className="mb-24 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
           className="flex items-center justify-between mb-10"
@@ -451,91 +427,61 @@ const Homepage = () => {
               Cập nhật kiến thức và kinh nghiệm chăm sóc thú cưng mỗi ngày.
             </p>
           </div>
-          <a className="text-primary font-bold hover:underline" href="#">
+          <Link className="text-primary font-bold hover:underline" to="/blog">
             Tất cả bài viết
-          </a>
+          </Link>
         </div>
+
+        {/* Lưới Blog Động */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Blog 1 */}
-          <div
-            className="group cursor-pointer"
-            data-aos="fade-up"
-            data-aos-delay="100"
-          >
-            <div className="relative h-60 rounded-[24px] overflow-hidden mb-6">
-              <img
-                alt="Blog 1"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgEFjauwy_GNl54zK9RLRUWigecWZ6lzch52KOCovg1DHvhJjGLIbtpoRR2vOrHdrg0najDQWUDgJ9mWIaqUmAfxg5hFsz6ExRuOO6IyVPgrgnzmuecu9bvG6eXjOP6Mv_yj-YScjPhI9OhZ9zOZhN4xLE9-x1WNyHs_RlOSRhxLc5cz1HSA4fYr1APT2l5MMjbgM92S5BX6AZHKHbN1WgtDRwYLZ3_yv89-KZJpOnaPXvn5tFLQmIntVj2z6cy4uob3-OwT5A0NI"
-              />
-              <div className="absolute top-4 left-4 bg-white/90 px-3 py-1 rounded-lg text-xs font-bold text-gray-600">
-                Dinh dưỡng
+          {latestBlogs.length > 0 ? (
+            latestBlogs.map((blog, index) => (
+              <div
+                key={blog.baiVietId}
+                className="group cursor-pointer"
+                data-aos="fade-up"
+                data-aos-delay={(index + 1) * 100}
+              >
+                <div className="relative h-60 rounded-[24px] overflow-hidden mb-6">
+                  <img
+                    alt={blog.tieuDe}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    src={
+                      blog.anhBia
+                        ? `${IMAGE_BASE_URL}${blog.anhBia}`
+                        : "https://via.placeholder.com/400x300?text=No+Image"
+                    }
+                    onError={(e) => {
+                      e.target.src =
+                        "https://via.placeholder.com/400x300?text=No+Image";
+                    }}
+                  />
+                  <div className="absolute top-4 left-4 bg-white/90 px-3 py-1 rounded-lg text-xs font-bold text-gray-600">
+                    {blog.tenDanhMuc}
+                  </div>
+                </div>
+                <div className="text-sm text-gray-400 mb-2 font-medium">
+                  {formatDateBlog(blog.ngayDang)}
+                </div>
+                <h3 className="text-xl font-bold group-hover:text-primary transition-colors leading-snug line-clamp-2">
+                  {blog.tieuDe}
+                </h3>
               </div>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-10 text-gray-400">
+              Đang tải tin tức...
             </div>
-            <div className="text-sm text-gray-400 mb-2 font-medium">
-              15 Tháng 5, 2024
-            </div>
-            <h3 className="text-xl font-bold group-hover:text-primary transition-colors leading-snug">
-              Top 5 loại thức ăn giàu dinh dưỡng nhất cho mèo Anh lông ngắn
-            </h3>
-          </div>
-
-          {/* Blog 2 */}
-          <div
-            className="group cursor-pointer"
-            data-aos="fade-up"
-            data-aos-delay="200"
-          >
-            <div className="relative h-60 rounded-[24px] overflow-hidden mb-6">
-              <img
-                alt="Blog 2"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2mBWz25RdlG1JpVfULSsFNZsUYKSzflIAjwLvHSVf4isUMQg8fPMckeFI8cu_3OjuDM6EdDSdrwH9UHS0KuuVUN70GcVBAZgdR03PcsAyrJZ2rliR03Sga3T0cVhKi2sBRbuTAYrST-Mv5nmfjB08Ij9NJSjiQyahKSbiLXRG4RT5Gj2VsNpFNOV-E2jNDQt1CXNDg-VH6BfR4WAqkOvytwfJNT10slsOCcp1CPpSNa7rNZejsC9vc0IdmVH5Q8fHAb015f-M6Ts"
-              />
-              <div className="absolute top-4 left-4 bg-white/90 px-3 py-1 rounded-lg text-xs font-bold text-gray-600">
-                Sức khỏe
-              </div>
-            </div>
-            <div className="text-sm text-gray-400 mb-2 font-medium">
-              12 Tháng 5, 2024
-            </div>
-            <h3 className="text-xl font-bold group-hover:text-primary transition-colors leading-snug">
-              Lịch tiêm phòng định kỳ quan trọng như thế nào đối với chó con?
-            </h3>
-          </div>
-
-          {/* Blog 3 */}
-          <div
-            className="group cursor-pointer"
-            data-aos="fade-up"
-            data-aos-delay="300"
-          >
-            <div className="relative h-60 rounded-[24px] overflow-hidden mb-6">
-              <img
-                alt="Blog 3"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8taaj-PupF2Taii4OS4kyq7i2IknhEb_bjH23DfhHR4tfpu95Nq5XcKP0g9c25SHRzBoHghYIYeDOqBeDinW1Y_VT-q6XYZ0fi_XaBZkQHM4aOLSFDZmg-6lHIs1wgXZUrbz7nbpffd1g0HwSjvvN5zfOVj6caFXo6hfOXiaGWvSiUbYOXwKXyaEzhgj7n8Dhllsnvf7A2PpdJainCZkesYItK-XKuNimKzQV_BE6EeF47E5odwZOgqpYCpJH0b_zc5bNAtOqQQ4"
-              />
-              <div className="absolute top-4 left-4 bg-white/90 px-3 py-1 rounded-lg text-xs font-bold text-gray-600">
-                Cẩm nang
-              </div>
-            </div>
-            <div className="text-sm text-gray-400 mb-2 font-medium">
-              10 Tháng 5, 2024
-            </div>
-            <h3 className="text-xl font-bold group-hover:text-primary transition-colors leading-snug">
-              Làm thế nào để huấn luyện chó đi vệ sinh đúng chỗ trong 7 ngày?
-            </h3>
-          </div>
+          )}
         </div>
       </section>
 
-      {/* 5. ĐÁNH GIÁ TỪ CỘNG ĐỒNG */}
-      {/* 5. ĐÁNH GIÁ TỪ CỘNG ĐỒNG (Đã sửa lỗi hiển thị) */}
+      {/* 5. ĐÁNH GIÁ TỪ CỘNG ĐỒNG (Giữ nguyên) */}
       <section
         className="mb-24 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8"
         data-aos="fade-up"
       >
+        {/* ... (Nội dung section này giữ nguyên) ... */}
         <div className="text-center mb-16">
           <h2 className="text-3xl font-extrabold text-gray-900 mb-4">
             Đánh giá từ cộng đồng
@@ -551,10 +497,7 @@ const Homepage = () => {
             4.9/5 dựa trên hơn 2,000 đánh giá từ khách hàng.
           </p>
         </div>
-
-        {/* Thay đổi từ Flex Scroll sang Grid để không bị cắt */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* Review 1 */}
           <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 hover:shadow-lg transition-shadow duration-300">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-14 h-14 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
@@ -576,8 +519,6 @@ const Homepage = () => {
               nhân viên dỗ dành rất khéo. Về nhà thơm tho và sạch sẽ hẳn!"
             </p>
           </div>
-
-          {/* Review 2 */}
           <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 hover:shadow-lg transition-shadow duration-300">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-14 h-14 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
@@ -599,8 +540,6 @@ const Homepage = () => {
               so với chất lượng dịch vụ 5 sao như thế này. Rất yên tâm."
             </p>
           </div>
-
-          {/* Review 3 */}
           <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 hover:shadow-lg transition-shadow duration-300">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-14 h-14 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
@@ -625,7 +564,7 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* 6. ĐĂNG KÝ NHẬN TIN */}
+      {/* 6. ĐĂNG KÝ NHẬN TIN (Giữ nguyên) */}
       <section
         className="mt-20 py-16 bg-primary rounded-[40px] text-center px-4 relative overflow-hidden max-w-screen-xl mx-auto mb-20"
         data-aos="zoom-in"

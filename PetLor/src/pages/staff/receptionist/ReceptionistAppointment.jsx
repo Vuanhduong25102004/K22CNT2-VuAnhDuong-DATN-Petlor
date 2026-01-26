@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import bookingService from "../../../services/bookingService";
 import { renderReceptionistStatusBadge } from "../../../utils/formatters";
-import { Link } from "react-router-dom";
 
 const ReceptionistAppointment = () => {
   const [appointments, setAppointments] = useState([]);
@@ -10,7 +10,10 @@ const ReceptionistAppointment = () => {
   const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [stats, setStats] = useState({ pending: 0, waiting: 0, completed: 0 });
 
-  // 1. Thứ tự ưu tiên trạng thái
+  // --- CẤU HÌNH ĐƯỜNG DẪN ẢNH TỪ BACKEND ---
+  const IMAGE_URL = "http://localhost:8080/uploads/";
+
+  // Thứ tự ưu tiên hiển thị (Số nhỏ ưu tiên cao)
   const statusPriority = {
     CHO_XAC_NHAN: 1,
     DA_XAC_NHAN: 2,
@@ -18,7 +21,7 @@ const ReceptionistAppointment = () => {
     DA_HUY: 4,
   };
 
-  // 2. Tải và sắp xếp dữ liệu
+  // --- TẢI DỮ LIỆU ---
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
@@ -26,7 +29,7 @@ const ReceptionistAppointment = () => {
       const data = response?.data || response || [];
 
       if (Array.isArray(data)) {
-        // Sắp xếp: Trạng thái ưu tiên trước, cùng trạng thái thì thời gian bắt đầu muộn nhất lên đầu
+        // Sắp xếp: Trạng thái ưu tiên -> Thời gian
         const sortedData = [...data].sort((a, b) => {
           const priorityA = statusPriority[a.trangThaiLichHen] || 99;
           const priorityB = statusPriority[b.trangThaiLichHen] || 99;
@@ -39,6 +42,7 @@ const ReceptionistAppointment = () => {
 
         setAppointments(sortedData);
 
+        // Tính toán thống kê
         setStats({
           pending: sortedData.filter(
             (a) => a.trangThaiLichHen === "DA_XAC_NHAN",
@@ -64,7 +68,7 @@ const ReceptionistAppointment = () => {
     loadData();
   }, [loadData]);
 
-  // 3. Logic lọc
+  // --- LOGIC LỌC ---
   const applyFilter = (label, dataSrc) => {
     if (label === "Tất cả") {
       setFilteredData(dataSrc);
@@ -84,7 +88,7 @@ const ReceptionistAppointment = () => {
     applyFilter(label, appointments);
   };
 
-  // 4. Xử lý Check-in (Cập nhật sang hoàn thành hoặc bước tiếp theo tùy quy trình)
+  // --- XỬ LÝ CHECK-IN ---
   const handleCheckIn = async (id) => {
     if (!window.confirm("Xác nhận khách đã đến và thực hiện check-in?")) return;
     try {
@@ -108,8 +112,9 @@ const ReceptionistAppointment = () => {
   return (
     <main className="w-full bg-[#fbfcfc] font-sans text-[#101918] min-h-screen p-8 lg:p-12">
       <div className="max-w-[1600px] mx-auto space-y-10">
+        {/* --- PHẦN 1: THỐNG KÊ (STATS CARDS) --- */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Card 1 */}
+          {/* Card 1: Đã xác nhận */}
           <div className="bg-white p-8 rounded-[32px] border border-[#e9f1f0] shadow-xl shadow-gray-200/50 flex items-center gap-6">
             <div className="size-16 bg-orange-50 rounded-2xl flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-orange-500 text-[36px]">
@@ -125,8 +130,7 @@ const ReceptionistAppointment = () => {
               </h3>
             </div>
           </div>
-
-          {/* Card 2 */}
+          {/* Card 2: Chờ xác nhận */}
           <div className="bg-white p-8 rounded-[32px] border border-[#e9f1f0] shadow-xl shadow-gray-200/50 flex items-center gap-6">
             <div className="size-16 bg-blue-50 rounded-2xl flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-blue-500 text-[36px]">
@@ -142,8 +146,7 @@ const ReceptionistAppointment = () => {
               </h3>
             </div>
           </div>
-
-          {/* Card 3 */}
+          {/* Card 3: Hoàn thành */}
           <div className="bg-white p-8 rounded-[32px] border border-[#e9f1f0] shadow-xl shadow-gray-200/50 flex items-center gap-6">
             <div className="size-16 bg-[#2a9d90]/10 rounded-2xl flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-[#2a9d90] text-[36px]">
@@ -161,7 +164,9 @@ const ReceptionistAppointment = () => {
           </div>
         </section>
 
+        {/* --- PHẦN 2: DANH SÁCH LỊCH HẸN --- */}
         <div className="space-y-8">
+          {/* Header & Filter */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <h3 className="text-2xl font-extrabold text-[#101918] flex items-center gap-3">
               <span className="material-symbols-outlined text-[#2a9d90] text-[32px]">
@@ -169,35 +174,30 @@ const ReceptionistAppointment = () => {
               </span>
               Lịch hẹn hôm nay
             </h3>
-
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex gap-3 bg-white p-1.5 rounded-2xl border border-[#e9f1f0] shadow-sm">
                 {["Tất cả", "Đã xác nhận", "Chờ xác nhận"].map((f) => (
                   <button
                     key={f}
                     onClick={() => handleFilter(f)}
-                    className={`px-6 py-2.5 text-sm font-bold rounded-xl transition-all ${
-                      activeFilter === f
-                        ? "bg-[#2a9d90] text-white shadow-md shadow-[#2a9d90]/20"
-                        : "text-[#588d87] hover:bg-[#f9fbfb]"
-                    }`}
+                    className={`px-6 py-2.5 text-sm font-bold rounded-xl transition-all ${activeFilter === f ? "bg-[#2a9d90] text-white shadow-md shadow-[#2a9d90]/20" : "text-[#588d87] hover:bg-[#f9fbfb]"}`}
                   >
                     {f}
                   </button>
                 ))}
               </div>
-
               <Link to="create">
                 <button className="bg-[#2a9d90] text-white px-5 py-3 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-[#2a9d90]/20 hover:bg-[#23857a] transition-all">
                   <span className="material-symbols-outlined text-[20px]">
                     add_circle
-                  </span>
+                  </span>{" "}
                   Thêm mới
                 </button>
               </Link>
             </div>
           </div>
 
+          {/* Grid Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {filteredData.map((item) => {
               const timeStr = new Date(item.thoiGianBatDau).toLocaleTimeString(
@@ -210,6 +210,7 @@ const ReceptionistAppointment = () => {
                   key={item.lichHenId}
                   className="bg-white rounded-[32px] border border-[#e9f1f0] shadow-xl shadow-gray-200/50 hover:shadow-2xl hover:shadow-[#2a9d90]/10 hover:-translate-y-1 transition-all duration-300 p-6 flex flex-col gap-6"
                 >
+                  {/* Card Header: Thời gian */}
                   <div className="flex items-center justify-between border-b border-[#e9f1f0] pb-4">
                     <div className="flex items-center gap-2">
                       <span className="material-symbols-outlined text-[#2a9d90] text-[24px]">
@@ -224,20 +225,30 @@ const ReceptionistAppointment = () => {
                     </span>
                   </div>
 
+                  {/* Card Body: Thông tin Thú cưng */}
                   <div className="flex items-start gap-5">
-                    <div className="size-20 rounded-2xl bg-[#f9fbfb] flex items-center justify-center overflow-hidden">
+                    {/* Ảnh thú cưng (Có xử lý Fallback) */}
+                    <div className="size-20 rounded-2xl bg-[#f9fbfb] flex items-center justify-center overflow-hidden border border-[#e9f1f0] shrink-0">
                       {item.anhThuCung ? (
                         <img
-                          src={`http://localhost:8080/uploads/${item.anhThuCung}`}
+                          src={`${IMAGE_URL}${item.anhThuCung}`}
                           alt="pet"
                           className="object-cover size-full"
+                          onError={(e) => {
+                            e.target.style.display = "none"; // Ẩn ảnh lỗi
+                            e.target.nextSibling.style.display = "block"; // Hiện icon fallback
+                          }}
                         />
-                      ) : (
-                        <span className="material-symbols-outlined text-gray-400 text-3xl">
-                          pets
-                        </span>
-                      )}
+                      ) : null}
+                      {/* Icon Fallback */}
+                      <span
+                        className="material-symbols-outlined text-gray-400 text-3xl"
+                        style={{ display: item.anhThuCung ? "none" : "block" }}
+                      >
+                        pets
+                      </span>
                     </div>
+
                     <div className="flex-1 min-w-0 py-1">
                       <h4 className="text-lg font-extrabold truncate text-[#101918]">
                         {item.tenThuCung}
@@ -254,6 +265,7 @@ const ReceptionistAppointment = () => {
                     </div>
                   </div>
 
+                  {/* Card Details: Dịch vụ & Nhân viên */}
                   <div className="bg-[#f9fbfb] rounded-2xl p-4 space-y-3 border border-[#e9f1f0]/50">
                     <div className="flex items-center gap-3">
                       <div className="size-8 bg-white rounded-full flex items-center justify-center border border-[#e9f1f0] text-[#2a9d90]">
@@ -270,15 +282,39 @@ const ReceptionistAppointment = () => {
                         </span>
                       </div>
                     </div>
+
+                    {/* --- HIỂN THỊ NHÂN VIÊN (ĐÃ UPDATE ẢNH) --- */}
                     <div className="flex items-center gap-3">
-                      <div className="size-8 rounded-full flex items-center justify-center text-[10px] font-black border border-white bg-blue-100 text-blue-600">
-                        {item.tenNhanVien
-                          ?.split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .slice(0, 2)
-                          .toUpperCase()}
+                      {/* Ảnh nhân viên */}
+                      <div className="size-8 shrink-0 relative">
+                        {item.anhNhanVien ? (
+                          <img
+                            src={`${IMAGE_URL}${item.anhNhanVien}`}
+                            alt={item.tenNhanVien}
+                            className="size-8 rounded-full object-cover border border-white shadow-sm absolute inset-0"
+                            onError={(e) => {
+                              e.target.style.display = "none";
+                              e.target.nextSibling.style.display = "flex";
+                            }}
+                          />
+                        ) : null}
+
+                        {/* Fallback Initials (Ẩn nếu có ảnh) */}
+                        <div
+                          className="size-8 rounded-full flex items-center justify-center text-[10px] font-black border border-white bg-blue-100 text-blue-600 shadow-sm absolute inset-0"
+                          style={{
+                            display: item.anhNhanVien ? "none" : "flex",
+                          }}
+                        >
+                          {item.tenNhanVien
+                            ?.split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .slice(0, 2)
+                            .toUpperCase()}
+                        </div>
                       </div>
+
                       <div>
                         <p className="text-[10px] text-[#588d87] font-bold uppercase">
                           Phụ trách
@@ -288,8 +324,10 @@ const ReceptionistAppointment = () => {
                         </span>
                       </div>
                     </div>
+                    {/* ------------------------------------------- */}
                   </div>
 
+                  {/* Card Footer: Status & Actions */}
                   <div className="flex items-center justify-between mt-auto pt-2">
                     {renderReceptionistStatusBadge(item.trangThaiLichHen)}
                     <div className="flex gap-3">
@@ -317,6 +355,7 @@ const ReceptionistAppointment = () => {
             })}
           </div>
 
+          {/* Footer Pagination */}
           <div className="flex items-center justify-between pt-6 border-t border-[#e9f1f0]">
             <p className="text-sm font-medium text-[#588d87]">
               Hiển thị{" "}
@@ -347,32 +386,6 @@ const ReceptionistAppointment = () => {
         </div>
       </div>
     </main>
-  );
-};
-
-// StatCard Component
-const StatCard = ({ icon, label, value, color }) => {
-  const colors = {
-    orange: "bg-orange-50 text-orange-500",
-    blue: "bg-blue-50 text-blue-500",
-    teal: "bg-[#2a9d90]/10 text-[#2a9d90]",
-  };
-  return (
-    <div className="bg-white p-8 rounded-[32px] border border-[#e9f1f0] shadow-xl flex items-center gap-6">
-      <div
-        className={`size-16 rounded-2xl flex items-center justify-center shrink-0 ${colors[color]}`}
-      >
-        <span className="material-symbols-outlined text-[36px]">{icon}</span>
-      </div>
-      <div>
-        <p className="text-[#588d87] text-sm font-bold uppercase tracking-widest">
-          {label}
-        </p>
-        <h3 className="text-4xl font-extrabold mt-1 text-[#101918]">
-          {value.toString().padStart(2, "0")}
-        </h3>
-      </div>
-    </div>
   );
 };
 

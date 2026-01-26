@@ -228,6 +228,7 @@ public class BaiVietService {
                 bv.getAnhBia(),
                 bv.getNgayDang(),
                 bv.getNhanVien().getHoTen(),
+                bv.getNhanVien().getAnhDaiDien(), // Thêm ảnh tác giả
                 bv.getDanhMucBaiViet() != null ? bv.getDanhMucBaiViet().getTenDanhMuc() : null,
                 bv.getTrangThai()
         );

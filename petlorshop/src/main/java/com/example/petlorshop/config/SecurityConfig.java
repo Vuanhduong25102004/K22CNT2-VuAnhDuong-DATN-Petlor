@@ -93,6 +93,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/lich-hen/today").hasAnyAuthority(receptionist, admin)
                         // API đặt lịch cho Lễ tân
                         .requestMatchers(HttpMethod.POST, "/api/lich-hen/receptionist").hasAnyAuthority(receptionist, admin)
+                        // API xem đơn thuốc
+                        .requestMatchers("/api/don-thuoc/**").hasAnyAuthority(doctor, receptionist, admin)
+                        // API tạo đơn hàng từ đơn thuốc
+                        .requestMatchers(HttpMethod.POST, "/api/don-hang/tu-don-thuoc/**").hasAnyAuthority(receptionist, admin)
 
                         // Quản lý blog cho Admin và Lễ tân
                         .requestMatchers(HttpMethod.POST, "/api/bai-viet/**").hasAnyAuthority(admin, receptionist)
