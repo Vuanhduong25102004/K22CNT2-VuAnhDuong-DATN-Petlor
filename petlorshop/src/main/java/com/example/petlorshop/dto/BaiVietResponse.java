@@ -12,13 +12,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class BaiVietResponse {
     private Integer baiVietId;
+    private Integer nhanVienId;
     private String tieuDe;
     private String slug;
     private String noiDung;
     private String anhBia;
     private LocalDateTime ngayDang;
     private String tenTacGia;
-    private String anhTacGia; // Thêm trường này
+    private String anhTacGia;
     private String tenDanhMuc;
     private BaiViet.TrangThaiBaiViet trangThai;
 }

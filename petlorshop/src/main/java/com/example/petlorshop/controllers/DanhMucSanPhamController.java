@@ -19,13 +19,11 @@ public class DanhMucSanPhamController {
     @Autowired
     private DanhMucSanPhamService danhMucSanPhamService;
 
-    // API cũ (List) - Giữ lại để tương thích nếu cần, hoặc có thể bỏ
     @GetMapping("/list")
     public List<DanhMucSanPham> getAllDanhMucSanPhamList() {
         return danhMucSanPhamService.getAllDanhMucSanPham();
     }
 
-    // API mới (Page + Search)
     @GetMapping
     public Page<DanhMucSanPham> getAllDanhMucSanPham(Pageable pageable, @RequestParam(required = false) String keyword) {
         return danhMucSanPhamService.getAllDanhMucSanPham(pageable, keyword);

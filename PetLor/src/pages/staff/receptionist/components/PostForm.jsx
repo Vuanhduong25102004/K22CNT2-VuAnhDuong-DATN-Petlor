@@ -15,12 +15,11 @@ const PostForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  // Xác định chế độ: Nếu có id trên URL thì là Edit, ngược lại là Create
   const isEdit = !!id;
 
   const storedUserId = localStorage.getItem("userId");
+  const storedNhanVienId = localStorage.getItem("nhanVienId");
 
-  // --- STATE ---
   const [formData, setFormData] = useState({
     tieuDe: "",
     slug: "",
@@ -35,7 +34,6 @@ const PostForm = () => {
   const [previewUrl, setPreviewUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Modules Quill
   const modules = {
     toolbar: [
       [{ header: [1, 2, 3, false] }],
@@ -46,15 +44,10 @@ const PostForm = () => {
     ],
   };
 
-  // =========================================================================
-  // --- LOAD DATA (ĐOẠN CODE ĐÃ SỬA NẰM Ở ĐÂY) ---
-  // =========================================================================
   useEffect(() => {
     const loadData = async () => {
-      // 1. Khai báo biến lưu danh mục tạm
       let fetchedCategories = [];
 
-      // --- BƯỚC A: Lấy danh sách chuyên mục trước ---
       try {
         const resCats = await postService.getAllPostCategories();
         fetchedCategories = Array.isArray(resCats)
@@ -62,7 +55,6 @@ const PostForm = () => {
           : resCats.content || [];
         setCategories(fetchedCategories);
       } catch (err) {
-        console.error("Lỗi danh mục:", err);
         return;
       }
       if (isEdit) {
@@ -72,33 +64,27 @@ const PostForm = () => {
             (cat) => cat.tenDanhMuc === resPost.tenDanhMuc,
           );
 
-          // Lấy ID tìm được, nếu không thấy thì để rỗng
           const foundCatId = foundCat
             ? foundCat.danhMucBvId || foundCat.id
             : "";
           setFormData({
             tieuDe: resPost.tieuDe || "",
             slug: resPost.slug || "",
-
-            // Điền ID đã tìm được vào đây
             danhMucBvId: foundCatId,
 
             noiDung: resPost.noiDung || "",
             trangThai: resPost.trangThai || "CONG_KHAI",
 
-            // Xử lý ID nhân viên (Backend bạn đang thiếu trường này trả về, tạm lấy userId cũ)
             userId:
               resPost.nhanVienId ||
               resPost.userId ||
               (storedUserId ? Number(storedUserId) : 1),
           });
 
-          // Hiển thị ảnh bìa cũ
           if (resPost.anhBia) {
             setPreviewUrl(getImageUrl(resPost.anhBia));
           }
         } catch (err) {
-          console.error(err);
           toast.error("Không tìm thấy bài viết");
           navigate("/staff/receptionist/posts");
         }
@@ -107,9 +93,7 @@ const PostForm = () => {
 
     loadData();
   }, [isEdit, id, navigate, storedUserId]);
-  // =========================================================================
 
-  // --- HANDLERS ---
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -138,17 +122,27 @@ const PostForm = () => {
 
   const handleSubmit = async () => {
     if (!formData.tieuDe || !formData.noiDung || !formData.danhMucBvId) {
-      toast.warning("Vui lòng điền đầy đủ thông tin!");
+      toast.warning(
+        "Vui lòng điền đầy đủ thông tin (Tiêu đề, Nội dung, Danh mục)!",
+      );
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const currentUserId = localStorage.getItem("userId");
+      const storedUserId = localStorage.getItem("userId");
+      const storedNhanVienId = localStorage.getItem("nhanVienId");
+
+      const finalNhanVienId = storedNhanVienId
+        ? Number(storedNhanVienId)
+        : storedUserId
+          ? Number(storedUserId)
+          : 1;
 
       const dataToSubmit = {
         ...formData,
-        userId: Number(currentUserId) || Number(formData.userId) || 1,
+        nhanVienId: finalNhanVienId,
+        userId: storedUserId ? Number(storedUserId) : 1,
         danhMucBvId: Number(formData.danhMucBvId),
       };
 
@@ -164,8 +158,7 @@ const PostForm = () => {
 
       navigate("/staff/receptionist/posts");
     } catch (error) {
-      console.error("Lỗi submit:", error);
-      const msg = error.response?.data?.message || "Lỗi xử lý!";
+      const msg = error.response?.data?.message || "Có lỗi xảy ra khi xử lý!";
       toast.error(msg);
     } finally {
       setIsSubmitting(false);
@@ -175,7 +168,6 @@ const PostForm = () => {
   return (
     <main className="flex-1 overflow-y-auto p-8 lg:p-12 pb-24 custom-scrollbar bg-[#fbfcfc] min-h-screen font-sans text-[#101918]">
       <div className="max-w-[1600px] mx-auto flex flex-col xl:flex-row gap-10">
-        {/* CỘT TRÁI */}
         <div className="flex-1 space-y-8">
           <div className="space-y-3">
             <label className="text-base font-extrabold text-[#101918] ml-2">
@@ -191,7 +183,6 @@ const PostForm = () => {
             />
           </div>
 
-          {/* Input Slug */}
           <div className="space-y-3">
             <label className="text-xs font-bold text-gray-500 ml-2">
               Slug (URL)
@@ -222,7 +213,6 @@ const PostForm = () => {
           </div>
         </div>
 
-        {/* CỘT PHẢI (SIDEBAR) */}
         <div className="w-full xl:w-[400px] space-y-8 h-fit xl:sticky xl:top-8">
           <div className="grid grid-cols-2 gap-4">
             <button
@@ -249,7 +239,6 @@ const PostForm = () => {
             </button>
           </div>
 
-          {/* Ảnh bìa */}
           <div className="bg-white p-6 rounded-[32px] border border-[#e9f1f0] shadow-xl shadow-gray-200/50 space-y-4">
             <p className="text-base font-extrabold text-[#101918]">
               Ảnh đại diện
@@ -284,7 +273,6 @@ const PostForm = () => {
             </label>
           </div>
 
-          {/* Cấu hình */}
           <div className="bg-white p-6 rounded-[32px] border border-[#e9f1f0] shadow-xl shadow-gray-200/50 space-y-6">
             <div className="space-y-3">
               <label className="text-xs font-black text-[#588d87] uppercase tracking-widest ml-1">

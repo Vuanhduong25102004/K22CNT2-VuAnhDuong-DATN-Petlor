@@ -1,22 +1,18 @@
 import apiClient from './apiClient';
 
 const petService = {
-  // --- TÌM KIẾM CHUNG ---
   searchGlobal: (keyword) => {
     return apiClient.get('/search', { 
       params: { keyword } 
     });
   },
 
-  // --- THÚ CƯNG ---
   getAllPets: (params) => apiClient.get('/thu-cung', { params }),
 
   getMyPets: () => apiClient.get('/thu-cung/me'),
 
-  // [MỚI] Lấy hồ sơ bệnh án (Chi tiết thú cưng + Lịch sử)
   getPetMedicalRecord: (id) => apiClient.get(`/thu-cung/${id}/ho-so-benh-an`),
 
-  // --- SỬA: Đặt Content-Type là multipart/form-data ---
   createMyPet: (data) => {
     const config = {};
     if (data instanceof FormData) {
@@ -53,7 +49,6 @@ const petService = {
   
   deletePet: (id) => apiClient.delete(`/thu-cung/${id}`),
 
-  // --- DỊCH VỤ (SPA, KHÁM...) ---
   getAllServices: (params) => apiClient.get('/dich-vu', { params }),
   
   getServiceById: (id) => apiClient.get(`/dich-vu/${id}`),

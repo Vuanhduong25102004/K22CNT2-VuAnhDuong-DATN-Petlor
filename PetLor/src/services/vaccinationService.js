@@ -1,7 +1,7 @@
 import apiClient from './apiClient';
 
 const vaccinationService = {
-  // --- SỔ TIÊM CHỦNG ---
+
   getAllVaccinationRecords: (params) => apiClient.get('/so-tiem-chung', { params }),
   
   getVaccinationRecordById: (id) => apiClient.get(`/so-tiem-chung/${id}`),
@@ -12,7 +12,6 @@ const vaccinationService = {
   
   deleteVaccinationRecord: (id) => apiClient.delete(`/so-tiem-chung/${id}`),
 
-  // --- LỊCH SỬ TIÊM PHÒNG CỦA THÚ CƯNG ---
   getVaccinationHistoryForPet: (petId, params) => apiClient.get(`/so-tiem-chung/thu-cung/${petId}`, { params }),
 
   addVaccinationToRecord: (recordId, vaccinationData) => apiClient.post(`/so-tiem-chung/${recordId}/tiem-phong`, vaccinationData),

@@ -5,12 +5,11 @@
 @import "tailwindcss";
 
 @theme {
-  /* --- MÀU SẮC (Cập nhật theo thiết kế UserProfile) --- */
-  --color-primary: #10B981; /* Màu xanh lá chuẩn của PetCare */
+  --color-primary: #10B981;
   --color-primary-hover: #0ec94d;
   
   --color-background-light: #f6f8f6;
-  --color-background-dark: #102210; /* Thêm màu nền tối cho Dark mode */
+  --color-background-dark: #102210; 
   
   --color-surface: #f0f4f2; 
   
@@ -21,28 +20,21 @@
   --color-text-gray-500: #6b7280;
   --color-border-gray-200: #e5e7eb;
 
-  /* --- FONT CHỮ (Dùng Manrope) --- */
   --font-display: "Plus Jakarta Sans", "Noto Sans", sans-serif;
   --font-body: "Noto Sans", sans-serif;
 
-  /* --- Border Radius --- */
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
 }
 
-/* --- CUSTOM UTILITIES (Giữ lại các class form cũ của bạn) --- */
-
-/* Scrollbar đẹp */
 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--color-border-color); border-radius: 3px; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #CBD5E1; }
 
-/* Ẩn scrollbar nhưng vẫn cuộn được */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Icon Material Symbols */
 .material-symbols-outlined {
   font-family: 'Material Symbols Outlined';
   font-weight: normal;
@@ -55,7 +47,6 @@
   letter-spacing: normal;
   word-wrap: normal;
   direction: ltr;
-  /* Font variation settings mặc định */
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
@@ -63,7 +54,6 @@
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-/* --- FORM STYLES (Styles cũ bạn đang dùng cho trang khác) --- */
 @layer components {
     .input-group {
         @apply flex flex-col space-y-2;
@@ -93,11 +83,11 @@
         @apply py-3 pl-0 pr-8;
     }
 }
-/* Dành cho Chrome, Safari và các trình duyệt dùng nhân Blink */
+
 ::-webkit-scrollbar {
   display: none;
 }
-/* Config Global cho HTML/Body */
+
 html, body {
   margin: 0;
   padding: 0;
@@ -109,94 +99,82 @@ html, body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-/* 1. Bỏ viền mặc định của trình duyệt khi click vào Link hoặc Button */
 aside nav a, 
 aside nav button {
     outline: none !important;
     box-shadow: none !important;
-    -webkit-tap-highlight-color: transparent; /* Bỏ lớp phủ màu trên điện thoại */
+    -webkit-tap-highlight-color: transparent; 
 }
 
-/* 2. Nếu cái border-gray-100 trong code làm xấu, ta có thể ẩn nó đi bằng CSS */
 .border-gray-100 {
     border-color: transparent !important;
 }
 
-/* 3. Tùy chỉnh riêng cho các item trong Sidebar để mượt hơn */
 aside nav a.bg-white {
-    border: none !important; /* Xóa hẳn border khi item đang active */
-    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08) !important; /* Thay border bằng shadow nhẹ */
+    border: none !important;
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08) !important;
 }
 
-/* Custom scrollbar cho các thành phần có class .custom-scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-  height: 6px; /* Độ cao của thanh cuộn ngang */
+  height: 6px; 
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #f1f1f1; /* Màu nền của đường ray */
+  background: #f1f1f1; 
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #10B981; /* Màu của thanh trượt (theo màu chủ đạo của bạn) */
+  background: #10B981; 
   border-radius: 10px;
   transition: all 0.3s;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #059669; /* Màu khi di chuột qua */
+  background: #059669; 
 }
 
-/* --- BẮT BUỘC: Style cho nội dung bài viết (React Quill) --- */
-
-/* 1. Xử lý khung bao quanh */
 .article-content {
-  color: #374151; /* Màu chữ xám đậm dễ đọc */
-  line-height: 1.8; /* Giãn dòng thoáng */
-  font-size: 1.125rem; /* Cỡ chữ 18px */
+  color: #374151;
+  line-height: 1.8;
+  font-size: 1.125rem;
   
-  /* QUAN TRỌNG: Bắt buộc xuống dòng nếu chữ quá dài không có dấu cách */
   overflow-wrap: break-word;
   word-wrap: break-word;
   word-break: break-word;
   hyphens: auto;
 }
 
-/* 2. Xử lý ảnh: Không bao giờ được to hơn khung bài viết */
 .article-content img {
-  max-width: 100% !important; /* Quan trọng nhất */
-  height: auto !important;    /* Giữ tỷ lệ ảnh */
+  max-width: 100% !important;
+  height: auto !important; 
   display: block;
-  margin: 20px auto;          /* Canh giữa ảnh */
-  border-radius: 12px;        /* Bo góc ảnh */
+  margin: 20px auto;      
+  border-radius: 12px;   
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* 3. Khôi phục tiêu đề (H1, H2...) vì Tailwind đã xóa style mặc định */
 .article-content h1 { font-size: 2.25em; font-weight: 800; margin: 32px 0 16px; line-height: 1.2; }
 .article-content h2 { font-size: 1.75em; font-weight: 700; margin: 28px 0 14px; color: #111827; }
 .article-content h3 { font-size: 1.5em; font-weight: 600; margin: 24px 0 12px; }
 
-/* 4. Khôi phục danh sách (Gạch đầu dòng, số thứ tự) */
 .article-content ul {
-  list-style-type: disc; /* Dấu chấm tròn */
-  padding-left: 1.5em;   /* Thụt đầu dòng */
+  list-style-type: disc; 
+  padding-left: 1.5em;  
   margin-bottom: 1.5em;
 }
 .article-content ol {
-  list-style-type: decimal; /* Số 1, 2, 3 */
+  list-style-type: decimal; 
   padding-left: 1.5em;
   margin-bottom: 1.5em;
 }
 .article-content li {
-  margin-bottom: 0.5em; /* Khoảng cách giữa các dòng */
+  margin-bottom: 0.5em;
   padding-left: 0.5em;
 }
 
-/* 5. Style cho trích dẫn */
 .article-content blockquote {
-  border-left: 4px solid #0FB478; /* Màu xanh PetLor */
+  border-left: 4px solid #0FB478; 
   background-color: #F3F4F6;
   padding: 1rem;
   font-style: italic;
@@ -204,7 +182,7 @@ aside nav a.bg-white {
   border-radius: 0 8px 8px 0;
 }
 
-/* 6. Style cho đường link */
+
 .article-content a {
   color: #0FB478;
   text-decoration: underline;
@@ -215,7 +193,6 @@ aside nav a.bg-white {
   color: #059669;
 }
 
-/* 7. Style cho bảng (Table) nếu có */
 .article-content table {
   width: 100%;
   border-collapse: collapse;

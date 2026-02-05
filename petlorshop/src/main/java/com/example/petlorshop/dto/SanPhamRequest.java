@@ -19,9 +19,8 @@ public class SanPhamRequest {
     private BigDecimal giaGiam;
     private Integer soLuongTonKho;
     private Integer danhMucId;
-    private Integer trongLuong; // Đơn vị: gram
+    private Integer trongLuong;
     
-    // Thuốc
     private LocalDate hanSuDung;
     private String soLo;
     private String donViTinh;

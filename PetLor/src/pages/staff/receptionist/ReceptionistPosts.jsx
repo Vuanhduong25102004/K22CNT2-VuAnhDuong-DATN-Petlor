@@ -1,31 +1,133 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast, ToastContainer, Slide } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import postService from "../../../services/postService";
-import { formatDate } from "../../admin/components/utils"; // Bỏ getImageUrl vì tự xử lý
+import { formatDate } from "../../admin/components/utils";
+
+const CustomToast = ({ closeToast, title, message, type }) => {
+  const isSuccess = type === "success";
+  const icon = isSuccess ? "check_circle" : "error";
+  const iconColor = isSuccess ? "text-[#2a9d90]" : "text-red-500";
+  const titleColor = isSuccess ? "text-[#2a9d90]" : "text-red-600";
+  const bgColor = isSuccess ? "bg-[#2a9d90]/5" : "bg-red-50";
+
+  return (
+    <div className="flex items-start gap-4 w-full">
+      <div
+        className={`shrink-0 size-10 rounded-full flex items-center justify-center ${bgColor}`}
+      >
+        <span className={`material-symbols-outlined text-[24px] ${iconColor}`}>
+          {icon}
+        </span>
+      </div>
+      <div className="flex-1 pt-1">
+        <h4 className={`text-sm font-extrabold ${titleColor} mb-1`}>{title}</h4>
+        <p className="text-xs font-bold text-[#101918]/80 leading-relaxed">
+          {message}
+        </p>
+      </div>
+      <button
+        onClick={closeToast}
+        className="text-gray-400 hover:text-gray-600 transition-colors pt-1"
+      >
+        <span className="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+  );
+};
+
+const ToastConfirm = ({ message, onConfirm, closeToast }) => (
+  <div className="flex flex-col w-full">
+    <div className="flex items-start gap-4 mb-3">
+      <div className="shrink-0 size-10 rounded-full flex items-center justify-center bg-[#2a9d90]/5">
+        <span className="material-symbols-outlined text-[24px] text-[#2a9d90]">
+          help
+        </span>
+      </div>
+      <div className="flex-1 pt-1">
+        <h4 className="text-sm font-extrabold text-[#2a9d90] mb-1">Xác nhận</h4>
+        <p className="text-xs font-bold text-[#101918]/80 leading-relaxed">
+          {message}
+        </p>
+      </div>
+    </div>
+    <div className="flex justify-end gap-2 pl-14">
+      <button
+        onClick={closeToast}
+        className="px-3 py-1.5 text-xs font-bold text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+      >
+        Hủy bỏ
+      </button>
+      <button
+        onClick={() => {
+          onConfirm();
+          closeToast();
+        }}
+        className="px-3 py-1.5 text-xs font-bold text-white bg-[#2a9d90] rounded-lg hover:bg-[#238b7e] transition-colors shadow-sm shadow-[#2a9d90]/20"
+      >
+        Đồng ý
+      </button>
+    </div>
+  </div>
+);
+
+const showToast = (message, type = "success") => {
+  toast(
+    <CustomToast
+      title={type === "success" ? "Thành công" : "Thất bại"}
+      message={message}
+      type={type}
+    />,
+    {
+      type: type,
+      icon: false,
+      closeButton: false,
+      style: {
+        borderRadius: "16px",
+        background: "white",
+        boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.1)",
+        padding: "16px",
+        border: "1px solid #e9f1f0",
+      },
+    },
+  );
+};
+
+const showConfirmToast = (message, onConfirm) => {
+  toast(<ToastConfirm message={message} onConfirm={onConfirm} />, {
+    autoClose: false,
+    closeOnClick: false,
+    draggable: false,
+    closeButton: false,
+    icon: false,
+    position: "top-center",
+    style: {
+      borderRadius: "16px",
+      background: "white",
+      boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.15)",
+      padding: "16px",
+      border: "1px solid #2a9d90",
+      minWidth: "350px",
+    },
+  });
+};
 
 const ReceptionistPosts = () => {
-  // --- STATE ---
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
   const ITEMS_PER_PAGE = 10;
-
-  // --- CẤU HÌNH ĐƯỜNG DẪN ẢNH ---
   const IMAGE_BASE_URL = "http://localhost:8080/uploads/";
 
-  // Stats Data
   const [stats, setStats] = useState({
     total: 0,
     published: 0,
     views: "24.5K",
   });
 
-  // --- FETCH DATA ---
   const fetchPosts = async () => {
     setLoading(true);
     try {
@@ -35,8 +137,8 @@ const ReceptionistPosts = () => {
       };
 
       const response = await postService.getAllPosts(params);
-
       const content = response.content || [];
+
       setPosts(content);
       setTotalPages(response.totalPages || 1);
       setTotalElements(response.totalElements || 0);
@@ -47,7 +149,8 @@ const ReceptionistPosts = () => {
         published: response.totalElements,
       }));
     } catch (error) {
-      console.error("Lỗi tải dữ liệu:", error);
+      console.error(error);
+      showToast("Không thể tải danh sách bài viết", "error");
     } finally {
       setLoading(false);
     }
@@ -57,17 +160,18 @@ const ReceptionistPosts = () => {
     fetchPosts();
   }, [currentPage]);
 
-  // --- HANDLERS ---
-  const handleDelete = async (id) => {
-    if (window.confirm("Bạn có chắc muốn xóa bài viết này?")) {
+  const handleDelete = (id) => {
+    const executeDelete = async () => {
       try {
         await postService.deletePost(id);
-        toast.success("Đã xóa bài viết");
+        showToast("Đã xóa bài viết thành công", "success");
         fetchPosts();
       } catch (error) {
-        toast.error("Xóa thất bại");
+        showToast("Xóa bài viết thất bại", "error");
       }
-    }
+    };
+
+    showConfirmToast("Bạn có chắc muốn xóa bài viết này?", executeDelete);
   };
 
   const handlePageChange = (newPage) => {
@@ -76,7 +180,6 @@ const ReceptionistPosts = () => {
     }
   };
 
-  // UI Stats Configuration
   const statsUI = [
     {
       label: "Tổng bài viết",
@@ -99,9 +202,25 @@ const ReceptionistPosts = () => {
   ];
 
   return (
-    <main className="w-full bg-[#fbfcfc] font-sans text-[#101918] min-h-screen p-8 lg:p-12">
+    <main className="w-full bg-[#fbfcfc] font-sans text-[#101918] min-h-screen p-8 lg:p-12 relative">
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        transition={Slide}
+        toastClassName={() =>
+          "relative flex p-0 min-h-10 rounded-2xl justify-between overflow-hidden cursor-pointer"
+        }
+        bodyClassName={() => "flex text-sm font-white font-med block p-3"}
+      />
+
       <div className="max-w-[1600px] mx-auto space-y-10">
-        {/* --- STATS --- */}
         <div className="flex flex-col gap-8">
           <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {statsUI.map((item, index) => (
@@ -129,9 +248,7 @@ const ReceptionistPosts = () => {
           </section>
         </div>
 
-        {/* --- TABLE --- */}
         <section className="bg-white rounded-[40px] border border-[#e9f1f0] shadow-xl shadow-gray-200/50 overflow-hidden">
-          {/* Header */}
           <div className="p-8 border-b border-[#e9f1f0] flex flex-col md:flex-row justify-between items-center gap-4">
             <h3 className="text-xl font-extrabold text-[#101918] flex items-center gap-2">
               <span className="material-symbols-outlined text-[#2a9d90]">
@@ -200,23 +317,20 @@ const ReceptionistPosts = () => {
                       key={post.baiVietId || post.id}
                       className="hover:bg-[#f9fbfb] transition-colors group"
                     >
-                      {/* Cột 1: Bài viết (Ảnh bìa + Tiêu đề) */}
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-5">
-                          {/* Ảnh bìa */}
                           {post.anhBia ? (
                             <img
                               alt="Thumbnail"
                               className="w-20 h-14 rounded-xl object-cover border border-[#e9f1f0] shadow-sm"
-                              src={`${IMAGE_BASE_URL}${post.anhBia}`} // SỬA: Dùng trực tiếp base url
+                              src={`${IMAGE_BASE_URL}${post.anhBia}`}
                               onError={(e) => {
-                                e.target.style.display = "none"; // Ẩn ảnh lỗi
-                                e.target.nextSibling.style.display = "flex"; // Hiện placeholder
+                                e.target.style.display = "none";
+                                e.target.nextSibling.style.display = "flex";
                               }}
                             />
                           ) : null}
 
-                          {/* Placeholder hiển thị khi không có ảnh hoặc ảnh lỗi */}
                           <div
                             className="w-20 h-14 rounded-xl bg-gray-100 flex items-center justify-center border border-[#e9f1f0] text-gray-400"
                             style={{ display: post.anhBia ? "none" : "flex" }}
@@ -237,17 +351,14 @@ const ReceptionistPosts = () => {
                         </div>
                       </td>
 
-                      {/* Cột 2: Chuyên mục */}
                       <td className="px-8 py-6">
                         <span className="px-3 py-1.5 text-[11px] font-black uppercase rounded-lg tracking-wide bg-blue-50 text-blue-600">
                           {post.tenDanhMuc || "Tổng hợp"}
                         </span>
                       </td>
 
-                      {/* Cột 3: Tác giả (Hiện ảnh Avatar) */}
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-3">
-                          {/* Avatar Tác giả */}
                           {post.anhTacGia ? (
                             <img
                               src={`${IMAGE_BASE_URL}${post.anhTacGia}`}
@@ -260,7 +371,6 @@ const ReceptionistPosts = () => {
                             />
                           ) : null}
 
-                          {/* Fallback Icon */}
                           <span
                             className="material-symbols-outlined text-[#588d87] text-[18px] bg-[#e9f1f0] rounded-full p-1"
                             style={{
@@ -276,18 +386,24 @@ const ReceptionistPosts = () => {
                         </div>
                       </td>
 
-                      {/* Cột 4: Ngày đăng */}
                       <td className="px-8 py-6 text-sm font-medium text-[#588d87]">
                         {formatDate(post.ngayDang).split(",")[0]}
                       </td>
 
-                      {/* Cột 5: Trạng thái */}
                       <td className="px-8 py-6">
                         <div
-                          className={`flex items-center gap-2 ${post.trangThai === "CONG_KHAI" ? "text-[#2a9d90]" : "text-gray-400"}`}
+                          className={`flex items-center gap-2 ${
+                            post.trangThai === "CONG_KHAI"
+                              ? "text-[#2a9d90]"
+                              : "text-gray-400"
+                          }`}
                         >
                           <span
-                            className={`size-2.5 rounded-full ${post.trangThai === "CONG_KHAI" ? "bg-[#2a9d90] animate-pulse" : "bg-gray-300"}`}
+                            className={`size-2.5 rounded-full ${
+                              post.trangThai === "CONG_KHAI"
+                                ? "bg-[#2a9d90] animate-pulse"
+                                : "bg-gray-300"
+                            }`}
                           ></span>
                           <span className="text-sm font-bold">
                             {post.trangThai === "CONG_KHAI"
@@ -297,18 +413,21 @@ const ReceptionistPosts = () => {
                         </div>
                       </td>
 
-                      {/* Cột 6: Thao tác */}
                       <td className="px-8 py-6">
                         <div className="flex items-center justify-end gap-3">
                           <Link
-                            to={`/staff/receptionist/posts/view/${post.baiVietId || post.id}`}
+                            to={`/staff/receptionist/posts/view/${
+                              post.baiVietId || post.id
+                            }`}
                           >
                             <button className="px-4 py-2 bg-[#f9fbfb] border border-[#e9f1f0] text-xs font-bold rounded-xl hover:bg-white hover:border-[#2a9d90] hover:text-[#2a9d90] transition-all shadow-sm">
                               Xem
                             </button>
                           </Link>
                           <Link
-                            to={`/staff/receptionist/posts/edit/${post.baiVietId || post.id}`}
+                            to={`/staff/receptionist/posts/edit/${
+                              post.baiVietId || post.id
+                            }`}
                             className="size-9 flex items-center justify-center text-[#2a9d90] bg-[#2a9d90]/5 hover:bg-[#2a9d90]/10 rounded-xl transition-colors"
                             title="Chỉnh sửa"
                           >
@@ -336,7 +455,6 @@ const ReceptionistPosts = () => {
             </table>
           </div>
 
-          {/* Footer / Pagination */}
           <div className="px-8 py-6 bg-[#f9fbfb] border-t border-[#e9f1f0] flex items-center justify-between">
             <p className="text-sm text-[#588d87] font-medium">
               Hiển thị{" "}

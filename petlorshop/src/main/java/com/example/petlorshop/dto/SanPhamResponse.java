@@ -24,7 +24,6 @@ public class SanPhamResponse {
     private Integer danhMucId;
     private String tenDanhMuc;
     
-    // Thuốc
     private LocalDate hanSuDung;
     private String soLo;
     private String donViTinh;

@@ -1,7 +1,6 @@
 import apiClient from './apiClient';
 
 const supplierService = {
-  // Lấy danh sách NCC (có phân trang & tìm kiếm)
   getAllSuppliers: (params) => apiClient.get('/nha-cung-cap', { params }),
 
   getSupplierById: (id) => apiClient.get(`/nha-cung-cap/${id}`),

@@ -18,13 +18,11 @@ public class DanhMucDichVuController {
     @Autowired
     private DanhMucDichVuService danhMucDichVuService;
 
-    // API cũ (List)
     @GetMapping("/list")
     public ResponseEntity<List<DanhMucDichVu>> getAllList() {
         return ResponseEntity.ok(danhMucDichVuService.getAllDanhMuc());
     }
 
-    // API mới (Page + Search)
     @GetMapping
     public ResponseEntity<Page<DanhMucDichVu>> getAll(Pageable pageable, @RequestParam(required = false) String keyword) {
         return ResponseEntity.ok(danhMucDichVuService.getAllDanhMuc(pageable, keyword));

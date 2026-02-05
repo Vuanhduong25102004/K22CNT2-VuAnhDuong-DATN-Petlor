@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import Select from "react-select";
-
-// --- 1. IMPORT TOASTIFY ---
 import { ToastContainer, toast, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -18,13 +16,10 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { fetchCart } = useCart();
 
-  // 1. Nhận dữ liệu từ giỏ hàng
   const { selectedItems, totalAmount, appliedVoucher } = location.state || {};
 
-  // State User
   const [currentUser, setCurrentUser] = useState(null);
 
-  // State Form
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -37,28 +32,23 @@ const Checkout = () => {
     voucherCode: appliedVoucher || "",
   });
 
-  // State API Địa lý
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
 
-  // State ID Địa lý
   const [selectedProvinceId, setSelectedProvinceId] = useState("");
   const [selectedDistrictId, setSelectedDistrictId] = useState("");
 
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [loading, setLoading] = useState(false);
 
-  // --- [NEW] STATE CHO MODAL QR CODE ---
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [createdOrderId, setCreatedOrderId] = useState(null); // Lưu ID đơn hàng vừa tạo để hiển thị nội dung CK
+  const [createdOrderId, setCreatedOrderId] = useState(null);
 
-  // Tính toán tiền
   const SHIPPING_FEE = 30000;
   const DISCOUNT = 0;
   const FINAL_TOTAL = (totalAmount || 0) + SHIPPING_FEE - DISCOUNT;
 
-  // Validate form
   const isFormValid =
     formData.fullName.trim() !== "" &&
     formData.phone.trim() !== "" &&
@@ -68,17 +58,14 @@ const Checkout = () => {
     formData.phuongXa !== "" &&
     formData.diaChi.trim() !== "";
 
-  // Helper hiển thị ảnh
   const getImageUrl = (imageName) => {
     if (!imageName) return "https://placehold.co/100x100?text=No+Image";
     if (imageName.startsWith("http")) return imageName;
     return `${SERVER_URL}/uploads/${imageName}`;
   };
 
-  // Check cart items
   useEffect(() => {
     if (!selectedItems || selectedItems.length === 0) {
-      // --- THAY ALERT ---
       toast.warn("Vui lòng chọn sản phẩm từ giỏ hàng trước!", {
         position: "top-center",
       });
@@ -86,7 +73,6 @@ const Checkout = () => {
     }
   }, [selectedItems, navigate]);
 
-  // Auto fill user
   useEffect(() => {
     const fillUserData = async () => {
       const token = localStorage.getItem("token");
@@ -103,24 +89,20 @@ const Checkout = () => {
               email: userData.email || "",
               diaChi: userData.diaChi || "",
             }));
-            // Nếu là User đăng nhập thành công, có thể cho phép chọn lại COD (nếu muốn chắc chắn)
-            // setPaymentMethod("COD");
           }
         } catch (error) {
           console.error("Lỗi lấy thông tin user:", error);
           setCurrentUser(null);
-          // Token lỗi -> Coi như Guest -> Chuyển về MOMO
+
           setPaymentMethod("MOMO");
         }
       } else {
-        // Không có token -> Guest -> Chuyển về MOMO
         setPaymentMethod("MOMO");
       }
     };
     fillUserData();
   }, []);
 
-  // --- LOGIC API ĐỊA LÝ ---
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
@@ -168,7 +150,6 @@ const Checkout = () => {
     }
   }, [selectedDistrictId]);
 
-  // --- OPTIONS FOR REACT-SELECT ---
   const provinceOptions = provinces.map((p) => ({
     value: p.id,
     label: p.full_name,
@@ -179,7 +160,6 @@ const Checkout = () => {
   }));
   const wardOptions = wards.map((w) => ({ value: w.id, label: w.full_name }));
 
-  // --- HANDLERS FOR REACT-SELECT ---
   const handleSelectProvince = (option) => {
     setSelectedProvinceId(option?.value || "");
     setSelectedDistrictId("");
@@ -201,22 +181,19 @@ const Checkout = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // --- SUBMIT ---
   const handlePlaceOrder = async () => {
-    // Log kiểm tra form có hợp lệ không
     if (!isFormValid) {
       toast.error("Vui lòng điền đầy đủ thông tin giao hàng!");
       return;
     }
 
     setLoading(true);
-    console.log("🚀 --- BẮT ĐẦU QUÁ TRÌNH ĐẶT HÀNG ---");
 
     try {
       const itemsPayload = selectedItems.map((item) => ({
         sanPhamId: item.sanPhamId || item.id,
         soLuong: item.soLuong,
-      })); // Chuẩn bị payload chung
+      }));
 
       const basePayload = {
         hoTenNguoiNhan: formData.fullName,
@@ -231,12 +208,10 @@ const Checkout = () => {
         ghiChu: formData.note,
       };
 
-      let orderResponse; // Lưu kết quả trả về từ API tạo đơn
+      let orderResponse;
 
       if (!currentUser) {
-        // --- GUEST ---
         if (paymentMethod === "COD") {
-          // --- THAY ALERT ---
           toast.warn(
             "Khách vãng lai vui lòng chọn thanh toán Online (VNPAY/MOMO)!",
             {
@@ -251,7 +226,6 @@ const Checkout = () => {
         const res = await orderService.createOrder(guestPayload, true);
         orderResponse = res.data || res;
       } else {
-        // --- USER ---
         const userPayload = {
           ...basePayload,
           userId: currentUser.userId,
@@ -261,7 +235,6 @@ const Checkout = () => {
         orderResponse = res.data || res;
       }
 
-      // --- XỬ LÝ SAU KHI TẠO ĐƠN ---
       if (paymentMethod === "COD") {
         finishOrderProcess();
       } else {
@@ -275,18 +248,16 @@ const Checkout = () => {
       console.error("❌ LỖI KHI GỌI API:", error);
       const errorMsg =
         error.response?.data?.message || "Đặt hàng thất bại. Vui lòng thử lại!";
-      // --- THAY ALERT ---
+
       toast.error(errorMsg);
       setLoading(false);
     }
   };
 
-  // Hàm dọn dẹp và chuyển trang
   const finishOrderProcess = async () => {
     localStorage.removeItem("cart");
     await fetchCart();
 
-    // --- THAY ALERT ---
     toast.success(
       <div>
         <div className="font-bold">Đặt hàng thành công!</div>
@@ -294,17 +265,15 @@ const Checkout = () => {
       </div>,
       {
         autoClose: 2500,
-        onClose: () => navigate("/"), // Chuyển trang sau khi toast đóng hoặc hết giờ
+        onClose: () => navigate("/"),
       },
     );
 
-    // Fallback chuyển trang nếu user không tương tác toast
     setTimeout(() => {
       navigate("/");
     }, 2800);
   };
 
-  // --- STYLE REACT-SELECT ---
   const selectClassNames = {
     control: ({ isFocused, isDisabled }) =>
       `w-full bg-white rounded-lg border h-12 px-4 flex items-center justify-between transition-all
@@ -335,7 +304,6 @@ const Checkout = () => {
 
   return (
     <main className="max-w-screen-xl mx-auto mt-16 px-4 pb-10 relative">
-      {/* --- 2. THÊM TOAST CONTAINER --- */}
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -351,7 +319,6 @@ const Checkout = () => {
         style={{ zIndex: 99999, marginTop: "60px" }}
       />
 
-      {/* Breadcrumb */}
       <div className="flex items-center gap-2 mb-8 text-sm">
         <Link className="text-gray-500 hover:text-primary" to="/cart">
           Giỏ hàng
@@ -367,7 +334,6 @@ const Checkout = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        {/* --- CỘT TRÁI: FORM --- */}
         <div className="lg:col-span-7 space-y-10">
           <section>
             <div className="mb-10">
@@ -431,7 +397,6 @@ const Checkout = () => {
                 />
               </div>
 
-              {/* React Select */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-semibold text-gray-700">
@@ -524,7 +489,6 @@ const Checkout = () => {
             </div>
           </section>
 
-          {/* Payment Methods */}
           <section>
             <div className="flex items-center gap-2 mb-6">
               <span className="material-symbols-outlined text-primary">
@@ -648,7 +612,6 @@ const Checkout = () => {
           </div>
         </div>
 
-        {/* --- CỘT PHẢI: SUMMARY --- */}
         <div className="lg:col-span-5">
           <div className="sticky top-24 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
             <h2 className="text-xl font-bold mb-6 text-gray-900">
@@ -693,7 +656,6 @@ const Checkout = () => {
                 />
                 <button
                   type="button"
-                  // --- THAY ALERT ---
                   onClick={() =>
                     toast.info("Tính năng đang phát triển", { autoClose: 1500 })
                   }
@@ -762,11 +724,9 @@ const Checkout = () => {
         </div>
       </div>
 
-      {/* --- [NEW] MODAL QUÉT QR CODE --- */}
       {showPaymentModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in-up">
-            {/* Header */}
             <div className="bg-primary p-6 text-center">
               <h3 className="text-white text-xl font-bold uppercase tracking-wide">
                 Thanh toán {paymentMethod}
@@ -776,10 +736,8 @@ const Checkout = () => {
               </p>
             </div>
 
-            {/* QR Image */}
             <div className="p-8 flex flex-col items-center justify-center space-y-4">
               <div className="relative group">
-                {/* QR Code */}
                 <img
                   src={`https://img.vietqr.io/image/MB-0969696969-compact2.png?amount=${FINAL_TOTAL}&addInfo=${paymentMethod}%20${
                     createdOrderId || "DONHANG"
@@ -807,7 +765,6 @@ const Checkout = () => {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="p-6 pt-0 flex gap-3">
               <button
                 onClick={() => setShowPaymentModal(false)}

@@ -6,7 +6,6 @@ import productService from "../services/productService";
 import { formatCurrency } from "../utils/formatters";
 import { SERVER_URL } from "../services/apiClient";
 
-// --- DỮ LIỆU GIẢ LẬP REVIEW & QUY TRÌNH (Do API chưa có) ---
 const MOCK_REVIEWS = [
   {
     id: 1,
@@ -51,7 +50,6 @@ const ServiceDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [mainImage, setMainImage] = useState("");
 
-  // State cho phần đánh giá
   const [reviews, setReviews] = useState(MOCK_REVIEWS);
   const [newComment, setNewComment] = useState("");
   const [userRating, setUserRating] = useState(5);
@@ -78,7 +76,7 @@ const ServiceDetailPage = () => {
           rating: 4.8,
           reviewsCount: 128,
           bookings: "500+",
-          // Nếu API sau này có trả về quy trình thì dùng, không thì dùng mặc định
+
           process: data.process || DEFAULT_PROCESS,
         };
 
@@ -96,14 +94,13 @@ const ServiceDetailPage = () => {
     AOS.init({ duration: 800, once: true });
   }, [id]);
 
-  // Xử lý gửi đánh giá
   const handleSubmitReview = (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
 
     const newReview = {
       id: reviews.length + 1,
-      user: "Bạn (Khách mới)", // Sau này lấy từ User Context
+      user: "Bạn (Khách mới)",
       avatar: "https://placehold.co/150",
       rating: userRating,
       date: new Date().toLocaleDateString("vi-VN"),
@@ -127,7 +124,6 @@ const ServiceDetailPage = () => {
   return (
     <div className="min-h-screen bg-[#f8faf9] pb-20 pt-24 font-display text-[#0d1b1a]">
       <main className="max-w-[1200px] mx-auto px-4 lg:px-10">
-        {/* Breadcrumbs */}
         <div className="flex flex-wrap gap-2 mb-6 text-sm font-medium">
           <Link to="/" className="text-[#4c9a93] hover:underline">
             Trang chủ
@@ -141,7 +137,6 @@ const ServiceDetailPage = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* CỘT TRÁI: ẢNH DỊCH VỤ */}
           <div className="lg:col-span-7 space-y-4" data-aos="fade-right">
             <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-white border border-[#e7f3f2] shadow-sm group">
               <img
@@ -150,7 +145,6 @@ const ServiceDetailPage = () => {
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
             </div>
-            {/* Gallery nhỏ (Giả lập ảnh khác bằng ảnh chính để demo) */}
             <div className="grid grid-cols-4 gap-4">
               {[1, 2, 3, 4].map((i) => (
                 <div
@@ -169,7 +163,6 @@ const ServiceDetailPage = () => {
             </div>
           </div>
 
-          {/* CỘT PHẢI: THÔNG TIN DỊCH VỤ */}
           <div
             className="lg:col-span-5 flex flex-col gap-6"
             data-aos="fade-left"
@@ -231,7 +224,6 @@ const ServiceDetailPage = () => {
               </p>
             </div>
 
-            {/* Chọn Kích thước (Giữ nguyên logic cũ) */}
             <div className="space-y-3">
               <p className="font-bold">Cân nặng thú cưng</p>
               <div className="grid grid-cols-3 gap-3">
@@ -243,12 +235,11 @@ const ServiceDetailPage = () => {
                     >
                       {label}
                     </button>
-                  )
+                  ),
                 )}
               </div>
             </div>
 
-            {/* Buttons */}
             <div className="flex flex-col gap-3 pt-4">
               <button className="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-2">
                 <span className="material-symbols-outlined fill-icon">
@@ -258,7 +249,6 @@ const ServiceDetailPage = () => {
               </button>
             </div>
 
-            {/* Trust Badges */}
             <div className="flex items-center justify-around p-4 rounded-xl bg-white border border-[#e7f3f2] mt-2">
               {[
                 { icon: "verified_user", text: "An toàn tuyệt đối" },
@@ -278,12 +268,10 @@ const ServiceDetailPage = () => {
           </div>
         </div>
 
-        {/* --- CHI TIẾT & QUY TRÌNH --- */}
         <div
           className="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-10"
           data-aos="fade-up"
         >
-          {/* Quy trình thực hiện (Dynamic Mapping) */}
           <div className="bg-white rounded-2xl p-8 border border-[#e7f3f2]">
             <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
               <span className="material-symbols-outlined text-primary">
@@ -306,7 +294,6 @@ const ServiceDetailPage = () => {
             </div>
           </div>
 
-          {/* Lưu ý */}
           <div className="bg-white rounded-2xl p-8 border border-[#e7f3f2]">
             <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
               <span className="material-symbols-outlined text-primary">
@@ -335,7 +322,6 @@ const ServiceDetailPage = () => {
           </div>
         </div>
 
-        {/* --- PHẦN ĐÁNH GIÁ (REVIEWS) --- */}
         <div
           className="mt-16 bg-white rounded-2xl border border-[#e7f3f2] overflow-hidden"
           data-aos="fade-up"
@@ -344,7 +330,6 @@ const ServiceDetailPage = () => {
             <h3 className="text-xl font-bold">Đánh giá từ khách hàng</h3>
           </div>
 
-          {/* Rating Summary */}
           <div className="flex flex-col md:flex-row gap-x-12 gap-y-8 p-8 border-b border-[#e7f3f2]">
             <div className="flex flex-col gap-2 items-center md:items-start">
               <p className="text-[#0d1b1a] text-5xl font-black leading-tight">
@@ -385,7 +370,6 @@ const ServiceDetailPage = () => {
             </div>
           </div>
 
-          {/* Reviews List */}
           <div className="p-8 space-y-8">
             {reviews.map((review) => (
               <div key={review.id} className="flex gap-4">
@@ -423,7 +407,6 @@ const ServiceDetailPage = () => {
             ))}
           </div>
 
-          {/* Form đánh giá */}
           <div className="p-8 bg-gray-50 border-t border-[#e7f3f2]">
             <h4 className="font-bold mb-4">Viết đánh giá của bạn</h4>
             <form onSubmit={handleSubmitReview} className="space-y-4">

@@ -43,7 +43,7 @@ public class AuthenticationService {
         user.setMatKhau(passwordEncoder.encode(request.getMatkhau()));
         user.setSoDienThoai(request.getSoDienThoai());
         user.setDiaChi(request.getDiaChi());
-        user.setRole(Role.USER); // Sửa lại thành Enum
+        user.setRole(Role.USER);
         
         NguoiDung savedUser = nguoiDungRepository.save(user);
 
@@ -69,6 +69,16 @@ public class AuthenticationService {
                 .orElseThrow(() -> new IllegalArgumentException("Email hoặc mật khẩu không hợp lệ."));
                 
         var jwt = jwtService.generateToken(user);
-        return new JwtAuthenticationResponse(jwt);
+        
+        Integer nhanVienId = (user.getNhanVien() != null) ? user.getNhanVien().getNhanVienId() : null;
+        
+        return new JwtAuthenticationResponse(
+            jwt,
+            user.getUserId(),
+            user.getHoTen(),
+            user.getEmail(),
+            user.getRole(),
+            nhanVienId
+        );
     }
 }

@@ -62,7 +62,6 @@ public class NhanVienService {
             throw new IllegalArgumentException("Vai trò không hợp lệ: " + roleStr);
         }
 
-        // Tự động set chức vụ theo role
         request.setChucVu(getChucVuByRole(role));
 
         String fileName = null;
@@ -102,7 +101,6 @@ public class NhanVienService {
             isNewUser = true;
         }
 
-        // Check Email
         if (StringUtils.hasText(request.getEmail())) {
             if (!request.getEmail().equals(nhanVien.getEmail())) {
                 if (nhanVienRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -128,7 +126,6 @@ public class NhanVienService {
             }
         }
 
-        // Check Phone
         if (StringUtils.hasText(request.getSoDienThoai())) {
             if (!request.getSoDienThoai().equals(nhanVien.getSoDienThoai()) || isNewUser) {
                 Optional<NguoiDung> existingUser = nguoiDungRepository.findBySoDienThoai(request.getSoDienThoai());
@@ -156,16 +153,13 @@ public class NhanVienService {
             throw new IllegalArgumentException("Mật khẩu là bắt buộc để tạo tài khoản người dùng mới.");
         }
         
-        // Update Role và Chức vụ
         String roleStr = request.getRole();
         if (roleStr != null && !INVALID_ROLES.contains(roleStr.toUpperCase())) {
             try {
                 Role role = Role.valueOf(roleStr.toUpperCase());
                 nguoiDung.setRole(role);
-                // Tự động cập nhật chức vụ theo role mới
                 request.setChucVu(getChucVuByRole(role));
             } catch (IllegalArgumentException e) {
-                // Ignore invalid role
             }
         } else if (isNewUser) {
             nguoiDung.setRole(Role.STAFF);
@@ -266,7 +260,7 @@ public class NhanVienService {
                 nhanVien.getChuyenKhoa(),
                 nhanVien.getKinhNghiem(),
                 nhanVien.getAnhDaiDien(),
-                nhanVien.getNguoiDung() != null ? nhanVien.getNguoiDung().getRole() : null, // Đã sửa: truyền trực tiếp Enum Role
+                nhanVien.getNguoiDung() != null ? nhanVien.getNguoiDung().getRole() : null,
                 nhanVien.getNguoiDung() != null ? nhanVien.getNguoiDung().getUserId() : null
         );
     }

@@ -54,18 +54,16 @@ public class PhieuNhapService {
         for (PhieuNhapRequest.ChiTietPhieuNhapDto ctDto : request.getChiTietList()) {
             SanPham sp;
             if (ctDto.getSanPhamId() != null) {
-                // Trường hợp 1: Sản phẩm đã tồn tại -> Cập nhật số lượng tồn kho
                 sp = sanPhamRepository.findById(ctDto.getSanPhamId())
                         .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm ID: " + ctDto.getSanPhamId()));
                 sp.setSoLuongTonKho(sp.getSoLuongTonKho() + ctDto.getSoLuong());
             } else {
-                // Trường hợp 2: Sản phẩm mới -> Tạo mới sản phẩm
                 sp = new SanPham();
                 sp.setTenSanPham(ctDto.getTenSanPham());
                 sp.setMoTaChiTiet(ctDto.getMoTaChiTiet());
-                sp.setGia(ctDto.getGiaBan()); // Giá bán
+                sp.setGia(ctDto.getGiaBan());
                 sp.setGiaGiam(BigDecimal.ZERO);
-                sp.setSoLuongTonKho(ctDto.getSoLuong()); // Số lượng tồn kho ban đầu = số lượng nhập
+                sp.setSoLuongTonKho(ctDto.getSoLuong());
                 sp.setHinhAnh(ctDto.getHinhAnh());
                 sp.setDaXoa(false);
 
@@ -76,7 +74,6 @@ public class PhieuNhapService {
                 }
             }
             
-            // Lưu sản phẩm (cập nhật hoặc tạo mới)
             sp = sanPhamRepository.save(sp);
 
             ChiTietPhieuNhap ct = new ChiTietPhieuNhap();
@@ -103,20 +100,15 @@ public class PhieuNhapService {
         PhieuNhap phieuNhap = phieuNhapRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu nhập ID: " + id));
 
-        // Hoàn tác kho (Trừ số lượng đã nhập)
         for (ChiTietPhieuNhap ct : phieuNhap.getChiTietPhieuNhapList()) {
             SanPham sp = ct.getSanPham();
             int soLuongMoi = sp.getSoLuongTonKho() - ct.getSoLuong();
-            
-            // Kiểm tra nếu trừ đi mà bị âm thì vẫn cho phép nhưng có thể log cảnh báo
-            // Hoặc chặn lại nếu muốn chặt chẽ: if (soLuongMoi < 0) throw Exception...
-            // Ở đây ta cho phép trừ để đảm bảo xóa được phiếu nhập sai.
             
             sp.setSoLuongTonKho(soLuongMoi);
             sanPhamRepository.save(sp);
         }
 
-        phieuNhapRepository.delete(phieuNhap); // Hibernate sẽ tự gọi SQL update da_xoa = true
+        phieuNhapRepository.delete(phieuNhap);
     }
 
     public Page<PhieuNhapResponse> getAllPhieuNhap(Pageable pageable, String keyword) {

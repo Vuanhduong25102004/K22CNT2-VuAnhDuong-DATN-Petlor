@@ -59,7 +59,6 @@ public class DonHangController {
     public ResponseEntity<?> createDonHang(@RequestBody DonHangRequest donHangRequest) {
         try {
             DonHang createdDonHang = donHangService.createDonHang(donHangRequest);
-            // Trả về DTO thay vì Entity để tránh lỗi lazy loading
             return donHangService.getDonHangById(createdDonHang.getDonHangId())
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.internalServerError().build());
@@ -128,7 +127,6 @@ public class DonHangController {
         }
     }
 
-    // API tạo đơn hàng từ đơn thuốc (Dành cho Lễ tân)
     @PostMapping("/tu-don-thuoc/{donThuocId}")
     public ResponseEntity<?> createOrderFromPrescription(@PathVariable Integer donThuocId) {
         try {

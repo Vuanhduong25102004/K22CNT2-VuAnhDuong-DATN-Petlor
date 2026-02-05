@@ -3,20 +3,17 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import { Link } from "react-router-dom";
 import productService from "../services/productService";
-import blogService from "../services/blogService"; // 1. Import Service Blog
+import blogService from "../services/blogService";
 
 const Homepage = () => {
-  // State lưu dữ liệu
   const [latestProducts, setLatestProducts] = useState([]);
-  const [latestBlogs, setLatestBlogs] = useState([]); // 2. State lưu bài viết
+  const [latestBlogs, setLatestBlogs] = useState([]);
 
-  // Cấu hình đường dẫn ảnh
   const IMAGE_BASE_URL = "http://localhost:8080/uploads/";
 
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    // Init AOS
     const aosInit = setTimeout(() => {
       AOS.init({
         duration: 800,
@@ -28,7 +25,6 @@ const Homepage = () => {
       AOS.refresh();
     }, 100);
 
-    // --- API: LẤY SẢN PHẨM ---
     const fetchProducts = async () => {
       try {
         const response = await productService.getAllProducts({
@@ -45,16 +41,12 @@ const Homepage = () => {
       }
     };
 
-    // --- API: LẤY BÀI VIẾT BLOG (MỚI) ---
     const fetchBlogs = async () => {
       try {
         const response = await blogService.getPublicPosts();
-        // API trả về mảng trực tiếp (theo JSON bạn cung cấp)
-        // Chỉ lấy 3 bài đầu tiên để khớp với giao diện 3 cột
         if (Array.isArray(response)) {
           setLatestBlogs(response.slice(0, 3));
         } else if (response.content) {
-          // Phòng trường hợp sau này API phân trang
           setLatestBlogs(response.content.slice(0, 3));
         }
       } catch (error) {
@@ -63,23 +55,20 @@ const Homepage = () => {
     };
 
     fetchProducts();
-    fetchBlogs(); // Gọi hàm lấy bài viết
+    fetchBlogs();
 
     return () => clearTimeout(aosInit);
   }, []);
 
-  // Helper format tiền tệ
   const formatMoney = (amount) =>
     new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(amount);
 
-  // Helper format ngày tháng cho Blog
   const formatDateBlog = (isoString) => {
     if (!isoString) return "";
     const date = new Date(isoString);
-    // Format: 21 Tháng 12, 2025
     return date.toLocaleDateString("vi-VN", {
       day: "numeric",
       month: "long",
@@ -90,7 +79,6 @@ const Homepage = () => {
   return (
     <>
       <section className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 mt-22 mb-24">
-        {/* ... (HERO SECTION GIỮ NGUYÊN) ... */}
         <div
           className="relative min-h-[560px] rounded-[40px] overflow-hidden bg-white shadow-2xl shadow-gray-200/50 flex flex-col md:flex-row"
           data-aos="fade-up"
@@ -168,7 +156,6 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* 1. DỊCH VỤ NỔI BẬT (Giữ nguyên) */}
       <section className="mb-24 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12" data-aos="fade-up">
           <h2 className="text-3xl font-extrabold text-gray-900 mb-4">
@@ -275,7 +262,6 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* 2. SẢN PHẨM MỚI NHẤT (Giữ nguyên logic API) */}
       <section className="mb-24 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
           className="flex items-center justify-between mb-10"
@@ -346,12 +332,10 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* 3. TẠI SAO CHỌN PETLOR (Giữ nguyên) */}
       <section
         className="mb-24 py-16 px-8 bg-white rounded-[40px] border border-gray-100 max-w-screen-xl mx-auto"
         data-aos="fade-up"
       >
-        {/* ... (Nội dung section này giữ nguyên như cũ) ... */}
         <div className="text-center mb-16">
           <h2 className="text-3xl font-extrabold text-gray-900 mb-4">
             Tại sao chọn PetLor?
@@ -413,7 +397,6 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* 4. TIN TỨC & BLOG (ĐÃ KẾT NỐI API) */}
       <section className="mb-24 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
           className="flex items-center justify-between mb-10"
@@ -432,7 +415,6 @@ const Homepage = () => {
           </Link>
         </div>
 
-        {/* Lưới Blog Động */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {latestBlogs.length > 0 ? (
             latestBlogs.map((blog, index) => (
@@ -476,12 +458,10 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* 5. ĐÁNH GIÁ TỪ CỘNG ĐỒNG (Giữ nguyên) */}
       <section
         className="mb-24 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8"
         data-aos="fade-up"
       >
-        {/* ... (Nội dung section này giữ nguyên) ... */}
         <div className="text-center mb-16">
           <h2 className="text-3xl font-extrabold text-gray-900 mb-4">
             Đánh giá từ cộng đồng
@@ -564,7 +544,6 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* 6. ĐĂNG KÝ NHẬN TIN (Giữ nguyên) */}
       <section
         className="mt-20 py-16 bg-primary rounded-[40px] text-center px-4 relative overflow-hidden max-w-screen-xl mx-auto mb-20"
         data-aos="zoom-in"

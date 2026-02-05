@@ -1,7 +1,6 @@
 import apiClient from "./apiClient";
 
 const searchService = {
-  // --- NHÓM 1: SẢN PHẨM & DỊCH VỤ (CẬP NHẬT) ---
 
   searchProducts: (keyword, categoryId) => {
     return apiClient.get("/san-pham", { 
@@ -23,8 +22,6 @@ const searchService = {
     return apiClient.get("/danh-muc-dich-vu", { params: { keyword } });
   },
 
-  // --- NHÓM 2: TIN TỨC & BÀI VIẾT (CẬP NHẬT) ---
-
     searchPosts: (keyword, categoryId) => {
     return apiClient.get("/bai-viet", { 
       params: { 
@@ -38,7 +35,6 @@ const searchService = {
     return apiClient.get("/bai-viet/danh-muc", { params: { keyword } });
   },
 
-  // --- CÁC NHÓM KHÁC (GIỮ NGUYÊN) ---
   searchUsers: (keyword) => {
     return apiClient.get("/nguoi-dung", { params: { keyword } });
   },

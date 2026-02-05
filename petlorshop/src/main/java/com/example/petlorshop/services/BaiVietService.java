@@ -36,7 +36,6 @@ public class BaiVietService {
     @Autowired
     private FileStorageService fileStorageService;
 
-    // --- Danh Mục Bài Viết ---
     public List<DanhMucBaiViet> getAllDanhMuc() {
         return danhMucBaiVietRepository.findAll();
     }
@@ -96,7 +95,6 @@ public class BaiVietService {
         danhMucBaiVietRepository.delete(dm);
     }
 
-    // --- Bài Viết ---
     public Page<BaiVietResponse> getAllBaiViet(Pageable pageable, String keyword, Integer categoryId) {
         if (StringUtils.hasText(keyword)) {
             List<BaiViet> allMatches = baiVietRepository.searchByKeyword(keyword);
@@ -105,7 +103,6 @@ public class BaiVietService {
             List<BaiVietResponse> filteredList = allMatches.stream()
                     .filter(bv -> (bv.getTieuDe() != null && bv.getTieuDe().toLowerCase().contains(lowerKeyword)) || 
                                   (bv.getNoiDung() != null && bv.getNoiDung().toLowerCase().contains(lowerKeyword)))
-                    // Lọc thêm theo danh mục nếu có
                     .filter(bv -> categoryId == null || (bv.getDanhMucBaiViet() != null && bv.getDanhMucBaiViet().getDanhMucBvId().equals(categoryId)))
                     .map(this::convertToResponse)
                     .collect(Collectors.toList());
@@ -159,9 +156,8 @@ public class BaiVietService {
     }
 
     public BaiVietResponse createBaiViet(BaiVietRequest request, MultipartFile anhBiaFile) {
-        // Tìm nhân viên dựa trên userId
-        NhanVien nv = nhanVienRepository.findByNguoiDung_UserId(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hồ sơ nhân viên cho User ID: " + request.getUserId()));
+        NhanVien nv = nhanVienRepository.findById(request.getNhanVienId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hồ sơ nhân viên cho ID: " + request.getNhanVienId()));
         
         BaiViet bv = new BaiViet();
         bv.setTieuDe(request.getTieuDe());
@@ -220,15 +216,24 @@ public class BaiVietService {
     }
 
     private BaiVietResponse convertToResponse(BaiViet bv) {
+        String tenTacGia = bv.getNhanVien().getHoTen();
+        String anhTacGia = bv.getNhanVien().getAnhDaiDien();
+
+        if (bv.getNhanVien().getNguoiDung() != null) {
+            tenTacGia = bv.getNhanVien().getNguoiDung().getHoTen();
+            anhTacGia = bv.getNhanVien().getNguoiDung().getAnhDaiDien();
+        }
+
         return new BaiVietResponse(
                 bv.getBaiVietId(),
+                bv.getNhanVien().getNhanVienId(),
                 bv.getTieuDe(),
                 bv.getSlug(),
                 bv.getNoiDung(),
                 bv.getAnhBia(),
                 bv.getNgayDang(),
-                bv.getNhanVien().getHoTen(),
-                bv.getNhanVien().getAnhDaiDien(), // Thêm ảnh tác giả
+                tenTacGia,
+                anhTacGia,
                 bv.getDanhMucBaiViet() != null ? bv.getDanhMucBaiViet().getTenDanhMuc() : null,
                 bv.getTrangThai()
         );

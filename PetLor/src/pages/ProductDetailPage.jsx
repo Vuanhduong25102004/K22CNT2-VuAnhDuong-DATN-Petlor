@@ -3,7 +3,6 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
-// --- IMPORT TOASTIFY ---
 import { ToastContainer, toast, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -18,28 +17,24 @@ const ProductDetailPage = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  // --- STATE ---
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
 
-  // State cho Đánh giá & Phân trang
   const [reviews, setReviews] = useState([]);
-  const [reviewPage, setReviewPage] = useState(0); // Trang hiện tại (bắt đầu từ 0)
-  const [totalReviewPages, setTotalReviewPages] = useState(0); // Tổng số trang
-  const [totalReviewsCount, setTotalReviewsCount] = useState(0); // Tổng số lượng đánh giá
+  const [reviewPage, setReviewPage] = useState(0);
+  const [totalReviewPages, setTotalReviewPages] = useState(0);
+  const [totalReviewsCount, setTotalReviewsCount] = useState(0);
 
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState("");
 
-  // Helper xử lý ảnh
   const getImageUrl = (imageName) => {
     if (!imageName) return "https://placehold.co/600x600?text=No+Image";
     if (imageName.startsWith("http")) return imageName;
     return `${SERVER_URL}/uploads/${imageName}`;
   };
 
-  // Helper format ngày tháng
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -52,12 +47,11 @@ const ProductDetailPage = () => {
     });
   };
 
-  // --- FETCH DATA ---
   useEffect(() => {
     const fetchProductData = async () => {
       try {
         setLoading(true);
-        // 1. Lấy thông tin sản phẩm chính
+
         const data = await productService.getProductById(id);
 
         const mappedProduct = {
@@ -74,17 +68,13 @@ const ProductDetailPage = () => {
         setProduct(mappedProduct);
         setMainImage(getImageUrl(mappedProduct.image));
 
-        // Reset số lượng
         if (mappedProduct.stock <= 0) setQuantity(0);
         else setQuantity(1);
 
-        // 2. Lấy sản phẩm gợi ý
         if (mappedProduct.categoryId) {
           fetchRelatedProducts(mappedProduct.categoryId, mappedProduct.id);
         }
 
-        // 3. Lấy đánh giá sản phẩm (Trang đầu tiên)
-        // Reset về trang 0 khi load sản phẩm mới
         setReviewPage(0);
         fetchReviews(mappedProduct.id, 0);
       } catch (error) {
@@ -103,7 +93,6 @@ const ProductDetailPage = () => {
     return () => clearTimeout(aosInit);
   }, [id]);
 
-  // --- API: LẤY SẢN PHẨM GỢI Ý ---
   const fetchRelatedProducts = async (categoryId, currentId) => {
     try {
       const response = await searchService.searchProducts("", categoryId);
@@ -128,13 +117,8 @@ const ProductDetailPage = () => {
     }
   };
 
-  // --- API: LẤY ĐÁNH GIÁ (CÓ PHÂN TRANG & SORT) ---
   const fetchReviews = async (productId, page) => {
     try {
-      // Query Params:
-      // page: số trang hiện tại
-      // size: 2 (2 đánh giá 1 trang)
-      // sort: soSao,desc (số sao giảm dần - cao nhất lên đầu)
       const url = `${SERVER_URL}/api/danh-gia/san-pham/${productId}?page=${page}&size=2&sort=soSao,desc`;
 
       const response = await fetch(url);
@@ -150,15 +134,10 @@ const ProductDetailPage = () => {
     }
   };
 
-  // --- XỬ LÝ CHUYỂN TRANG ĐÁNH GIÁ ---
   const handleReviewPageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalReviewPages) {
       setReviewPage(newPage);
       fetchReviews(product.id, newPage);
-
-      // Optional: Scroll nhẹ xuống phần đánh giá nếu cần
-      // const reviewSection = document.getElementById('reviews-section');
-      // if(reviewSection) reviewSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -243,7 +222,6 @@ const ProductDetailPage = () => {
       <ToastContainer style={{ marginTop: "60px", zIndex: 99999 }} />
 
       <div className="max-w-7xl mx-auto">
-        {/* --- BREADCRUMB --- */}
         <nav className="flex items-center gap-2 text-sm text-slate-400 mb-10">
           <Link className="hover:text-primary transition-colors" to="/">
             Trang chủ
@@ -262,10 +240,8 @@ const ProductDetailPage = () => {
           </span>
         </nav>
 
-        {/* --- MAIN PRODUCT CARD --- */}
         <div className="bg-white rounded-4xl p-6 lg:p-12 shadow-xl shadow-slate-200/50 border border-slate-100 mb-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-            {/* LEFT: IMAGES */}
             <div className="space-y-6" data-aos="fade-right">
               <div className="aspect-square bg-slate-50 rounded-3xl overflow-hidden border border-slate-100 flex items-center justify-center p-8 group relative">
                 <img
@@ -311,7 +287,6 @@ const ProductDetailPage = () => {
               </div>
             </div>
 
-            {/* RIGHT: INFO */}
             <div className="flex flex-col" data-aos="fade-left">
               <div className="mb-4">
                 <span className="px-4 py-1.5 bg-primary/10 text-primary text-[11px] font-extrabold rounded-full uppercase tracking-[0.1em]">
@@ -322,7 +297,6 @@ const ProductDetailPage = () => {
                 {product.name}
               </h1>
 
-              {/* Rating Section (Static 5.0 for demo as backend doesn't provide avg) */}
               <div className="flex items-center gap-6 mb-8">
                 <div className="flex items-center gap-1.5">
                   <div className="flex text-yellow-400">
@@ -460,10 +434,8 @@ const ProductDetailPage = () => {
           </div>
         </div>
 
-        {/* --- BOTTOM SECTION --- */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-16">
           <div className="lg:col-span-2 space-y-12">
-            {/* Details */}
             <div data-aos="fade-up">
               <h2 className="text-2xl font-extrabold text-slate-900 mb-8 flex items-center gap-3">
                 <span className="w-2 h-8 bg-primary rounded-full"></span>Thông
@@ -486,7 +458,6 @@ const ProductDetailPage = () => {
               </div>
             </div>
 
-            {/* --- REVIEWS SECTION (PHÂN TRANG & SORT) --- */}
             <div id="reviews-section" data-aos="fade-up">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-3">
@@ -501,7 +472,6 @@ const ProductDetailPage = () => {
               <div className="space-y-6">
                 {reviews.length > 0 ? (
                   <>
-                    {/* List Reviews */}
                     {reviews.map((review) => (
                       <div
                         key={review.danhGiaId}
@@ -556,7 +526,6 @@ const ProductDetailPage = () => {
                       </div>
                     ))}
 
-                    {/* --- PAGINATION CONTROLS --- */}
                     {totalReviewPages > 1 && (
                       <div className="flex justify-center items-center gap-2 mt-8">
                         <button
@@ -602,7 +571,6 @@ const ProductDetailPage = () => {
             </div>
           </div>
 
-          {/* Sidebar */}
           <aside className="space-y-8" data-aos="fade-left">
             <h2 className="text-2xl font-extrabold text-slate-900 mb-8 flex items-center gap-3">
               <span className="w-2 h-8 bg-primary rounded-full"></span>

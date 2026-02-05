@@ -11,16 +11,14 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CompleteAppointmentRequest {
-    // Ghi chú chung của bác sĩ cho buổi khám
+
     private String ghiChuBacSi;
 
-    // Phần tiêm chủng
     private boolean coTiemPhong; 
     private String tenVacXin;
     private LocalDate ngayTaiChung; 
-    private String ghiChu; // Ghi chú riêng cho mũi tiêm (nếu cần)
+    private String ghiChu;
 
-    // Phần kê đơn thuốc
     private boolean coKeDon;
     private String chanDoan;
     private String loiDan;
@@ -30,7 +28,7 @@ public class CompleteAppointmentRequest {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class ThuocKeDonDto {
-        private Integer thuocId; // ID sản phẩm
+        private Integer thuocId;
         private Integer soLuong;
         private String lieuDung;
     }

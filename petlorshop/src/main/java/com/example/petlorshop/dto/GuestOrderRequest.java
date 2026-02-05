@@ -15,7 +15,7 @@ public class GuestOrderRequest {
     private String tinhThanh;
     private String quanHuyen;
     private String phuongXa;
-    private String email; // Optional, để gửi mail xác nhận
+    private String email;
     private String maKhuyenMai;
     private DonHang.PhuongThucThanhToan phuongThucThanhToan;
     private List<ChiTietDonHangRequest> chiTietDonHangs;

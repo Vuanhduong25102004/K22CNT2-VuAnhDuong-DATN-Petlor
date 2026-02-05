@@ -42,7 +42,7 @@ public class ThuCungController {
                 thuCung.getGiongLoai(),
                 thuCung.getNgaySinh(),
                 thuCung.getGioiTinh(),
-                thuCung.getCanNang(), // Thêm canNang
+                thuCung.getCanNang(),
                 thuCung.getGhiChuSucKhoe(),
                 thuCung.getHinhAnh(),
                 thuCung.getNguoiDung().getUserId(),
@@ -142,7 +142,6 @@ public class ThuCungController {
         return ResponseEntity.ok(hoSo);
     }
 
-    // API tìm thú cưng theo SĐT chủ sở hữu (Dành cho Lễ tân)
     @GetMapping("/by-phone")
     public ResponseEntity<List<ThuCungResponse>> getPetsByOwnerPhone(@RequestParam String phone) {
         List<ThuCung> pets = thuCungService.getPetsByOwnerPhone(phone);

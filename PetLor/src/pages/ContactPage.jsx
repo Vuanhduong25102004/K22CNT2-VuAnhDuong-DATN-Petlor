@@ -1,10 +1,8 @@
 import React, { useEffect } from "react";
-// 1. Import AOS
 import AOS from "aos";
 import "aos/dist/aos.css";
 
 const ContactPage = () => {
-  // 2. Khởi tạo AOS
   useEffect(() => {
     const aosInit = setTimeout(() => {
       AOS.init({
@@ -23,7 +21,6 @@ const ContactPage = () => {
       <main className="flex-grow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
           <div className="flex flex-col gap-12">
-            {/* Header Section - Animation Fade Up */}
             <div
               className="flex flex-wrap justify-between gap-6"
               data-aos="fade-up"
@@ -40,11 +37,8 @@ const ContactPage = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16">
-              {/* LEFT COLUMN: Contact Info & Map */}
               <div className="lg:col-span-2 flex flex-col gap-8">
-                {/* Info Cards */}
                 <div className="space-y-6">
-                  {/* Address - Delay 100ms */}
                   <div
                     className="flex items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm"
                     data-aos="fade-up"
@@ -65,7 +59,6 @@ const ContactPage = () => {
                     </div>
                   </div>
 
-                  {/* Phone - Delay 200ms */}
                   <div
                     className="flex items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm"
                     data-aos="fade-up"
@@ -84,7 +77,6 @@ const ContactPage = () => {
                     </div>
                   </div>
 
-                  {/* Email - Delay 300ms */}
                   <div
                     className="flex items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm"
                     data-aos="fade-up"
@@ -104,7 +96,6 @@ const ContactPage = () => {
                   </div>
                 </div>
 
-                {/* Google Maps Iframe - Delay 400ms */}
                 <div
                   className="w-full h-80 rounded-xl overflow-hidden border border-gray-200 shadow-sm"
                   data-aos="fade-up"
@@ -123,10 +114,9 @@ const ContactPage = () => {
                 </div>
               </div>
 
-              {/* RIGHT COLUMN: Contact Form - Delay 200ms (Xuất hiện cùng lúc với cột trái) */}
               <div
                 className="lg:col-span-3 bg-white p-8 rounded-xl border border-gray-200 shadow-sm"
-                data-aos="fade-up" // Hoặc dùng "fade-left" nếu muốn nó trượt từ phải sang
+                data-aos="fade-up"
                 data-aos-delay="200"
               >
                 <form action="#" className="space-y-6" method="POST">
@@ -224,15 +214,12 @@ const ContactPage = () => {
                   </div>
 
                   <div>
-                    {/* NÚT GỬI: Đã cập nhật animation "Swipe Right" + "Scale mượt" */}
                     <button
                       type="submit"
                       className="relative group flex w-full justify-center rounded-lg bg-primary px-4 py-3 text-sm font-bold text-[#111813] shadow-sm overflow-hidden transition-all duration-300 ease-out hover:scale-105"
                     >
-                      {/* Lớp nền chạy từ trái sang */}
                       <span className="absolute left-0 top-0 h-full w-0 bg-[#0dbd47] transition-all duration-300 ease-out group-hover:w-full"></span>
 
-                      {/* Chữ nổi lên trên */}
                       <span className="relative z-10">Gửi tin nhắn</span>
                     </button>
                   </div>
@@ -241,7 +228,6 @@ const ContactPage = () => {
             </div>
           </div>
 
-          {/* FAQ SECTION - (MỚI THÊM) */}
           <div className="mt-20 pt-16 border-t border-gray-200">
             <div className="text-center mb-12" data-aos="fade-up">
               <h2 className="text-3xl font-bold text-text-main">

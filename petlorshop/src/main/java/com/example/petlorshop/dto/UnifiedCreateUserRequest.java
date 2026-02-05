@@ -10,15 +10,14 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UnifiedCreateUserRequest {
-    // Thông tin bắt buộc cho mọi User
+
     private String hoTen;
     private String email;
     private String password;
     private String soDienThoai;
     private String diaChi;
-    private String role; // Sửa thành String
+    private String role;
 
-    // Thông tin chỉ dành cho Nhân viên (Optional)
     private String chucVu;
     private String chuyenKhoa;
     private String kinhNghiem;

@@ -49,16 +49,14 @@ const DoctorSchedule = () => {
         );
         setPetDetail(data);
 
-        // --- CHỈ LẤY LỊCH SỬ TIÊM CHỦNG ---
         const vaccines = (data.lichSuTiemChung || []).map((v) => ({
           type: "VACCINE",
           date: v.ngayTiem,
           title: `Tiêm: ${v.tenVacXin}`,
-          // Sử dụng bacSiThucHien theo đúng log dữ liệu của bạn
+
           note: `${v.ghiChu || ""} - BS: ${v.bacSiThucHien || "Hệ thống"}`,
         }));
 
-        // Sắp xếp theo ngày mới nhất
         const sortedHistory = [...vaccines].sort(
           (a, b) => new Date(b.date) - new Date(a.date),
         );

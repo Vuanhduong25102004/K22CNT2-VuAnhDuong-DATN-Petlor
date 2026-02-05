@@ -22,5 +22,5 @@ public class ThuCungResponse {
     private String hinhAnh;
     private Integer userId;
     private String tenChu;
-    private String soDienThoaiChuSoHuu; // Thêm trường này
+    private String soDienThoaiChuSoHuu;
 }

@@ -76,22 +76,17 @@ const AdminOrders = () => {
       if (!params.date) delete params.date;
 
       const response = await orderService.getAllOrders(params);
-      // Xử lý dữ liệu trả về từ JSON mới
       let ordersList = [];
       let totalPagesCalc = 0;
       let totalElementsCalc = 0;
 
       if (Array.isArray(response)) {
-        // Nếu API trả về mảng (chưa phân trang server), thực hiện phân trang client
         totalElementsCalc = response.length;
         totalPagesCalc = Math.ceil(totalElementsCalc / ITEMS_PER_PAGE);
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
         ordersList = response.slice(startIndex, startIndex + ITEMS_PER_PAGE);
       } else {
-        // Nếu API trả về Page object (đã phân trang server)
         const content = response?.content || [];
-        // Nếu backend trả về 1 trang (totalPages=1) nhưng số lượng bản ghi > ITEMS_PER_PAGE
-        // (nghĩa là backend trả về list dài hơn mong muốn), ta thực hiện phân trang client.
         if (
           (response?.totalPages === 1 || response?.totalPages === 0) &&
           content.length > ITEMS_PER_PAGE

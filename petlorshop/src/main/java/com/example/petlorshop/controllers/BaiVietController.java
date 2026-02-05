@@ -25,16 +25,13 @@ public class BaiVietController {
     private BaiVietService baiVietService;
 
     @Autowired
-    private ObjectMapper objectMapper; // Dùng để parse JSON thủ công
+    private ObjectMapper objectMapper;
 
-    // --- Danh Mục ---
-    // API cũ (List)
     @GetMapping("/danh-muc/list")
     public ResponseEntity<List<DanhMucBaiViet>> getAllDanhMucList() {
         return ResponseEntity.ok(baiVietService.getAllDanhMuc());
     }
 
-    // API mới (Page + Search)
     @GetMapping("/danh-muc")
     public ResponseEntity<Page<DanhMucBaiViet>> getAllDanhMuc(Pageable pageable, @RequestParam(required = false) String keyword) {
         return ResponseEntity.ok(baiVietService.getAllDanhMuc(pageable, keyword));
@@ -63,12 +60,10 @@ public class BaiVietController {
         return ResponseEntity.ok(Map.of("message", "Xóa danh mục thành công"));
     }
 
-    // --- Bài Viết ---
     @GetMapping
     public ResponseEntity<Page<BaiVietResponse>> getAllBaiViet(Pageable pageable, 
                                                                @RequestParam(required = false) String keyword,
                                                                @RequestParam(required = false) Integer categoryId) {
-        System.out.println("DEBUG: getAllBaiViet - keyword: " + keyword + ", categoryId: " + categoryId);
         return ResponseEntity.ok(baiVietService.getAllBaiViet(pageable, keyword, categoryId));
     }
 
@@ -98,7 +93,7 @@ public class BaiVietController {
 
     @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<BaiVietResponse> createBaiViet(
-            @RequestPart("data") String dataJson, // Nhận String thay vì Object để tránh lỗi Content-Type
+            @RequestPart("data") String dataJson,
             @RequestPart(value = "anhBia", required = false) MultipartFile anhBiaFile) throws JsonProcessingException {
         
         BaiVietRequest request = objectMapper.readValue(dataJson, BaiVietRequest.class);

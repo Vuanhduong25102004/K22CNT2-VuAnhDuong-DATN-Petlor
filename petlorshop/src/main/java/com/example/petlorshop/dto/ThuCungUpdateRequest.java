@@ -18,10 +18,9 @@ public class ThuCungUpdateRequest {
     private String giongLoai;
     private LocalDate ngaySinh;
     private String gioiTinh;
-    private BigDecimal canNang; // Đã thêm trường canNang
+    private BigDecimal canNang;
     private String ghiChuSucKhoe;
     
-    // Thông tin đổi chủ
     private Integer userId; 
     private String tenChuSoHuu;
     private String soDienThoaiChuSoHuu;

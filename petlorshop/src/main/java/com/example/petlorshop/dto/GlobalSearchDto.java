@@ -13,13 +13,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GlobalSearchDto {
-    // Public search results
     private List<SanPham> sanPhams;
     private List<DichVu> dichVus;
     private List<ThuCung> thuCungs;
-    private List<BaiViet> baiViets; // Thêm bài viết
+    private List<BaiViet> baiViets;
 
-    // Admin-only search results
     private List<NguoiDung> nguoiDungs;
     private List<NhanVien> nhanViens;
     private List<DonHang> donHangs;
@@ -27,7 +25,6 @@ public class GlobalSearchDto {
     private List<DanhMucSanPham> danhMucSanPhams;
     private List<DanhMucDichVu> danhMucDichVus;
 
-    // Constructor for public search
     public GlobalSearchDto(List<SanPham> sanPhams, List<DichVu> dichVus, List<ThuCung> thuCungs, List<BaiViet> baiViets) {
         this.sanPhams = sanPhams;
         this.dichVus = dichVus;

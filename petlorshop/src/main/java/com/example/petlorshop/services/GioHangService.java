@@ -113,7 +113,6 @@ public class GioHangService {
     }
 
     private GioHangResponse mapToGioHangResponse(GioHang gioHang) {
-        // Sắp xếp danh sách chi tiết giỏ hàng theo ngày thêm mới nhất
         List<CartItemResponse> cartItems = gioHang.getChiTietGioHangList().stream()
                 .sorted(Comparator.comparing(ChiTietGioHang::getNgayThem, Comparator.nullsLast(Comparator.reverseOrder())))
                 .map(this::mapToCartItemResponse)
@@ -140,14 +139,14 @@ public class GioHangService {
         BigDecimal thanhTien = giaBan.multiply(BigDecimal.valueOf(chiTiet.getSoLuong()));
         
         return new CartItemResponse(
-                chiTiet.getId(), // Sửa ở đây
+                chiTiet.getId(),
                 sanPham.getSanPhamId(),
                 sanPham.getTenSanPham(),
                 sanPham.getHinhAnh(),
-                giaBan, // Sử dụng giá bán thực tế
+                giaBan,
                 chiTiet.getSoLuong(),
                 thanhTien,
-                chiTiet.getNgayThem() // Thêm ngày thêm vào response
+                chiTiet.getNgayThem()
         );
     }
 }

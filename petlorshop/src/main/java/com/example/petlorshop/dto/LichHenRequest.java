@@ -9,13 +9,13 @@ import java.time.LocalDateTime;
 public class LichHenRequest {
     private Integer userId;
     private Integer thuCungId;
-    private String tenThuCung; // Nếu chưa có ID
+    private String tenThuCung;
     private String chungLoai;
     private String giongLoai;
     private java.time.LocalDate ngaySinh;
     private String gioiTinh;
     
-    private String tenKhachHang; // Dành cho tạo user mới nếu cần
+    private String tenKhachHang;
     private String soDienThoaiKhachHang;
 
     private Integer dichVuId;
@@ -23,5 +23,5 @@ public class LichHenRequest {
     private LocalDateTime thoiGianBatDau;
     private String ghiChuKhachHang;
     
-    private LichHen.LoaiLichHen loaiLichHen; // Thêm trường này
+    private LichHen.LoaiLichHen loaiLichHen;
 }

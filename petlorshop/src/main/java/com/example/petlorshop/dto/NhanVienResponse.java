@@ -19,6 +19,6 @@ public class NhanVienResponse {
     private String chuyenKhoa;
     private String kinhNghiem;
     private String anhDaiDien;
-    private Role role; // Đã đổi từ String sang Role
+    private Role role;
     private Integer userId;
 }

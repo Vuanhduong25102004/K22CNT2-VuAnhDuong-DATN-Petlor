@@ -46,16 +46,12 @@ public class SanPhamService {
         Page<SanPham> sanPhamPage;
 
         if (StringUtils.hasText(keyword) && categoryId != null) {
-            // Tìm theo tên VÀ danh mục
             sanPhamPage = sanPhamRepository.findByTenSanPhamContainingIgnoreCaseAndDanhMucSanPham_DanhMucId(keyword, categoryId, pageable);
         } else if (StringUtils.hasText(keyword)) {
-            // Chỉ tìm theo tên
             sanPhamPage = sanPhamRepository.findByTenSanPhamContainingIgnoreCase(keyword, pageable);
         } else if (categoryId != null) {
-            // Chỉ lọc theo danh mục
             sanPhamPage = sanPhamRepository.findByDanhMucSanPham_DanhMucId(categoryId, pageable);
         } else {
-            // Lấy tất cả
             sanPhamPage = sanPhamRepository.findAll(pageable);
         }
 
@@ -81,7 +77,6 @@ public class SanPhamService {
         newSanPham.setTrongLuong(request.getTrongLuong() != null ? request.getTrongLuong() : 500);
         newSanPham.setDanhMucSanPham(danhMuc);
         
-        // Thuốc
         newSanPham.setHanSuDung(request.getHanSuDung());
         newSanPham.setSoLo(request.getSoLo());
         newSanPham.setDonViTinh(request.getDonViTinh());
@@ -111,7 +106,6 @@ public class SanPhamService {
             sanPham.setTrongLuong(request.getTrongLuong());
         }
         
-        // Thuốc
         sanPham.setHanSuDung(request.getHanSuDung());
         sanPham.setSoLo(request.getSoLo());
         sanPham.setDonViTinh(request.getDonViTinh());

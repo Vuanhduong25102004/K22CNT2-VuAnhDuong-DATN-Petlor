@@ -34,16 +34,12 @@ public class DichVuService {
         Page<DichVu> dichVuPage;
 
         if (StringUtils.hasText(keyword) && categoryId != null) {
-            // Tìm theo từ khóa VÀ danh mục
             dichVuPage = dichVuRepository.searchByKeywordAndCategory(keyword, categoryId, pageable);
         } else if (StringUtils.hasText(keyword)) {
-            // Chỉ tìm theo từ khóa
             dichVuPage = dichVuRepository.searchByKeyword(keyword, pageable);
         } else if (categoryId != null) {
-            // Chỉ lọc theo danh mục
             dichVuPage = dichVuRepository.findByDanhMucDichVu_DanhMucDvId(categoryId, pageable);
         } else {
-            // Lấy tất cả
             dichVuPage = dichVuRepository.findAll(pageable);
         }
 

@@ -16,7 +16,6 @@ public class CuaHangService {
     public CuaHang getThongTinCuaHang() {
         List<CuaHang> list = cuaHangRepository.findAll();
         if (list.isEmpty()) {
-            // Tạo mặc định nếu chưa có
             CuaHang defaultShop = new CuaHang();
             defaultShop.setTenCuaHang("Petlor Shop");
             defaultShop.setTinhThanh("Hà Nội");

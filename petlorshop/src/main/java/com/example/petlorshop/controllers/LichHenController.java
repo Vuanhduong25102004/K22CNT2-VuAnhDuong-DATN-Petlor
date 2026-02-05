@@ -55,7 +55,6 @@ public class LichHenController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // API cho bác sĩ xem lịch hẹn của mình
     @GetMapping("/doctor/me")
     public ResponseEntity<List<LichHenResponse>> getDoctorAppointments() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -64,7 +63,6 @@ public class LichHenController {
         return ResponseEntity.ok(doctorAppointments);
     }
 
-    // API cho bác sĩ xem lịch trình hôm nay
     @GetMapping("/doctor/schedule-today")
     public ResponseEntity<List<LichHenResponse>> getDoctorScheduleToday() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -73,14 +71,12 @@ public class LichHenController {
         return ResponseEntity.ok(schedule);
     }
 
-    // API cho Lễ tân xem tất cả lịch hẹn hôm nay
     @GetMapping("/today")
     public ResponseEntity<List<LichHenResponse>> getAllAppointmentsToday() {
         List<LichHenResponse> schedule = lichHenService.getAllAppointmentsToday();
         return ResponseEntity.ok(schedule);
     }
 
-    // API cho bác sĩ xác nhận lịch hẹn
     @PutMapping("/doctor/{id}/confirm")
     public ResponseEntity<LichHenResponse> confirmAppointment(@PathVariable Integer id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -89,7 +85,6 @@ public class LichHenController {
         return ResponseEntity.ok(confirmedLichHen);
     }
 
-    // API cho bác sĩ hoàn thành lịch hẹn
     @PutMapping("/doctor/{id}/complete")
     public ResponseEntity<LichHenResponse> completeAppointment(@PathVariable Integer id, @RequestBody(required = false) CompleteAppointmentRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -110,7 +105,7 @@ public class LichHenController {
             LichHenResponse createdLichHen = lichHenService.createReceptionistAppointment(request);
             return new ResponseEntity<>(createdLichHen, HttpStatus.CREATED);
         } catch (Exception e) {
-            e.printStackTrace(); // In lỗi ra console server để debug
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }

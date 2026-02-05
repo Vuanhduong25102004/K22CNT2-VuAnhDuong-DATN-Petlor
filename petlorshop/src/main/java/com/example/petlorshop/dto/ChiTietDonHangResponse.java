@@ -15,7 +15,7 @@ public class ChiTietDonHangResponse {
     private BigDecimal donGia;
     private Integer sanPhamId;
     private String tenSanPham;
-    private String tenDanhMuc; // Thêm trường tên danh mục
+    private String tenDanhMuc;
     private String hinhAnh;
     private boolean daDanhGia;
 }

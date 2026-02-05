@@ -32,7 +32,6 @@ public class GioHangController {
         NguoiDung currentUser = nguoiDungRepository.findByEmail(currentUsername)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại."));
 
-        // Admin can access any cart, but a regular user can only access their own.
         if (currentUser.getRole() != Role.ADMIN && !currentUser.getUserId().equals(userId)) {
             throw new SecurityException("Bạn không có quyền truy cập vào giỏ hàng này.");
         }
@@ -86,7 +85,6 @@ public class GioHangController {
     public ResponseEntity<GioHangResponse> themVaoGioMe(@Valid @RequestBody AddToCartRequest request) {
         try {
             NguoiDung currentUser = getCurrentUser();
-            // Override userId in request with current user id to ensure security
             request.setUserId(currentUser.getUserId());
             
             GioHangResponse gioHang = gioHangService.themSanPhamVaoGio(request);

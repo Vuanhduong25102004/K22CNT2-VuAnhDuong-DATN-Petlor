@@ -19,7 +19,6 @@ public class DichVuResponse {
     private Integer thoiLuongUocTinh;
     private String hinhAnh;
 
-    // Thông tin danh mục
     private Integer danhMucDvId;
     private String tenDanhMucDv;
 }

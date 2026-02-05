@@ -18,7 +18,6 @@ const AboutUsPage = () => {
     return () => clearTimeout(aosInit);
   }, []);
 
-  // Style cho background pattern
   const heroPatternStyle = {
     backgroundImage: "radial-gradient(#0FB478 0.5px, transparent 0.5px)",
     backgroundSize: "24px 24px",
@@ -28,7 +27,6 @@ const AboutUsPage = () => {
   return (
     <div className="w-full min-h-screen font-display bg-gray-50 text-gray-900 overflow-x-hidden transition-colors duration-300">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20 mt-16">
-        {/* --- 1. HERO STORY SECTION --- */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center mb-24">
           <div className="order-2 lg:order-1" data-aos="fade-right">
             <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-bold mb-6">
@@ -104,7 +102,6 @@ const AboutUsPage = () => {
           </div>
         </section>
 
-        {/* --- 2. MISSION & VISION --- */}
         <section className="mb-24">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div
@@ -156,7 +153,6 @@ const AboutUsPage = () => {
           </div>
         </section>
 
-        {/* --- 3. CORE VALUES --- */}
         <section
           className="mb-24 py-16 px-8 bg-white rounded-[40px] border border-gray-100 shadow-sm"
           data-aos="fade-up"
@@ -213,7 +209,6 @@ const AboutUsPage = () => {
           </div>
         </section>
 
-        {/* --- 4. EXPERT TEAM --- */}
         <section className="mb-24">
           <div className="text-center mb-16" data-aos="fade-up">
             <h2 className="text-3xl font-extrabold text-gray-900 mb-4">
@@ -273,7 +268,6 @@ const AboutUsPage = () => {
           </div>
         </section>
 
-        {/* --- 5. DEVELOPMENT TIMELINE --- */}
         <section className="mb-24">
           <div className="text-center mb-16" data-aos="fade-up">
             <h2 className="text-3xl font-extrabold text-gray-900 mb-4">
@@ -285,10 +279,8 @@ const AboutUsPage = () => {
             </p>
           </div>
           <div className="relative max-w-4xl mx-auto">
-            {/* Đường kẻ dọc */}
             <div className="absolute left-1/2 -translate-x-1/2 w-0.5 h-full bg-primary/20 hidden md:block"></div>
 
-            {/* Timeline Item 1 */}
             <div
               className="relative mb-12 flex flex-col md:flex-row items-center justify-between"
               data-aos="fade-up"
@@ -307,7 +299,6 @@ const AboutUsPage = () => {
               <div className="w-full md:w-[45%]"></div>
             </div>
 
-            {/* Timeline Item 2 */}
             <div
               className="relative mb-12 flex flex-col md:flex-row items-center justify-between"
               data-aos="fade-up"
@@ -326,7 +317,6 @@ const AboutUsPage = () => {
               </div>
             </div>
 
-            {/* Timeline Item 3 */}
             <div
               className="relative mb-12 flex flex-col md:flex-row items-center justify-between"
               data-aos="fade-up"
@@ -345,7 +335,6 @@ const AboutUsPage = () => {
               <div className="w-full md:w-[45%]"></div>
             </div>
 
-            {/* Timeline Item 4 */}
             <div
               className="relative flex flex-col md:flex-row items-center justify-between"
               data-aos="fade-up"
@@ -366,13 +355,11 @@ const AboutUsPage = () => {
           </div>
         </section>
 
-        {/* --- 6. COMMUNITY SECTION (THAY THẾ NEWSLETTER) --- */}
         <section
           className="mt-24 rounded-[48px] overflow-hidden bg-[#F3F7F6] border border-teal-50 mb-10"
           data-aos="fade-up"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2">
-            {/* Hình ảnh (Cột trái trên PC) */}
             <div className="relative h-[400px] lg:h-auto order-2 lg:order-1">
               <img
                 alt="Happy pet owners"
@@ -386,7 +373,6 @@ const AboutUsPage = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#F3F7F6] hidden lg:block"></div>
             </div>
 
-            {/* Nội dung (Cột phải trên PC) */}
             <div className="p-10 lg:p-20 flex flex-col justify-center order-1 lg:order-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold w-fit mb-6">
                 <span className="material-symbols-outlined text-sm">group</span>

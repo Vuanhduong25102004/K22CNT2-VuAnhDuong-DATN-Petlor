@@ -25,7 +25,7 @@ public class HoSoBenhAnResponse {
 
     private List<LichSuKham> lichSuKham;
     private List<LichSuTiemChung> lichSuTiemChung;
-    private List<LichSuDonThuoc> lichSuDonThuoc; // Thêm danh sách đơn thuốc
+    private List<LichSuDonThuoc> lichSuDonThuoc;
 
     @Data
     @AllArgsConstructor

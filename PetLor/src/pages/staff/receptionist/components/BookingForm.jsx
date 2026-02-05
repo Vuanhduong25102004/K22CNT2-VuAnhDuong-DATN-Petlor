@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import "react-toastify/dist/ReactToastify.css"; // Đảm bảo import CSS toast
 import petService from "../../../../services/petService";
 import bookingService from "../../../../services/bookingService";
 
-// --- CONSTANTS ---
 const IMAGE_BASE_URL = "http://localhost:8080/uploads";
 
-// Enum loại lịch hẹn
 const APPOINTMENT_TYPES = [
   { value: "THUONG_LE", label: "Thường lệ" },
   { value: "KHAN_CAP", label: "Khẩn cấp (Cấp cứu)" },
@@ -20,22 +19,18 @@ const APPOINTMENT_TYPES = [
 const BookingForm = () => {
   const navigate = useNavigate();
 
-  // --- STATE ---
   const [loading, setLoading] = useState(false);
   const [services, setServices] = useState([]);
-
-  // State quản lý tìm kiếm
   const [foundPets, setFoundPets] = useState([]);
   const [isSearchingUser, setIsSearchingUser] = useState(false);
   const [isNewPet, setIsNewPet] = useState(true);
 
-  // Form Data
   const [formData, setFormData] = useState({
     tenKhachHang: "",
     soDienThoaiKhachHang: "",
     tenThuCung: "",
     chungLoai: "Chó",
-    giongLoai: "", // [MỚI] Trường giống loài
+    giongLoai: "",
     gioiTinh: "Đực",
     dichVuId: "",
     loaiLichHen: "THUONG_LE",
@@ -43,7 +38,6 @@ const BookingForm = () => {
     selectedPetId: null,
   });
 
-  // Calendar State
   const [dateTime, setDateTime] = useState({
     date: new Date().getDate(),
     month: new Date().getMonth() + 1,
@@ -52,22 +46,19 @@ const BookingForm = () => {
     viewDate: new Date(),
   });
 
-  // --- EFFECT: Lấy dịch vụ ---
   useEffect(() => {
     const fetchServices = async () => {
       try {
         const res = await petService.getAllServices();
-        const data = Array.isArray(res) ? res : res.content || [];
+        const data = res.content || res.data || (Array.isArray(res) ? res : []);
         setServices(data);
       } catch (error) {
-        console.error("Lỗi lấy danh sách dịch vụ:", error);
         toast.error("Không thể tải danh sách dịch vụ");
       }
     };
     fetchServices();
   }, []);
 
-  // --- HANDLER: Tìm thú cưng & Tự điền tên chủ ---
   const handlePhoneBlur = async () => {
     const phone = formData.soDienThoaiKhachHang;
     if (!phone || phone.length < 9) return;
@@ -77,16 +68,13 @@ const BookingForm = () => {
 
     try {
       const res = await petService.getPetsByPhone(phone);
-      const pets = Array.isArray(res) ? res : res.content || [];
+      const pets = res.content || res.data || (Array.isArray(res) ? res : []);
 
       if (pets.length > 0) {
         setFoundPets(pets);
-        toast.info(`Tìm thấy ${pets.length} thú cưng.`);
+        toast.success(`Tìm thấy ${pets.length} thú cưng cũ.`);
 
-        // [LOGIC MỚI] Lấy tên chủ từ thú cưng đầu tiên tìm thấy
-        // Dựa trên JSON: { "tenChu": "Vu Anh Duong", ... }
-        const ownerName = pets[0].tenChu || "";
-
+        const ownerName = pets[0].tenChu || pets[0].tenKhachHang || "";
         if (ownerName) {
           setFormData((prev) => ({ ...prev, tenKhachHang: ownerName }));
         }
@@ -101,27 +89,25 @@ const BookingForm = () => {
     }
   };
 
-  // --- HANDLER: Chọn thú cưng cũ ---
   const handleSelectOldPet = (pet) => {
     setFormData((prev) => ({
       ...prev,
       tenThuCung: pet.tenThuCung,
       selectedPetId: pet.thuCungId || pet.id,
       chungLoai: pet.chungLoai || "Chó",
-      giongLoai: pet.giongLoai || "", // Map giống loài cũ
+      giongLoai: pet.giongLoai || "",
       gioiTinh: pet.gioiTinh || "Đực",
     }));
     setIsNewPet(false);
   };
 
-  // --- HANDLER: Chuyển sang nhập mới ---
   const handleSwitchToNewPet = () => {
     setFormData((prev) => ({
       ...prev,
       tenThuCung: "",
       selectedPetId: null,
       chungLoai: "Chó",
-      giongLoai: "", // Reset giống loài
+      giongLoai: "",
       gioiTinh: "Đực",
     }));
     setIsNewPet(true);
@@ -132,7 +118,6 @@ const BookingForm = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // --- CALENDAR LOGIC ---
   const viewYear = dateTime.viewDate.getFullYear();
   const viewMonth = dateTime.viewDate.getMonth();
   const getDaysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
@@ -192,21 +177,6 @@ const BookingForm = () => {
     return slotTime > now.getTime();
   };
 
-  const getAutoTimeSlot = () => {
-    const now = new Date();
-    let minutes = now.getMinutes();
-    let hours = now.getHours();
-
-    if (minutes < 30) {
-      minutes = 30;
-    } else {
-      minutes = 0;
-      hours += 1;
-    }
-    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
-  };
-
-  // --- SUBMIT ---
   const handleSubmit = async () => {
     if (
       !formData.tenKhachHang ||
@@ -218,13 +188,15 @@ const BookingForm = () => {
       return;
     }
 
+    if (!dateTime.time) {
+      toast.warning("Vui lòng chọn khung giờ hẹn!");
+      return;
+    }
+
     setLoading(true);
     try {
-      let finalTime = dateTime.time;
-      if (!finalTime) finalTime = getAutoTimeSlot();
-
       const formattedDate = `${dateTime.year}-${String(dateTime.month).padStart(2, "0")}-${String(dateTime.date).padStart(2, "0")}`;
-      const thoiGianBatDau = `${formattedDate}T${finalTime}:00`;
+      const thoiGianBatDau = `${formattedDate}T${dateTime.time}:00`;
 
       const payload = {
         tenKhachHang: formData.tenKhachHang,
@@ -235,20 +207,18 @@ const BookingForm = () => {
         ghiChuKhachHang: formData.ghiChu,
         tenThuCung: formData.tenThuCung,
 
-        // Logic gửi kèm dữ liệu pet
-        thuCungId: !isNewPet ? formData.selectedPetId : null,
+        thuCungId: !isNewPet ? Number(formData.selectedPetId) : null,
         chungLoai: isNewPet ? formData.chungLoai : null,
-        giongLoai: isNewPet ? formData.giongLoai : null, // [MỚI] Gửi giống loài
+        giongLoai: isNewPet ? formData.giongLoai : null,
         gioiTinh: isNewPet ? formData.gioiTinh : null,
       };
 
-      console.log("📦 Payload:", payload);
       await bookingService.createReceptionistBooking(payload);
       toast.success("Đặt lịch thành công!");
       setTimeout(() => navigate("/staff/receptionist/booking"), 1500);
     } catch (error) {
-      console.error("Lỗi:", error);
-      toast.error(error.response?.data?.message || "Đặt lịch thất bại");
+      const msg = error.response?.data?.message || "Đặt lịch thất bại";
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -256,6 +226,8 @@ const BookingForm = () => {
 
   return (
     <main className="flex-1 overflow-y-auto p-8 lg:p-12 pb-32 custom-scrollbar bg-[#fbfcfc] min-h-screen font-sans text-[#101918]">
+      <ToastContainer position="top-right" autoClose={3000} />
+
       <div className="max-w-[1600px] mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
@@ -366,7 +338,11 @@ const BookingForm = () => {
                           <div className="size-12 rounded-full flex items-center justify-center mb-2 overflow-hidden bg-gray-100">
                             {pet.hinhAnh ? (
                               <img
-                                src={`${IMAGE_BASE_URL}/${pet.hinhAnh}`}
+                                src={
+                                  pet.hinhAnh.startsWith("http")
+                                    ? pet.hinhAnh
+                                    : `${IMAGE_BASE_URL}/${pet.hinhAnh}`
+                                }
                                 alt={pet.tenThuCung}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
@@ -445,7 +421,6 @@ const BookingForm = () => {
 
                 {isNewPet && (
                   <>
-                    {/* CHỦNG LOẠI */}
                     <div className="space-y-3">
                       <label className="text-sm font-black text-[#588d87] uppercase tracking-widest ml-1">
                         Chủng loại
@@ -467,7 +442,6 @@ const BookingForm = () => {
                       </div>
                     </div>
 
-                    {/* [MỚI] GIỐNG LOÀI */}
                     <div className="space-y-3">
                       <label className="text-sm font-black text-[#588d87] uppercase tracking-widest ml-1">
                         Giống loài
@@ -653,7 +627,6 @@ const BookingForm = () => {
               </div>
             </section>
 
-            {/* NGƯỜI PHỤ TRÁCH */}
             <section className="bg-white p-8 rounded-[32px] border border-[#e9f1f0] shadow-xl shadow-gray-200/50 opacity-80">
               <div className="flex items-center gap-4 mb-6">
                 <div className="size-12 rounded-full bg-[#2a9d90]/10 flex items-center justify-center text-[#2a9d90]">
@@ -669,20 +642,6 @@ const BookingForm = () => {
                 <p className="text-sm text-orange-500 italic bg-orange-50 p-3 rounded-xl border border-orange-100">
                   * Hệ thống sẽ tự động phân bổ bác sĩ hoặc nhân viên phù hợp.
                 </p>
-                <div className="space-y-3">
-                  <label className="text-sm font-black text-[#588d87] uppercase tracking-widest ml-1">
-                    Phòng / Khoa
-                  </label>
-                  <div className="relative">
-                    <select className="w-full appearance-none bg-[#f9fbfb] border border-[#e9f1f0] rounded-[24px] px-6 py-5 text-base font-bold text-[#101918] outline-none">
-                      <option>Dịch vụ Spa & Grooming</option>
-                      <option>Khoa Nội</option>
-                    </select>
-                    <span className="material-symbols-outlined absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-xl">
-                      expand_more
-                    </span>
-                  </div>
-                </div>
               </div>
             </section>
           </div>

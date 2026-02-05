@@ -9,22 +9,18 @@ const ReceptionistOrderDetail = () => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // State thanh toán & xử lý
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [isPaymentLocked, setIsPaymentLocked] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false); // State loading khi bấm nút xác nhận
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const IMAGE_BASE_URL = "http://localhost:8080/uploads/";
 
-  // --- FETCH DATA ---
   const fetchOrderDetail = async () => {
-    // Không set loading=true ở đây để tránh nháy trang khi update lại data sau khi bấm nút
     try {
       const response = await orderService.getOrderById(id);
       const data = response.data || response;
       setOrder(data);
 
-      // Logic khóa phương thức thanh toán
       if (data.phuongThucThanhToan) {
         setIsPaymentLocked(true);
         if (data.phuongThucThanhToan === "COD") setPaymentMethod("cash");
@@ -48,7 +44,6 @@ const ReceptionistOrderDetail = () => {
     if (id) fetchOrderDetail();
   }, [id]);
 
-  // --- XỬ LÝ CẬP NHẬT TRẠNG THÁI (API MỚI) ---
   const handleUpdateStatus = async (newStatus) => {
     if (
       !window.confirm(`Bạn có chắc muốn chuyển trạng thái sang "${newStatus}"?`)
@@ -57,13 +52,12 @@ const ReceptionistOrderDetail = () => {
 
     setIsUpdating(true);
     try {
-      // Gọi API PUT /api/don-hang/{id}
       await orderService.updateOrder(id, {
         trangThai: newStatus,
       });
 
       alert("Cập nhật trạng thái thành công!");
-      fetchOrderDetail(); // Load lại dữ liệu mới nhất
+      fetchOrderDetail();
     } catch (error) {
       console.error("Lỗi cập nhật:", error);
       alert("Có lỗi xảy ra khi cập nhật trạng thái.");
@@ -72,7 +66,6 @@ const ReceptionistOrderDetail = () => {
     }
   };
 
-  // --- HELPERS ---
   const formatMoney = (amount) =>
     new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -97,11 +90,9 @@ const ReceptionistOrderDetail = () => {
     return classes;
   };
 
-  // Helper xác định nút bấm dựa trên trạng thái hiện tại
   const renderActionButtons = () => {
     if (!order) return null;
 
-    // Logic hiển thị nút theo quy trình
     switch (order.trangThai) {
       case "Chờ xử lý":
       case "CHO_XU_LY":
@@ -201,7 +192,6 @@ const ReceptionistOrderDetail = () => {
   return (
     <main className="w-full bg-[#fbfcfc] font-sans text-[#101918] min-h-screen p-8 lg:p-12 relative">
       <div className="max-w-[1600px] mx-auto space-y-8">
-        {/* HEADER */}
         <div className="flex items-center gap-6">
           <button
             onClick={() => navigate(-1)}
@@ -226,9 +216,7 @@ const ReceptionistOrderDetail = () => {
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-          {/* LEFT COLUMN */}
           <div className="xl:col-span-8 space-y-8">
-            {/* Product List */}
             <section className="bg-white rounded-[40px] border border-[#e9f1f0] shadow-xl shadow-gray-200/50 overflow-hidden">
               <div className="p-8 border-b border-[#e9f1f0] flex justify-between items-center bg-[#f9fbfb]">
                 <h3 className="text-xl font-extrabold text-[#101918] flex items-center gap-2">
@@ -299,7 +287,6 @@ const ReceptionistOrderDetail = () => {
               </div>
             </section>
 
-            {/* Customer Info */}
             <section className="bg-white rounded-[32px] border border-[#e9f1f0] shadow-xl shadow-gray-200/50 p-8 flex items-center justify-between">
               <div className="flex items-center gap-6">
                 <div className="relative">

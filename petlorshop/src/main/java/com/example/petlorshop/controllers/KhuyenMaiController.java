@@ -18,7 +18,6 @@ public class KhuyenMaiController {
     @Autowired
     private KhuyenMaiService khuyenMaiService;
 
-    // --- CRUD APIs ---
     @GetMapping
     public Page<KhuyenMai> getAllKhuyenMai(Pageable pageable, @RequestParam(required = false) String keyword) {
         return khuyenMaiService.getAllKhuyenMai(pageable, keyword);
@@ -50,8 +49,6 @@ public class KhuyenMaiController {
         }
         return ResponseEntity.notFound().build();
     }
-
-    // --- NGHIỆP VỤ APIs ---
 
     @PostMapping("/kiem-tra")
     public ResponseEntity<?> kiemTraKhuyenMai(@RequestBody Map<String, Object> payload) {

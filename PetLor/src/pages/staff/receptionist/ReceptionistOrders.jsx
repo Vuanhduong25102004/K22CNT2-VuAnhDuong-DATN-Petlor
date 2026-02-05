@@ -1,6 +1,122 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast, Slide } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import orderService from "../../../services/orderService";
+
+// --- CUSTOM TOAST COMPONENTS (Giống AdminReviews) ---
+
+// 1. Toast thông báo (Success/Error)
+const CustomToast = ({ closeToast, title, message, type }) => {
+  const isSuccess = type === "success";
+  const icon = isSuccess ? "check_circle" : "error";
+  const iconColor = isSuccess ? "text-[#2a9d90]" : "text-red-500";
+  const titleColor = isSuccess ? "text-[#2a9d90]" : "text-red-600";
+  const bgColor = isSuccess ? "bg-[#2a9d90]/5" : "bg-red-50";
+
+  return (
+    <div className="flex items-start gap-4 w-full">
+      <div
+        className={`shrink-0 size-10 rounded-full flex items-center justify-center ${bgColor}`}
+      >
+        <span className={`material-symbols-outlined text-[24px] ${iconColor}`}>
+          {icon}
+        </span>
+      </div>
+      <div className="flex-1 pt-1">
+        <h4 className={`text-sm font-extrabold ${titleColor} mb-1`}>{title}</h4>
+        <p className="text-xs font-bold text-[#101918]/80 leading-relaxed">
+          {message}
+        </p>
+      </div>
+      <button
+        onClick={closeToast}
+        className="text-gray-400 hover:text-gray-600 transition-colors pt-1"
+      >
+        <span className="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+  );
+};
+
+// 2. Toast xác nhận (Confirm Action) - Style đồng bộ
+const ToastConfirm = ({ message, onConfirm, closeToast }) => (
+  <div className="flex flex-col w-full">
+    <div className="flex items-start gap-4 mb-3">
+      <div className="shrink-0 size-10 rounded-full flex items-center justify-center bg-[#2a9d90]/5">
+        <span className="material-symbols-outlined text-[24px] text-[#2a9d90]">
+          help
+        </span>
+      </div>
+      <div className="flex-1 pt-1">
+        <h4 className="text-sm font-extrabold text-[#2a9d90] mb-1">Xác nhận</h4>
+        <p className="text-xs font-bold text-[#101918]/80 leading-relaxed">
+          {message}
+        </p>
+      </div>
+    </div>
+    <div className="flex justify-end gap-2 pl-14">
+      <button
+        onClick={closeToast}
+        className="px-3 py-1.5 text-xs font-bold text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+      >
+        Hủy bỏ
+      </button>
+      <button
+        onClick={() => {
+          onConfirm();
+          closeToast();
+        }}
+        className="px-3 py-1.5 text-xs font-bold text-white bg-[#2a9d90] rounded-lg hover:bg-[#238b7e] transition-colors shadow-sm shadow-[#2a9d90]/20"
+      >
+        Đồng ý
+      </button>
+    </div>
+  </div>
+);
+
+// --- HELPER FUNCTION ---
+const showToast = (message, type = "success") => {
+  toast(
+    <CustomToast
+      title={type === "success" ? "Thành công" : "Thất bại"}
+      message={message}
+      type={type}
+    />,
+    {
+      type: type,
+      icon: false,
+      closeButton: false,
+      style: {
+        borderRadius: "16px",
+        background: "white",
+        boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.1)",
+        padding: "16px",
+        border: "1px solid #e9f1f0",
+      },
+    },
+  );
+};
+
+// Helper riêng cho Confirm để áp dụng style giống CustomToast
+const showConfirmToast = (message, onConfirm) => {
+  toast(<ToastConfirm message={message} onConfirm={onConfirm} />, {
+    autoClose: false,
+    closeOnClick: false,
+    draggable: false,
+    closeButton: false,
+    icon: false,
+    position: "top-center",
+    style: {
+      borderRadius: "16px",
+      background: "white",
+      boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.15)", // Shadow đậm hơn chút để nổi bật
+      padding: "16px",
+      border: "1px solid #2a9d90", // Border xanh để nhấn mạnh
+      minWidth: "350px",
+    },
+  });
+};
 
 const ReceptionistOrders = () => {
   const navigate = useNavigate();
@@ -11,7 +127,7 @@ const ReceptionistOrders = () => {
   const [pagination, setPagination] = useState({
     page: 0,
     size: 4,
-    totalPages: 1, // Mặc định là 1 để tránh lỗi render ban đầu
+    totalPages: 1,
     totalElements: 0,
   });
   const [sortConfig, setSortConfig] = useState({
@@ -47,15 +163,14 @@ const ReceptionistOrders = () => {
         sort: `${sortConfig.key},${sortConfig.direction}`,
       });
 
-      // Xử lý response linh hoạt (cho cả axios interceptor hoặc raw response)
       const data = response.data || response;
 
       if (data) {
-        setOrders(data.content || []); // Fallback mảng rỗng nếu null
+        setOrders(data.content || []);
         setPagination({
           page: data.number || 0,
           size: data.size || 10,
-          totalPages: data.totalPages || 0, // Quan trọng: lấy từ API
+          totalPages: data.totalPages || 0,
           totalElements: data.totalElements || 0,
         });
         setSelectedIds([]);
@@ -63,6 +178,7 @@ const ReceptionistOrders = () => {
     } catch (error) {
       console.error("Lỗi khi tải danh sách đơn hàng:", error);
       setOrders([]);
+      showToast("Không thể tải danh sách đơn hàng", "error");
     } finally {
       setLoading(false);
     }
@@ -72,7 +188,7 @@ const ReceptionistOrders = () => {
     fetchOrders(0);
   }, [sortConfig]);
 
-  // --- HANDLERS (Giữ nguyên) ---
+  // --- HANDLERS ---
   const handleSelectAll = (e) => {
     if (e.target.checked) {
       const selectableIds = orders
@@ -92,42 +208,47 @@ const ReceptionistOrders = () => {
     }
   };
 
-  const handleBulkUpdate = async (targetStatus) => {
+  const handleBulkUpdate = (targetStatus) => {
     if (selectedIds.length === 0) return;
-    if (
-      !window.confirm(
-        `Xác nhận chuyển ${selectedIds.length} đơn hàng sang trạng thái "${targetStatus}"?`,
-      )
-    )
-      return;
 
-    setIsBulkUpdating(true);
-    try {
-      await Promise.all(
-        selectedIds.map((id) =>
-          orderService.updateOrder(id, { trangThai: targetStatus }),
-        ),
-      );
-      alert("Cập nhật thành công!");
-      fetchOrders(pagination.page);
-    } catch (error) {
-      alert("Có lỗi xảy ra khi cập nhật hàng loạt.");
-    } finally {
-      setIsBulkUpdating(false);
-    }
+    const executeBulkUpdate = async () => {
+      setIsBulkUpdating(true);
+      try {
+        await Promise.all(
+          selectedIds.map((id) =>
+            orderService.updateOrder(id, { trangThai: targetStatus }),
+          ),
+        );
+        showToast("Cập nhật thành công!", "success");
+        fetchOrders(pagination.page);
+      } catch (error) {
+        showToast("Có lỗi xảy ra khi cập nhật hàng loạt.", "error");
+      } finally {
+        setIsBulkUpdating(false);
+      }
+    };
+
+    showConfirmToast(
+      `Xác nhận chuyển ${selectedIds.length} đơn hàng sang trạng thái "${targetStatus}"?`,
+      executeBulkUpdate,
+    );
   };
 
-  const handleQuickUpdate = async (id, nextStatus) => {
-    if (!window.confirm(`Chuyển trạng thái đơn #${id}?`)) return;
-    try {
-      await orderService.updateOrder(id, { trangThai: nextStatus });
-      fetchOrders(pagination.page);
-    } catch (error) {
-      alert("Lỗi cập nhật trạng thái");
-    }
+  const handleQuickUpdate = (id, nextStatus) => {
+    const executeQuickUpdate = async () => {
+      try {
+        await orderService.updateOrder(id, { trangThai: nextStatus });
+        showToast(`Cập nhật đơn hàng #${id} thành công!`, "success");
+        fetchOrders(pagination.page);
+      } catch (error) {
+        showToast("Lỗi cập nhật trạng thái", "error");
+      }
+    };
+
+    showConfirmToast(`Chuyển trạng thái đơn #${id}?`, executeQuickUpdate);
   };
 
-  // --- HELPERS (Giữ nguyên) ---
+  // --- HELPERS (Formatting) ---
   const formatMoney = (amount) =>
     new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -240,7 +361,7 @@ const ReceptionistOrders = () => {
     isOrderSelectable(o.trangThai),
   ).length;
 
-  // Stats (Giữ nguyên)
+  // Stats
   const stats = [
     {
       label: "Tổng đơn hàng",
@@ -274,8 +395,25 @@ const ReceptionistOrders = () => {
 
   return (
     <main className="w-full bg-[#fbfcfc] font-sans text-[#101918] min-h-screen p-8 lg:p-12 relative">
+      {/* TOAST CONTAINER CONFIG - GIỐNG ADMIN REVIEWS */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        transition={Slide}
+        toastClassName={() =>
+          "relative flex p-0 min-h-10 rounded-2xl justify-between overflow-hidden cursor-pointer"
+        }
+        bodyClassName={() => "flex text-sm font-white font-med block p-3"}
+      />
+
       <div className="max-w-[1600px] mx-auto space-y-10">
-        {/* STATS */}
         <div className="flex flex-col gap-8">
           <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((item, index) => (
@@ -400,7 +538,6 @@ const ReceptionistOrders = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#f9fbfb] border-b border-[#e9f1f0]">
-                  {/* CHECKBOX HEADER */}
                   <th className="px-8 py-6 w-16">
                     <input
                       type="checkbox"
@@ -481,7 +618,6 @@ const ReceptionistOrders = () => {
                             : ""
                         }`}
                       >
-                        {/* CHECKBOX ROW */}
                         <td className="px-8 py-6">
                           <input
                             type="checkbox"
@@ -617,7 +753,6 @@ const ReceptionistOrders = () => {
             </table>
           </div>
 
-          {/* --- PAGINATION (ĐÃ FIX HIỂN THỊ) --- */}
           <div className="px-8 py-6 bg-[#f9fbfb] border-t border-[#e9f1f0] flex items-center justify-between">
             <p className="text-sm text-[#588d87] font-medium">
               Hiển thị{" "}
@@ -639,7 +774,6 @@ const ReceptionistOrders = () => {
                 </span>
               </button>
 
-              {/* Loop tạo nút trang (Luôn hiển thị ít nhất 1 nút nếu totalPages > 0) */}
               {pagination.totalPages > 0 &&
                 Array.from({ length: pagination.totalPages }, (_, index) => (
                   <button

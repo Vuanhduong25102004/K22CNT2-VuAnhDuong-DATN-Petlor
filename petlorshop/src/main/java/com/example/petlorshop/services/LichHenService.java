@@ -62,7 +62,6 @@ public class LichHenService {
                 .map(this::convertToResponse);
     }
 
-    // Lấy danh sách lịch hẹn của bác sĩ (nhân viên) đang đăng nhập
     public List<LichHenResponse> getDoctorAppointments(String email) {
         NguoiDung user = nguoiDungRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + email));
@@ -77,7 +76,6 @@ public class LichHenService {
                 .collect(Collectors.toList());
     }
 
-    // Lấy lịch trình hôm nay của bác sĩ
     public List<LichHenResponse> getDoctorScheduleToday(String email) {
         NguoiDung user = nguoiDungRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + email));
@@ -95,7 +93,6 @@ public class LichHenService {
                 .collect(Collectors.toList());
     }
 
-    // Lấy tất cả lịch hẹn hôm nay (cho Lễ tân)
     public List<LichHenResponse> getAllAppointmentsToday() {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
@@ -129,7 +126,6 @@ public class LichHenService {
         lichHen.setGhiChu(request.getGhiChuKhachHang());
         lichHen.setNguoiDung(nguoiDung);
         
-        // Lưu thông tin khách hàng từ User vào bảng LichHen
         lichHen.setTenKhachHang(nguoiDung.getHoTen());
         lichHen.setSdtKhachHang(nguoiDung.getSoDienThoai());
         lichHen.setEmailKhachHang(nguoiDung.getEmail());
@@ -139,7 +135,6 @@ public class LichHenService {
         lichHen.setNhanVien(assignedNhanVien);
         lichHen.setTrangThai(LichHen.TrangThai.CHO_XAC_NHAN);
         
-        // Set loại lịch hẹn (mặc định là THUONG_LE nếu null)
         lichHen.setLoaiLichHen(request.getLoaiLichHen() != null ? request.getLoaiLichHen() : LichHen.LoaiLichHen.THUONG_LE);
 
         LichHen savedLichHen = lichHenRepository.save(lichHen);
@@ -178,7 +173,6 @@ public class LichHenService {
         lichHen.setThuCung(thuCung);
         lichHen.setNhanVien(assignedNhanVien);
         
-        // Sửa lại: Mặc định là CHỜ XÁC NHẬN
         lichHen.setTrangThai(LichHen.TrangThai.CHO_XAC_NHAN);
         
         lichHen.setLoaiLichHen(request.getLoaiLichHen() != null ? request.getLoaiLichHen() : LichHen.LoaiLichHen.THUONG_LE);
@@ -201,8 +195,6 @@ public class LichHenService {
             throw new RuntimeException("Dịch vụ dự kiến kết thúc lúc " + thoiGianKetThuc.toLocalTime() + ", vượt quá giờ đóng cửa (" + CLOSING_TIME + ").");
         }
 
-        // Tìm nhân viên rảnh (tái sử dụng logic cũ nhưng cần adapt vì request khác kiểu)
-        // Tạo tạm LichHenRequest để dùng lại hàm findAvailableStaff
         LichHenRequest tempRequest = new LichHenRequest();
         tempRequest.setNhanVienId(request.getNhanVienId());
         NhanVien assignedNhanVien = findAvailableStaff(tempRequest, dichVu, request.getThoiGianBatDau(), thoiGianKetThuc);
@@ -212,14 +204,11 @@ public class LichHenService {
         lichHen.setThoiGianKetThuc(thoiGianKetThuc);
         lichHen.setGhiChu(request.getGhiChu());
         
-        // Lưu thông tin khách vãng lai
         lichHen.setNguoiDung(null);
         lichHen.setTenKhachHang(request.getTenKhachHang());
         lichHen.setSdtKhachHang(request.getSoDienThoaiKhachHang());
         lichHen.setEmailKhachHang(request.getEmailKhachHang());
         
-        // Lưu thông tin thú cưng vào ghi chú hoặc xử lý riêng nếu cần
-        // Ở đây ta có thể tạo một ThuCung tạm thời hoặc chỉ lưu tên vào ghi chú
         if (request.getTenThuCung() != null) {
             String note = (lichHen.getGhiChu() != null ? lichHen.getGhiChu() : "") + 
                           " [Thú cưng: " + request.getTenThuCung() + " - " + request.getChungLoai() + "]";
@@ -230,7 +219,6 @@ public class LichHenService {
         lichHen.setNhanVien(assignedNhanVien);
         lichHen.setTrangThai(LichHen.TrangThai.CHO_XAC_NHAN);
         
-        // Set loại lịch hẹn
         lichHen.setLoaiLichHen(request.getLoaiLichHen() != null ? request.getLoaiLichHen() : LichHen.LoaiLichHen.THUONG_LE);
 
         LichHen savedLichHen = lichHenRepository.save(lichHen);
@@ -273,13 +261,11 @@ public class LichHenService {
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy thú cưng với ID: " + request.getThuCungId()));
         }
         if (StringUtils.hasText(request.getTenThuCung())) {
-            // Logic mới: Tìm xem chủ này đã có con thú cưng tên này chưa
             List<ThuCung> existingPets = thuCungRepository.findByNguoiDung_UserIdAndTenThuCungIgnoreCase(owner.getUserId(), request.getTenThuCung());
             if (!existingPets.isEmpty()) {
-                return existingPets.get(0); // Dùng lại con đầu tiên tìm thấy
+                return existingPets.get(0);
             }
 
-            // Nếu chưa có -> Tạo mới
             ThuCung newPet = new ThuCung();
             newPet.setTenThuCung(request.getTenThuCung());
             newPet.setChungLoai(request.getChungLoai());
@@ -301,14 +287,13 @@ public class LichHenService {
             }
             return nhanVien;
         } else {
-            // Xác định Role cần thiết dựa trên dịch vụ
             Role requiredRole = determineRequiredRole(dichVu);
             
             List<NhanVien> potentialStaff = nhanVienRepository.findAll();
             if (potentialStaff.isEmpty()) throw new RuntimeException("Không có nhân viên nào trong hệ thống.");
 
             return potentialStaff.stream()
-                .filter(staff -> staff.getNguoiDung() != null && staff.getNguoiDung().getRole() == requiredRole) // Lọc theo Role
+                .filter(staff -> staff.getNguoiDung() != null && staff.getNguoiDung().getRole() == requiredRole)
                 .filter(staff -> isTimeSlotAvailable(staff.getNhanVienId(), start, end))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy nhân viên phù hợp (" + getRoleDisplayName(requiredRole) + ") rảnh vào thời gian này."));
@@ -322,13 +307,11 @@ public class LichHenService {
         }
         String serviceName = dichVu.getTenDichVu().toLowerCase();
         
-        // Logic xác định Role dựa trên tên danh mục hoặc tên dịch vụ
         if (category.contains("spa") || category.contains("làm đẹp") || category.contains("vệ sinh") || 
             serviceName.contains("spa") || serviceName.contains("cắt tỉa") || serviceName.contains("tắm") || serviceName.contains("grooming")) {
             return Role.SPA;
         }
         
-        // Mặc định là DOCTOR cho các dịch vụ y tế (khám, chữa bệnh, tiêm...)
         return Role.DOCTOR;
     }
     
@@ -368,12 +351,10 @@ public class LichHenService {
             lichHen.setThoiGianKetThuc(request.getThoiGianKetThuc());
         }
 
-        // Cập nhật ghi chú trước khi xử lý trạng thái
         if (request.getGhiChu() != null) {
             lichHen.setGhiChu(request.getGhiChu());
         }
         
-        // Cập nhật loại lịch hẹn
         if (request.getLoaiLichHen() != null) {
             lichHen.setLoaiLichHen(request.getLoaiLichHen());
         }
@@ -385,7 +366,6 @@ public class LichHenService {
         return lichHenRepository.save(lichHen);
     }
 
-    // API xác nhận lịch hẹn cho bác sĩ
     @Transactional
     public LichHenResponse confirmAppointment(String email, Integer id) {
         NguoiDung user = nguoiDungRepository.findByEmail(email)
@@ -398,7 +378,6 @@ public class LichHenService {
         LichHen lichHen = lichHenRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Lịch hẹn không tồn tại: " + id));
         
-        // Kiểm tra xem lịch hẹn có phải của bác sĩ này không
         if (!lichHen.getNhanVien().getNhanVienId().equals(user.getNhanVien().getNhanVienId())) {
             throw new RuntimeException("Bạn không có quyền xác nhận lịch hẹn này.");
         }
@@ -412,7 +391,6 @@ public class LichHenService {
         return convertToResponse(savedLichHen);
     }
 
-    // API hoàn thành lịch hẹn cho bác sĩ
     @Transactional
     public LichHenResponse completeAppointment(String email, Integer id, CompleteAppointmentRequest request) {
         NguoiDung user = nguoiDungRepository.findByEmail(email)
@@ -425,7 +403,6 @@ public class LichHenService {
         LichHen lichHen = lichHenRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Lịch hẹn không tồn tại: " + id));
         
-        // Kiểm tra xem lịch hẹn có phải của bác sĩ này không
         if (!lichHen.getNhanVien().getNhanVienId().equals(user.getNhanVien().getNhanVienId())) {
             throw new RuntimeException("Bạn không có quyền hoàn thành lịch hẹn này.");
         }
@@ -436,12 +413,10 @@ public class LichHenService {
         
         lichHen.setTrangThai(LichHen.TrangThai.DA_HOAN_THANH);
         
-        // Cập nhật ghi chú bác sĩ nếu có
         if (request != null && request.getGhiChuBacSi() != null) {
             lichHen.setGhiChuBacSi(request.getGhiChuBacSi());
         }
         
-        // Xử lý tạo sổ tiêm chủng nếu có yêu cầu
         if (request != null && request.isCoTiemPhong()) {
             if (lichHen.getThuCung() == null) {
                 throw new RuntimeException("Lịch hẹn này không có thông tin thú cưng để tạo sổ tiêm chủng.");
@@ -459,7 +434,6 @@ public class LichHenService {
             soTiemChungRepository.save(stc);
         }
 
-        // Xử lý kê đơn thuốc
         if (request != null && request.isCoKeDon() && request.getDanhSachThuoc() != null && !request.getDanhSachThuoc().isEmpty()) {
             if (lichHen.getThuCung() == null) {
                 throw new RuntimeException("Lịch hẹn này không có thông tin thú cưng để kê đơn.");
@@ -478,12 +452,10 @@ public class LichHenService {
                 SanPham thuoc = sanPhamRepository.findById(item.getThuocId())
                         .orElseThrow(() -> new RuntimeException("Không tìm thấy thuốc với ID: " + item.getThuocId()));
                 
-                // Kiểm tra tồn kho (Tùy chọn: có thể cho phép kê âm hoặc chặn)
                 if (thuoc.getSoLuongTonKho() < item.getSoLuong()) {
                     throw new RuntimeException("Thuốc " + thuoc.getTenSanPham() + " không đủ số lượng tồn kho (Còn: " + thuoc.getSoLuongTonKho() + ")");
                 }
                 
-                // Trừ tồn kho ngay lập tức (để tránh bán hết khi khách ra quầy)
                 thuoc.setSoLuongTonKho(thuoc.getSoLuongTonKho() - item.getSoLuong());
                 sanPhamRepository.save(thuoc);
 
@@ -547,9 +519,7 @@ public class LichHenService {
             if (thoiGianKetThuc.toLocalTime().isAfter(CLOSING_TIME)) {
                 throw new RuntimeException("Dịch vụ dự kiến kết thúc lúc " + thoiGianKetThuc.toLocalTime() + ", vượt quá giờ đóng cửa (" + CLOSING_TIME + ").");
             }
-            // Kiểm tra lịch hẹn của nhân viên nếu trùng
             List<LichHen> conflicts = lichHenRepository.findOverlappingAppointments(lichHen.getNhanVien().getNhanVienId(), request.getThoiGianBatDau(), thoiGianKetThuc);
-            // Loại bỏ chính lịch hẹn đang sửa khỏi danh sách conflict
             conflicts.removeIf(lh -> lh.getLichHenId().equals(id));
             
             if (!conflicts.isEmpty()) {
@@ -564,8 +534,6 @@ public class LichHenService {
             lichHen.setGhiChu(request.getGhiChu());
         }
 
-        // Không cho phép khách hàng tự đổi trạng thái qua API này (trừ khi hủy - đã có API riêng)
-        
         LichHen savedLichHen = lichHenRepository.save(lichHen);
         return convertToResponse(savedLichHen);
     }
@@ -588,7 +556,6 @@ public class LichHenService {
         DichVu dichVu = lichHen.getDichVu();
         NhanVien nhanVien = lichHen.getNhanVien();
         
-        // Logic hiển thị tên khách hàng: Ưu tiên lấy từ bảng LichHen (vì đã lưu snapshot), nếu không có thì lấy từ User
         String tenKhachHang = lichHen.getTenKhachHang();
         String sdtKhachHang = lichHen.getSdtKhachHang();
         
@@ -600,18 +567,18 @@ public class LichHenService {
         return new LichHenResponse(
                 lichHen.getLichHenId(), lichHen.getThoiGianBatDau(), lichHen.getThoiGianKetThuc(),
                 lichHen.getTrangThai().name(),
-                lichHen.getLoaiLichHen() != null ? lichHen.getLoaiLichHen().getDisplayName() : null, // Hiển thị loại lịch hẹn
+                lichHen.getLoaiLichHen() != null ? lichHen.getLoaiLichHen().getDisplayName() : null,
                 lichHen.getGhiChu(),
-                lichHen.getGhiChuBacSi(), // Thêm ghi chú bác sĩ
+                lichHen.getGhiChuBacSi(),
                 lichHen.getLyDoHuy(),
                 nguoiDung != null ? nguoiDung.getUserId() : null, 
-                tenKhachHang, // Tên hiển thị
-                sdtKhachHang, // SĐT hiển thị
-                nguoiDung != null ? nguoiDung.getAnhDaiDien() : null, // Thêm ảnh khách hàng
-                thuCung != null ? thuCung.getThuCungId() : null, thuCung != null ? thuCung.getTenThuCung() : null, thuCung != null ? thuCung.getGiongLoai() : null, thuCung != null ? thuCung.getHinhAnh() : null, // Đã sửa thành getHinhAnh()
+                tenKhachHang,
+                sdtKhachHang,
+                nguoiDung != null ? nguoiDung.getAnhDaiDien() : null,
+                thuCung != null ? thuCung.getThuCungId() : null, thuCung != null ? thuCung.getTenThuCung() : null, thuCung != null ? thuCung.getGiongLoai() : null, thuCung != null ? thuCung.getHinhAnh() : null,
                 dichVu != null ? dichVu.getDichVuId() : null, dichVu != null ? dichVu.getTenDichVu() : null, dichVu != null ? dichVu.getGiaDichVu() : null,
                 nhanVien != null ? nhanVien.getNhanVienId() : null, nhanVien != null ? nhanVien.getHoTen() : null,
-                nhanVien != null ? nhanVien.getAnhDaiDien() : null // Thêm ảnh nhân viên
+                nhanVien != null ? nhanVien.getAnhDaiDien() : null
         );
     }
 }

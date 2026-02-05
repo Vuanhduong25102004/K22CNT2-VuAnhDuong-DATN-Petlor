@@ -23,10 +23,8 @@ public class ThuCungRequest {
 
     private String ghiChuSucKhoe;
 
-    // userId không còn bắt buộc nếu có số điện thoại
     private Integer userId;
 
-    // Thông tin chủ sở hữu (dùng khi không có userId)
     private String tenChuSoHuu;
     private String soDienThoaiChuSoHuu;
 }

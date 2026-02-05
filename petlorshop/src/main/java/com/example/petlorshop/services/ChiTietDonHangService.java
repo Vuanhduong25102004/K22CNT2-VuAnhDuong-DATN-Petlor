@@ -14,6 +14,10 @@ public class ChiTietDonHangService {
     @Autowired
     private ChiTietDonHangRepository chiTietDonHangRepository;
 
+    public List<ChiTietDonHang> getChiTietByDonHangId(Integer donHangId) {
+        return chiTietDonHangRepository.findByDonHang_DonHangId(donHangId);
+    }
+
     public List<ChiTietDonHang> getAllChiTietDonHang() {
         return chiTietDonHangRepository.findAll();
     }
@@ -31,14 +35,15 @@ public class ChiTietDonHangService {
                 .orElseThrow(() -> new RuntimeException("Chi tiết đơn hàng không tồn tại với id: " + id));
 
         chiTietDonHang.setSoLuong(chiTietDonHangDetails.getSoLuong());
-        chiTietDonHang.setDonGia(chiTietDonHangDetails.getDonGia()); // Sửa thành setDonGia
-
+        chiTietDonHang.setDonGia(chiTietDonHangDetails.getDonGia());
+        
         return chiTietDonHangRepository.save(chiTietDonHang);
     }
 
     public void deleteChiTietDonHang(Integer id) {
-        ChiTietDonHang chiTietDonHang = chiTietDonHangRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Chi tiết đơn hàng không tồn tại với id: " + id));
-        chiTietDonHangRepository.delete(chiTietDonHang);
+        if (!chiTietDonHangRepository.existsById(id)) {
+             throw new RuntimeException("Chi tiết đơn hàng không tồn tại với id: " + id);
+        }
+        chiTietDonHangRepository.deleteById(id);
     }
 }

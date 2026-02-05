@@ -34,7 +34,6 @@ const LoginPage = () => {
   return (
     <div className="w-full h-screen font-display bg-white text-text-main antialiased overflow-hidden">
       <div className="flex w-full h-full">
-        {/* LEFT SIDE - IMAGE & BRANDING */}
         <div className="hidden lg:flex w-1/2 h-full relative bg-gray-100">
           <div
             className="absolute inset-0 bg-cover bg-center"
@@ -44,7 +43,6 @@ const LoginPage = () => {
           ></div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
 
-          {/* Logo on Image */}
           <div className="absolute top-8 left-8 z-10">
             <div className="flex items-center gap-3 text-white">
               <div className="flex items-center justify-center size-10 rounded-xl bg-primary/20 text-primary">
@@ -56,7 +54,6 @@ const LoginPage = () => {
             </div>
           </div>
 
-          {/* Quote */}
           <div className="absolute bottom-12 left-12 right-12 z-10 text-white">
             <h3 className="text-3xl font-bold mb-3 leading-snug">
               Chăm sóc yêu thương,
@@ -74,9 +71,7 @@ const LoginPage = () => {
           </div>
         </div>
 
-        {/* RIGHT SIDE - FORM */}
         <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-6 lg:p-12 xl:p-24 overflow-y-auto bg-white">
-          {/* Mobile Logo */}
           <div className="lg:hidden w-full flex items-center gap-2 mb-8">
             <div className="size-8 text-primary">
               <svg
@@ -105,7 +100,6 @@ const LoginPage = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              {/* Email Input */}
               <label className="flex flex-col w-full group">
                 <p className="text-text-main text-sm font-bold leading-normal pb-2">
                   Email hoặc số điện thoại
@@ -128,7 +122,6 @@ const LoginPage = () => {
                 </div>
               </label>
 
-              {/* Password Input */}
               <label className="flex flex-col w-full group">
                 <div className="flex justify-between items-center pb-2">
                   <p className="text-text-main text-sm font-bold leading-normal">
@@ -174,7 +167,6 @@ const LoginPage = () => {
                 <p className="text-red-500 text-sm font-medium">{error}</p>
               )}
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary hover:bg-primary-hover text-text-main text-base font-bold leading-normal tracking-[0.015em] transition-all shadow-sm hover:shadow-md mt-1"
@@ -182,7 +174,6 @@ const LoginPage = () => {
                 <span className="truncate">Đăng nhập</span>
               </button>
 
-              {/* Divider */}
               <div className="relative flex py-2 items-center">
                 <div className="flex-grow border-t border-border-color"></div>
                 <span className="flex-shrink-0 mx-4 text-text-secondary text-xs font-medium">
@@ -191,7 +182,6 @@ const LoginPage = () => {
                 <div className="flex-grow border-t border-border-color"></div>
               </div>
 
-              {/* Social Buttons */}
               <div className="grid grid-cols-2 gap-4">
                 <button className="flex items-center justify-center gap-2 h-11 rounded-lg border border-border-color bg-background-light hover:bg-gray-100 transition-colors">
                   <svg
@@ -251,7 +241,6 @@ const LoginPage = () => {
               </p>
             </form>
 
-            {/* Footer Links */}
             <div className="mt-auto pt-8 flex justify-center gap-6 text-xs text-text-secondary">
               <a className="hover:text-text-main transition-colors" href="#">
                 Điều khoản

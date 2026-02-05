@@ -5,28 +5,23 @@ import { Link } from "react-router-dom";
 import blogService from "../services/blogService";
 import searchService from "../services/searchService";
 
-// Cấu hình đường dẫn ảnh
 const IMAGE_BASE_URL = "http://localhost:8080/uploads/";
 
 const BlogPage = () => {
-  // --- STATE QUẢN LÝ DỮ LIỆU ---
-  const [posts, setPosts] = useState([]); // Dữ liệu chính (có sort/search)
-  const [trendingPosts, setTrendingPosts] = useState([]); // [MỚI] Dữ liệu Sidebar (độc lập, không sort)
+  const [posts, setPosts] = useState([]);
+  const [trendingPosts, setTrendingPosts] = useState([]);
 
   const [featuredPost, setFeaturedPost] = useState(null);
   const [recentPosts, setRecentPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // --- STATE DANH MỤC & TÌM KIẾM ---
   const [categories, setCategories] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 
-  // --- STATE CUSTOM DROPDOWN ---
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // --- HELPER FUNCTIONS ---
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -48,7 +43,6 @@ const BlogPage = () => {
     return `${IMAGE_BASE_URL}${filename}`;
   };
 
-  // --- 1. FETCH CATEGORIES ---
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -68,14 +62,11 @@ const BlogPage = () => {
     fetchCategories();
   }, []);
 
-  // --- [MỚI] FETCH TRENDING POSTS (LOGIC RIÊNG CHO SIDEBAR) ---
-  // Chỉ gọi 1 lần khi load trang, không phụ thuộc vào search/filter
   useEffect(() => {
     const fetchTrending = async () => {
       try {
         const data = await blogService.getPublicPosts();
         const list = Array.isArray(data) ? data : [];
-        // Lấy 3 bài đầu tiên theo thứ tự API trả về (Không sort lại)
         setTrendingPosts(list.slice(0, 3));
       } catch (error) {
         console.error("Lỗi tải bài viết nổi bật:", error);
@@ -84,13 +75,10 @@ const BlogPage = () => {
     fetchTrending();
   }, []);
 
-  // --- 2. FETCH POSTS (LOGIC CŨ CHO MAIN GRID) ---
-  // Vẫn giữ logic sắp xếp theo ngày cho danh sách chính
   const fetchPosts = async (searchQuery = "", catId = null) => {
     setLoading(true);
     try {
       let data;
-      // LOGIC: Gọi API Search hoặc Get All
       if (searchQuery.trim() || catId !== null) {
         const response = await searchService.searchPosts(searchQuery, catId);
         if (Array.isArray(response)) data = response;
@@ -101,7 +89,6 @@ const BlogPage = () => {
         data = await blogService.getPublicPosts();
       }
 
-      // [GIỮ NGUYÊN LOGIC CŨ]: Sắp xếp giảm dần theo ngày đăng cho Main Grid
       const sortedData = Array.isArray(data)
         ? data.sort((a, b) => new Date(b.ngayDang) - new Date(a.ngayDang))
         : [];
@@ -122,8 +109,6 @@ const BlogPage = () => {
       setTimeout(() => AOS.refresh(), 100);
     }
   };
-
-  // --- HANDLERS ---
   const handleSearchClick = () => fetchPosts(keyword, selectedCategoryId);
 
   const handleKeyDown = (e) => {
@@ -178,7 +163,6 @@ const BlogPage = () => {
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 text-gray-900 font-sans mt-13">
-      {/* --- SECTION 1: FEATURED POST --- */}
       <div
         className={`transition-opacity duration-300 ${loading ? "opacity-50 pointer-events-none" : "opacity-100"}`}
       >
@@ -244,7 +228,6 @@ const BlogPage = () => {
         )}
       </div>
 
-      {/* --- SECTION 2: FILTERS & SEARCH --- */}
       <section
         className="mb-12 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8 border-b border-gray-100 pb-8 relative z-50"
         data-aos="fade-up"
@@ -323,11 +306,9 @@ const BlogPage = () => {
         </div>
       </section>
 
-      {/* --- SECTION 3: MAIN GRID (Z-INDEX 0) --- */}
       <div
         className={`grid grid-cols-1 lg:grid-cols-12 gap-12 transition-opacity duration-300 relative z-0 ${loading ? "opacity-50 pointer-events-none" : "opacity-100"}`}
       >
-        {/* LEFT COLUMN: ARTICLES (Thay đổi theo Search/Filter) */}
         <div className="lg:col-span-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {recentPosts.length > 0 ? (
@@ -407,7 +388,6 @@ const BlogPage = () => {
             )}
           </div>
 
-          {/* Pagination */}
           {recentPosts.length > 0 && (
             <div className="mt-16 flex justify-center gap-2" data-aos="fade-up">
               <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-gray-100 text-gray-500 hover:border-primary hover:text-primary transition-colors">
@@ -426,7 +406,6 @@ const BlogPage = () => {
           )}
         </div>
 
-        {/* RIGHT COLUMN: SIDEBAR (ĐỘC LẬP, KHÔNG SORT) */}
         <aside className="lg:col-span-4">
           <div className="sticky top-28 space-y-10">
             <div
@@ -438,7 +417,6 @@ const BlogPage = () => {
                 nhiều nhất
               </h3>
               <div className="space-y-6">
-                {/* Dùng trendingPosts thay vì posts để không bị ảnh hưởng bởi search */}
                 {trendingPosts.map((post, index) => (
                   <Link
                     key={post.baiVietId || index}
@@ -493,7 +471,6 @@ const BlogPage = () => {
         </aside>
       </div>
 
-      {/* --- SECTION 4: NEWSLETTER --- */}
       <section
         className="mt-24 relative overflow-hidden rounded-[48px] p-2 bg-white shadow-2xl border border-gray-100"
         data-aos="fade-up"

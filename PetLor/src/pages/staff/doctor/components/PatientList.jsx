@@ -1,7 +1,6 @@
 import React from "react";
 
 const PatientList = () => {
-  // Dữ liệu giả lập (Sau này bạn sẽ lấy từ API)
   const patients = [
     {
       id: 1,
@@ -11,7 +10,7 @@ const PatientList = () => {
       owner: "Nguyễn Anh Tuấn",
       lastVisit: "12/10/2024",
       status: "Cần theo dõi",
-      statusClass: "bg-red-50 text-red-500", // status-badge-watch
+      statusClass: "bg-red-50 text-red-500",
       avatar:
         "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=100&q=80",
     },
@@ -23,7 +22,7 @@ const PatientList = () => {
       owner: "Lê Thị Mai",
       lastVisit: "10/10/2024",
       status: "Khỏe mạnh",
-      statusClass: "bg-emerald-50 text-emerald-600", // status-badge-healthy
+      statusClass: "bg-emerald-50 text-emerald-600",
       avatar:
         "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=100&q=80",
     },
@@ -35,7 +34,7 @@ const PatientList = () => {
       owner: "Trần Minh Tâm",
       lastVisit: "13/10/2024",
       status: "Đang điều trị",
-      statusClass: "bg-amber-50 text-amber-600", // status-badge-treating
+      statusClass: "bg-amber-50 text-amber-600",
       avatar:
         "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=100&q=80",
     },
@@ -56,9 +55,7 @@ const PatientList = () => {
   return (
     <div className="w-full bg-gray-50 font-sans text-slate-600 pb-12">
       <div className="max-w-[1600px] mx-auto p-12 space-y-10">
-        {/* --- 1. Stats Cards --- */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Card 1 */}
           <div className="bg-white p-8 rounded-[36px] border border-gray-100 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] flex items-center gap-6 group hover:border-teal-600/20 transition-all">
             <div className="size-16 bg-teal-600/10 text-teal-600 rounded-[24px] flex items-center justify-center">
               <span className="material-symbols-outlined text-3xl">groups</span>
@@ -71,7 +68,6 @@ const PatientList = () => {
             </div>
           </div>
 
-          {/* Card 2 */}
           <div className="bg-white p-8 rounded-[36px] border border-gray-100 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] flex items-center gap-6 group hover:border-teal-600/20 transition-all">
             <div className="size-16 bg-amber-50 text-amber-600 rounded-[24px] flex items-center justify-center">
               <span className="material-symbols-outlined text-3xl">
@@ -86,7 +82,6 @@ const PatientList = () => {
             </div>
           </div>
 
-          {/* Card 3 */}
           <div className="bg-white p-8 rounded-[36px] border border-gray-100 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] flex items-center gap-6 group hover:border-teal-600/20 transition-all">
             <div className="size-16 bg-blue-50 text-blue-600 rounded-[24px] flex items-center justify-center">
               <span className="material-symbols-outlined text-3xl">
@@ -102,9 +97,7 @@ const PatientList = () => {
           </div>
         </div>
 
-        {/* --- 2. Table Section --- */}
         <div className="bg-white rounded-[40px] border border-gray-100 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] overflow-hidden">
-          {/* Header Table */}
           <div className="px-10 py-8 border-b border-gray-50 flex items-center justify-between">
             <h3 className="text-xl font-extrabold text-[#0c1d1d]">
               Danh sách chi tiết
@@ -119,7 +112,6 @@ const PatientList = () => {
             </div>
           </div>
 
-          {/* Table Content */}
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -137,7 +129,6 @@ const PatientList = () => {
                     key={patient.id}
                     className="hover:bg-gray-50/80 transition-colors group"
                   >
-                    {/* Cột Bệnh nhân */}
                     <td className="px-10 py-6">
                       <div className="flex items-center gap-4">
                         <div className="size-14 rounded-2xl overflow-hidden border-2 border-white shadow-sm shrink-0">
@@ -158,7 +149,6 @@ const PatientList = () => {
                       </div>
                     </td>
 
-                    {/* Cột Chủ nuôi */}
                     <td className="px-6 py-6">
                       <div className="flex items-center gap-3">
                         <div className="size-8 rounded-full bg-gray-100 flex items-center justify-center">
@@ -172,12 +162,10 @@ const PatientList = () => {
                       </div>
                     </td>
 
-                    {/* Cột Lần khám cuối */}
                     <td className="px-6 py-6 text-sm font-medium text-gray-500">
                       {patient.lastVisit}
                     </td>
 
-                    {/* Cột Trạng thái */}
                     <td className="px-6 py-6">
                       <span
                         className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider ${patient.statusClass}`}
@@ -186,7 +174,6 @@ const PatientList = () => {
                       </span>
                     </td>
 
-                    {/* Cột Thao tác */}
                     <td className="px-10 py-6 text-right">
                       <div className="flex justify-end gap-2">
                         <button className="px-4 py-2 bg-gray-50 text-teal-600 text-xs font-bold rounded-xl hover:bg-teal-600 hover:text-white transition-all">
@@ -205,7 +192,6 @@ const PatientList = () => {
             </table>
           </div>
 
-          {/* Pagination */}
           <div className="px-10 py-6 border-t border-gray-50 flex items-center justify-between">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
               Hiển thị 4 trên 1,284 bệnh nhân

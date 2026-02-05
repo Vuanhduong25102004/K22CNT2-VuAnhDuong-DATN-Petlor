@@ -5,29 +5,23 @@ import bookingService from "../services/bookingService";
 import authService from "../services/authService";
 import petService from "../services/petService";
 
-// --- 1. IMPORT TOASTIFY ---
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// --- CONSTANTS ---
 const API_BASE_URL = "http://localhost:8080";
 const IMAGE_BASE_URL = "http://localhost:8080/uploads";
 
 const Booking = () => {
   const navigate = useNavigate();
-
-  // --- STATE MANAGEMENT ---
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
-  // Dữ liệu từ API
   const [apiData, setApiData] = useState({
     categories: [],
     services: [],
     myPets: [],
   });
 
-  // Trạng thái Form
   const [form, setForm] = useState({
     petName: "",
     petType: "",
@@ -40,7 +34,6 @@ const Booking = () => {
     note: "",
   });
 
-  // Trạng thái Thời gian
   const [dateTime, setDateTime] = useState({
     date: new Date().getDate(),
     month: new Date().getMonth() + 1,
@@ -49,11 +42,9 @@ const Booking = () => {
     viewDate: new Date(),
   });
 
-  // Auth Logic
   const [currentUserId] = useState(authService.getCurrentUserId());
   const isGuest = !currentUserId;
 
-  // --- FETCH DATA ---
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -82,7 +73,7 @@ const Booking = () => {
         });
       } catch (error) {
         console.error("Init Error:", error);
-        toast.error("Lỗi kết nối máy chủ!"); // Thay alert nếu có lỗi init
+        toast.error("Lỗi kết nối máy chủ!");
       } finally {
         setInitialLoading(false);
       }
@@ -90,7 +81,6 @@ const Booking = () => {
     fetchData();
   }, [isGuest]);
 
-  // --- LOGIC & HELPERS ---
   const updateForm = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -135,7 +125,6 @@ const Booking = () => {
     return pet?.hinhAnh ? `${IMAGE_BASE_URL}/${pet.hinhAnh}` : null;
   }, [form.selectedPetId, apiData.myPets]);
 
-  // --- CALENDAR LOGIC ---
   const viewYear = dateTime.viewDate.getFullYear();
   const viewMonth = dateTime.viewDate.getMonth();
 
@@ -165,7 +154,6 @@ const Booking = () => {
     }));
   };
 
-  // --- TIME SLOT LOGIC ---
   const timeSlots = useMemo(() => {
     const slots = [];
     for (let i = 8; i <= 18; i++) {
@@ -194,10 +182,8 @@ const Booking = () => {
     return slotTime > now.getTime();
   };
 
-  // --- 6. SUBMIT (ĐÃ SỬA DÙNG TOAST) ---
   const handleBooking = async (e) => {
     e.preventDefault();
-    // Thay alert bằng toast.warn cho validation
     if (!form.serviceId) {
       return toast.warn("Vui lòng chọn dịch vụ! 🛠️");
     }
@@ -241,17 +227,12 @@ const Booking = () => {
         });
       }
 
-      // Thay alert bằng toast.success
       toast.success("Đặt lịch thành công! 🐾", {
         position: "top-center",
         autoClose: 2000,
-        onClose: () => navigate("/"), // Chuyển trang sau khi toast đóng
+        onClose: () => navigate("/"),
       });
-
-      // Hoặc nếu muốn chuyển ngay:
-      // navigate("/");
     } catch (error) {
-      // Thay alert bằng toast.error
       const errorMsg = error.response?.data?.message || "Có lỗi xảy ra.";
       toast.error(errorMsg);
     } finally {
@@ -277,7 +258,6 @@ const Booking = () => {
       <ToastContainer position="top-right" autoClose={3000} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
-        {/* HEADER */}
         <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 mt-15">
           <div>
             <h1 className="text-3xl font-extrabold text-gray-900 mb-2">
@@ -299,12 +279,6 @@ const Booking = () => {
 
         <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 lg:p-10">
           <form className="space-y-10">
-            {/* ... (Phần nội dung Form giữ nguyên không đổi) ... */}
-
-            {/* Code form quá dài nên tôi rút gọn hiển thị ở đây để tập trung vào logic thay đổi */}
-            {/* Bạn hãy giữ nguyên toàn bộ nội dung JSX bên trong form như code cũ */}
-
-            {/* SECTION 1: GUEST INFO */}
             {isGuest ? (
               <section className="space-y-6">
                 <div className="flex items-center gap-3">
@@ -363,7 +337,6 @@ const Booking = () => {
               </div>
             )}
 
-            {/* SECTION 2: PET INFO */}
             <section className="space-y-6">
               <div className="flex items-center gap-3">
                 <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white font-bold text-base">
@@ -529,7 +502,6 @@ const Booking = () => {
             </section>
             <hr className="border-gray-100" />
 
-            {/* SECTION 3: SERVICES */}
             <section className="space-y-6">
               <div className="flex items-center gap-3">
                 <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white font-bold text-base">
@@ -630,7 +602,6 @@ const Booking = () => {
             </section>
             <hr className="border-gray-100" />
 
-            {/* SECTION 4: TIME & CALENDAR */}
             <section className="space-y-6">
               <div className="flex items-center gap-3">
                 <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white font-bold text-base">
@@ -639,7 +610,6 @@ const Booking = () => {
                 <h2 className="text-xl font-bold">Thời gian hẹn</h2>
               </div>
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                {/* CALENDAR */}
                 <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
                   <div className="flex justify-between items-center mb-6">
                     <span className="text-base font-bold capitalize">
@@ -710,7 +680,6 @@ const Booking = () => {
                   </div>
                 </div>
 
-                {/* TIME SLOTS */}
                 <div className="space-y-4">
                   <label className="text-sm font-bold text-gray-700">
                     Khung giờ
@@ -772,59 +741,6 @@ const Booking = () => {
           </form>
         </div>
       </main>
-
-      {/* FOOTER */}
-      <footer className="border-t border-gray-200 bg-white pt-8 pb-28">
-        <div className="max-w-[900px] mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div className="col-span-1">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="bg-primary/20 p-1 rounded-lg">
-                  <span className="material-symbols-outlined text-primary text-lg">
-                    pets
-                  </span>
-                </div>
-                <span className="text-lg font-extrabold tracking-tight">
-                  Pet<span className="text-primary">Lor</span>
-                </span>
-              </div>
-              <p className="text-gray-500 text-[10px]">
-                Thiên đường chăm sóc toàn diện cho thú cưng cao cấp.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-bold text-[11px] mb-4">Dịch vụ</h4>
-              <ul className="space-y-2 text-[10px] text-gray-500">
-                <li>Spa & Grooming</li>
-                <li>Khám thú y</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold text-[11px] mb-4">Hỗ trợ</h4>
-              <ul className="space-y-2 text-[10px] text-gray-500">
-                <li>Chính sách</li>
-                <li>FAQ</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold text-[11px] mb-4">Liên hệ</h4>
-              <ul className="space-y-2 text-[10px] text-gray-500">
-                <li className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-sm">
-                    phone
-                  </span>{" "}
-                  1900 123 456
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-100 pt-4 flex justify-between items-center">
-            <p className="text-gray-400 text-[9px]">© 2024 PetLor Vietnam.</p>
-          </div>
-        </div>
-      </footer>
-
-      {/* FIXED BOTTOM BAR */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-100 shadow-[0_-8px_30px_rgba(0,0,0,0.05)] py-2.5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between">

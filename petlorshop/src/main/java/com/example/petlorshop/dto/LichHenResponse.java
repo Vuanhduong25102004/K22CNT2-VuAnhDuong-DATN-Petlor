@@ -17,7 +17,7 @@ public class LichHenResponse {
     private String trangThaiLichHen;
     private String loaiLichHen;
     private String ghiChuKhachHang;
-    private String ghiChuBacSi; // Thêm trường này
+    private String ghiChuBacSi;
     private String lyDoHuy;
     
     private Integer userId;

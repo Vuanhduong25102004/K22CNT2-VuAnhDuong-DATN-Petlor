@@ -128,7 +128,6 @@ public class ThuCungService {
         return thuCungRepository.save(thuCung);
     }
 
-    // Refactor: Tách logic tìm/tạo chủ sở hữu ra để dùng chung
     private NguoiDung findOrCreateOwner(Integer userId, String tenChuSoHuu, String soDienThoai) {
         if (userId != null) {
             return nguoiDungRepository.findById(userId)
@@ -204,7 +203,6 @@ public class ThuCungService {
             thuCung.setCanNang(request.getCanNang());
         }
 
-        // Logic đổi chủ sở hữu: Kiểm tra xem có thông tin đổi chủ không
         if (request.getUserId() != null || StringUtils.hasText(request.getSoDienThoaiChuSoHuu())) {
             NguoiDung chuMoi = findOrCreateOwner(request.getUserId(), request.getTenChuSoHuu(), request.getSoDienThoaiChuSoHuu());
             thuCung.setNguoiDung(chuMoi);
@@ -235,7 +233,6 @@ public class ThuCungService {
         ThuCung thuCung = thuCungRepository.findById(thuCungId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy thú cưng với ID: " + thuCungId));
         
-        // 1. Lịch sử khám bệnh
         List<LichHen> lichSuKhamRaw = lichHenRepository.findAll().stream()
                 .filter(lh -> lh.getThuCung() != null && lh.getThuCung().getThuCungId().equals(thuCungId))
                 .filter(lh -> lh.getTrangThai() == LichHen.TrangThai.DA_HOAN_THANH)
@@ -252,7 +249,6 @@ public class ThuCungService {
                 ))
                 .collect(Collectors.toList());
         
-        // 2. Lịch sử tiêm chủng
         List<SoTiemChung> lichSuTiemChungRaw = soTiemChungRepository.findByThuCung_ThuCungId(thuCungId);
         
         List<HoSoBenhAnResponse.LichSuTiemChung> lichSuTiemChung = lichSuTiemChungRaw.stream()
@@ -266,7 +262,6 @@ public class ThuCungService {
                 ))
                 .collect(Collectors.toList());
 
-        // 3. Lịch sử đơn thuốc
         List<DonThuoc> lichSuDonThuocRaw = donThuocRepository.findByThuCung_ThuCungId(thuCungId);
 
         List<HoSoBenhAnResponse.LichSuDonThuoc> lichSuDonThuoc = lichSuDonThuocRaw.stream()
@@ -302,7 +297,7 @@ public class ThuCungService {
                 thuCung.getHinhAnh(),
                 lichSuKham,
                 lichSuTiemChung,
-                lichSuDonThuoc // Thêm danh sách đơn thuốc vào response
+                lichSuDonThuoc
         );
     }
 }

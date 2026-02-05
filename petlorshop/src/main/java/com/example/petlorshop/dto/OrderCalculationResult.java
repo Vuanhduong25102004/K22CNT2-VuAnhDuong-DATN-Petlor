@@ -20,5 +20,5 @@ public class OrderCalculationResult {
     private BigDecimal phiVanChuyen;
     private BigDecimal tongThanhToan;
     private KhuyenMai khuyenMai;
-    private List<ChiTietDonHang> chiTietDonHangs; // Danh sách chi tiết đã được chuẩn bị dữ liệu (giá, sp)
+    private List<ChiTietDonHang> chiTietDonHangs;
 }

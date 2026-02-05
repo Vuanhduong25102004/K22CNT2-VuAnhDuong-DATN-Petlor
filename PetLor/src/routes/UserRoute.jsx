@@ -37,10 +37,7 @@ const UserRoute = () => {
   return (
     <div className="bg-[var(--color-background-light)] font-display text-[var(--color-text-main)] min-h-screen flex flex-col mt-16">
       <div className="max-w-7xl mx-auto w-full flex-grow flex flex-col lg:flex-row gap-8 py-8 px-4 sm:px-6 lg:px-8">
-        {/* Sidebar đứng yên không load lại */}
         <UserProfileSidebar user={user} />
-
-        {/* Nội dung các trang con (MyPets, Appointments,...) thay đổi ở đây */}
         <div className="flex-1 min-w-0">
           <Outlet context={[user]} />
         </div>

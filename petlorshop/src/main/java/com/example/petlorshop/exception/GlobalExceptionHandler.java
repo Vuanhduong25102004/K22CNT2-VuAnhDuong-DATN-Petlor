@@ -17,7 +17,6 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Xử lý lỗi sai thông tin đăng nhập (Bad Credentials)
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Object> handleBadCredentialsException(BadCredentialsException ex, WebRequest request) {
         Map<String, Object> body = new HashMap<>();
@@ -30,7 +29,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
     }
 
-    // Xử lý lỗi tài khoản bị khóa, vô hiệu hóa...
     @ExceptionHandler(AccountStatusException.class)
     public ResponseEntity<Object> handleAccountStatusException(AccountStatusException ex, WebRequest request) {
         Map<String, Object> body = new HashMap<>();
@@ -43,7 +41,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
     }
 
-    // Xử lý lỗi không có quyền truy cập (Access Denied)
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
         Map<String, Object> body = new HashMap<>();
@@ -56,7 +53,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
     }
 
-    // Xử lý RuntimeException (Lỗi logic chung: Không tìm thấy ID, trùng email...)
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Object> handleRuntimeException(RuntimeException ex, WebRequest request) {
         Map<String, Object> body = new HashMap<>();
@@ -69,7 +65,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    // Xử lý lỗi Validate (@Valid trong DTO)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
@@ -88,7 +83,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    // Xử lý các lỗi khác (500 Internal Server Error)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGlobalException(Exception ex, WebRequest request) {
         Map<String, Object> body = new HashMap<>();

@@ -73,7 +73,6 @@ import SpaSchedule from "../pages/staff/spa/SpaSchedule";
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* Public Routes & User Protected Routes */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/services" element={<ServicesPage />} />
@@ -89,7 +88,6 @@ const AppRoutes = () => {
         <Route path="/booking" element={<Booking />} />
         <Route path="/profilepage" element={<ProfilePage />} />
 
-        {/* Protected User Routes */}
         <Route element={<ProtectedRoute />}>
           <Route element={<UserLayout />}>
             <Route path="/profile" element={<UserProfile />} />
@@ -101,11 +99,9 @@ const AppRoutes = () => {
         </Route>
       </Route>
 
-      {/* Auth Routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
-      {/* Admin Routes */}
       <Route element={<AdminRoute />}>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
@@ -127,11 +123,8 @@ const AppRoutes = () => {
         </Route>
       </Route>
 
-      {/* --- STAFF ROUTES (UPDATED) --- */}
       <Route element={<StaffRoute />}>
-        {/* Layout chung cho nhân viên */}
         <Route path="/staff" element={<StaffLayout />}>
-          {/* Index: Nếu vào /staff thì chuyển hướng (tùy logic của bạn) */}
           <Route
             index
             element={
@@ -141,13 +134,11 @@ const AppRoutes = () => {
             }
           />
 
-          {/* Khu vực Bác sĩ -> /staff/doctor */}
           <Route path="doctor" element={<DoctorDashboard />} />
           <Route path="doctor/schedule" element={<DoctorSchedule />} />
           <Route path="doctor/patients" element={<PatientList />} />
           <Route path="doctor/reports" element={<DoctorReport />} />
 
-          {/* Khu vực Lễ tân -> /staff/reception */}
           <Route path="receptionist" element={<ReceptionistDashboard />} />
           <Route
             path="receptionist/booking"
@@ -181,7 +172,6 @@ const AppRoutes = () => {
             element={<ReceptionistOrderDetail />}
           />
 
-          {/* Khu vực Spa -> /staff/spa */}
           <Route path="spa" element={<SpaDashboard />} />
           <Route path="spa/schedule" element={<SpaSchedule />} />
         </Route>

@@ -15,7 +15,7 @@ public class DonThuocResponse {
     private Integer donThuocId;
     private Integer lichHenId;
     private String tenBacSi;
-    private String anhBacSi; // Thêm trường này
+    private String anhBacSi;
     private String tenKhachHang;
     private String sdtKhachHang;
     private String tenThuCung;

@@ -3,7 +3,6 @@ import React from "react";
 const ProfilePage = () => {
   return (
     <div className="bg-gray-50 min-h-screen mt-16">
-      {/* Header Section */}
       <section className="relative overflow-hidden pt-12 pb-24 bg-teal-600">
         <div className="absolute inset-0 opacity-10">
           <svg
@@ -24,11 +23,9 @@ const ProfilePage = () => {
         </div>
       </section>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 mb-20 relative z-20">
         <div className="bg-white rounded-xl p-8 md:p-12 shadow-xl">
           <div className="flex flex-col lg:flex-row gap-16">
-            {/* Left Column: Avatar & Socials */}
             <div className="w-full lg:w-1/3 flex flex-col items-center">
               <div className="relative group">
                 <div className="relative p-1.5 rounded-full border-2 border-dashed border-emerald-600/30 group-hover:border-emerald-600 transition-colors">
@@ -60,7 +57,6 @@ const ProfilePage = () => {
                   <span className="h-px bg-gray-200 flex-grow"></span>
                 </h3>
                 <div className="space-y-4">
-                  {/* GitHub Link */}
                   <a
                     className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100 hover:border-emerald-600/40 hover:bg-white transition-all group"
                     href="#"
@@ -85,7 +81,6 @@ const ProfilePage = () => {
                     </span>
                   </a>
 
-                  {/* Facebook Link */}
                   <a
                     className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100 hover:border-emerald-600/40 hover:bg-white transition-all group"
                     href="#"
@@ -111,7 +106,6 @@ const ProfilePage = () => {
               </div>
             </div>
 
-            {/* Right Column: Personal Info */}
             <div className="w-full lg:w-2/3">
               <div className="flex items-center gap-3 mb-10">
                 <div className="w-1.5 h-8 bg-emerald-600 rounded-full"></div>
@@ -121,7 +115,6 @@ const ProfilePage = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
-                {/* Field: Họ tên */}
                 <div className="space-y-2.5">
                   <label className="text-sm font-extrabold text-gray-500 flex items-center gap-2 ml-1 uppercase tracking-wider">
                     <span className="material-symbols-outlined text-emerald-600 text-lg">
@@ -137,7 +130,6 @@ const ProfilePage = () => {
                   />
                 </div>
 
-                {/* Field: Email */}
                 <div className="space-y-2.5">
                   <label className="text-sm font-extrabold text-gray-500 flex items-center gap-2 ml-1 uppercase tracking-wider">
                     <span className="material-symbols-outlined text-emerald-600 text-lg">
@@ -153,7 +145,6 @@ const ProfilePage = () => {
                   />
                 </div>
 
-                {/* Field: SĐT */}
                 <div className="space-y-2.5">
                   <label className="text-sm font-extrabold text-gray-500 flex items-center gap-2 ml-1 uppercase tracking-wider">
                     <span className="material-symbols-outlined text-emerald-600 text-lg">
@@ -169,7 +160,6 @@ const ProfilePage = () => {
                   />
                 </div>
 
-                {/* Field: Trường */}
                 <div className="space-y-2.5">
                   <label className="text-sm font-extrabold text-gray-500 flex items-center gap-2 ml-1 uppercase tracking-wider">
                     <span className="material-symbols-outlined text-emerald-600 text-lg">
@@ -185,7 +175,6 @@ const ProfilePage = () => {
                   />
                 </div>
 
-                {/* Field: Ngành */}
                 <div className="space-y-2.5">
                   <label className="text-sm font-extrabold text-gray-500 flex items-center gap-2 ml-1 uppercase tracking-wider">
                     <span className="material-symbols-outlined text-emerald-600 text-lg">

@@ -10,7 +10,6 @@ import productService from "../services/productService";
 import searchService from "../services/searchService";
 import { useCart } from "../context/CartContext";
 
-// Helper format giá
 const formatPrice = (price) => {
   if (price === null || price === undefined) return "";
   if (typeof price === "number") {
@@ -23,24 +22,21 @@ const formatPrice = (price) => {
 };
 
 const ProductsPage = () => {
-  // --- STATE QUẢN LÝ DỮ LIỆU ---
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // --- STATE LỌC & TÌM KIẾM & PHÂN TRANG ---
   const [categories, setCategories] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [sortOrder, setSortOrder] = useState("");
 
   // State phân trang mới
-  const [currentPage, setCurrentPage] = useState(0); // API Spring Boot thường bắt đầu từ 0
+  const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const pageSize = 20; // 20 sản phẩm / trang
+  const pageSize = 20;
 
   const { addToCart } = useCart();
 
-  // --- HÀM XỬ LÝ THÊM GIỎ HÀNG ---
   const handleAddToCart = (product) => {
     addToCart(product, 1);
 
@@ -77,7 +73,6 @@ const ProductsPage = () => {
     });
   };
 
-  // --- 1. LẤY DANH MỤC SẢN PHẨM TỪ API ---
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -98,9 +93,8 @@ const ProductsPage = () => {
     fetchCategories();
   }, []);
 
-  // --- 2. HÀM TẢI SẢN PHẨM (CẬP NHẬT PHÂN TRANG) ---
   const fetchProducts = async (
-    page = 0, // Mặc định trang 0
+    page = 0,
     searchQuery = "",
     catId = null,
     sortValue = "",
@@ -109,7 +103,6 @@ const ProductsPage = () => {
     try {
       let response;
 
-      // Cấu hình params gửi lên API
       const params = {
         page: page,
         size: pageSize,
@@ -119,9 +112,7 @@ const ProductsPage = () => {
         params.sort = sortValue;
       }
 
-      // Gọi API Search hoặc GetAll
       if (searchQuery.trim() || catId !== null) {
-        // Lưu ý: searchService cần hỗ trợ truyền params page/size
         response = await searchService.searchProducts(
           searchQuery,
           catId,
@@ -131,24 +122,19 @@ const ProductsPage = () => {
         response = await productService.getAllProducts(params);
       }
 
-      // Xử lý dữ liệu trả về từ Spring Boot Pageable
       let data = [];
       let total = 0;
 
-      // Kiểm tra cấu trúc response để lấy content và totalPages
       if (response?.content && Array.isArray(response.content)) {
-        // Trường hợp trả về trực tiếp Page object
         data = response.content;
         total = response.totalPages;
       } else if (
         response?.data?.content &&
         Array.isArray(response.data.content)
       ) {
-        // Trường hợp bọc trong axios data
         data = response.data.content;
         total = response.data.totalPages;
       } else if (Array.isArray(response)) {
-        // Trường hợp trả về List thuần (không phân trang)
         data = response;
         total = 1;
       }
@@ -177,14 +163,12 @@ const ProductsPage = () => {
     }
   };
 
-  // Gọi API khi thay đổi page, keyword, category, sort
   useEffect(() => {
     fetchProducts(currentPage, keyword, selectedCategoryId, sortOrder);
-  }, [currentPage, selectedCategoryId, sortOrder]); // Keyword thường xử lý riêng ở nút search
+  }, [currentPage, selectedCategoryId, sortOrder]);
 
-  // --- HANDLERS ---
   const handleSearch = () => {
-    setCurrentPage(0); // Reset về trang đầu khi tìm kiếm
+    setCurrentPage(0);
     fetchProducts(0, keyword, selectedCategoryId, sortOrder);
   };
 
@@ -196,8 +180,7 @@ const ProductsPage = () => {
 
   const handleCategoryClick = (catId) => {
     setSelectedCategoryId(catId);
-    setCurrentPage(0); // Reset về trang đầu khi lọc danh mục
-    // useEffect sẽ tự gọi fetchProducts
+    setCurrentPage(0);
   };
 
   const handleReset = () => {
@@ -205,16 +188,14 @@ const ProductsPage = () => {
     setSelectedCategoryId(null);
     setSortOrder("");
     setCurrentPage(0);
-    // useEffect sẽ tự gọi fetchProducts
   };
 
   const handleSortChange = (e) => {
     const newSortOrder = e.target.value;
     setSortOrder(newSortOrder);
-    setCurrentPage(0); // Reset về trang đầu khi sort
+    setCurrentPage(0);
   };
 
-  // Hàm chuyển trang
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalPages) {
       setCurrentPage(newPage);
@@ -248,7 +229,6 @@ const ProductsPage = () => {
       <ToastContainer style={{ marginTop: "50px", zIndex: 9999 }} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-16">
-        {/* --- HERO SECTION --- */}
         <section
           className="relative min-h-[480px] lg:h-[520px] rounded-3xl overflow-hidden mb-12 bg-white border border-gray-100 flex flex-col lg:flex-row"
           data-aos="fade-up"
@@ -288,7 +268,7 @@ const ProductsPage = () => {
               className="w-full h-full object-cover"
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsKA4bJQUp5mRHcMG9sYxHfPgEanH1R4WKbtETtGYSeII2bdl1KnUKZS5jLhumrTVcYaoFA9g30YR9WSoI0eEuJKFEwIYrHKPgP_PIsd-BjRV3taTMu40R5eaMe23-aseCmnOH32d-vjQ0Z350lTKAWKUWZmxxAUctnJZYBeUQrVDK-kGFZjT84yoJCczSy_UgCqUbbwcBPtia6SWvX-kHTZtlC3h36Vl5otzc9NJJuWDDoZOcoWqRzPTNsIHhcVcARru4tZYf9fw"
             />
-            {/* Badge floating */}
+
             <div
               className="absolute top-8 right-8 bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-xl flex items-center gap-4 border border-white/20"
               data-aos="zoom-in"
@@ -328,7 +308,6 @@ const ProductsPage = () => {
           </div>
         </section>
 
-        {/* --- FILTER & SEARCH SECTION --- */}
         <section className="mb-12" data-aos="fade-up">
           <div className="bg-white p-4 rounded-full border border-gray-100 shadow-sm flex flex-col lg:flex-row gap-6 items-center justify-between">
             <div className="relative w-full lg:w-96">
@@ -394,7 +373,6 @@ const ProductsPage = () => {
           </div>
         </section>
 
-        {/* --- PRODUCTS GRID --- */}
         <section className="mb-24">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {loading ? (
@@ -495,7 +473,6 @@ const ProductsPage = () => {
             )}
           </div>
 
-          {/* --- PAGINATION SECTION (DYNAMIC) --- */}
           {totalPages > 1 && (
             <div className="mt-16 flex justify-center gap-2" data-aos="fade-up">
               <button
@@ -510,7 +487,6 @@ const ProductsPage = () => {
                 <span className="material-symbols-outlined">chevron_left</span>
               </button>
 
-              {/* Render danh sách các trang */}
               {Array.from({ length: totalPages }, (_, i) => i).map((page) => (
                 <button
                   key={page}
@@ -540,7 +516,6 @@ const ProductsPage = () => {
           )}
         </section>
 
-        {/* --- NEWSLETTER SECTION --- */}
         <section
           className="mt-20 py-16 bg-primary rounded-3xl text-center px-4 relative overflow-hidden mb-20"
           data-aos="zoom-in"

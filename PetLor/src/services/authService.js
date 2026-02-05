@@ -18,27 +18,40 @@ const authService = {
   
   login: async (credentials) => {
     const response = await apiClient.post('/auth/login', credentials);
-    
-    // Xử lý dữ liệu trả về (hỗ trợ cả trường hợp axios bọc data và không)
-    const data = response.data ? response.data : response;
 
+    const data = response.data ? response.data : response;
     const token = data.accessToken || data.token; 
 
     if (token) {
       localStorage.setItem('accessToken', token); 
       localStorage.setItem('token', token); 
-      
+     
       let userId = data.userId || data.id || (data.user && data.user.id);
 
-      if (!userId) {
+      let nhanVienId = data.nhanVienId || 
+                       (data.user && data.user.nhanVienId) || 
+                       (data.user && data.user.nhanVien && data.user.nhanVien.id) ||
+                       (data.nhanVien && data.nhanVien.id);
+      if (!userId || !nhanVienId) {
         const decoded = parseJwt(token);
         if (decoded) {
-          userId = decoded.userId || decoded.id || decoded.sub;
+          if (!userId) userId = decoded.userId || decoded.id || decoded.sub;
+          
+          if (!nhanVienId) {
+             nhanVienId = decoded.nhanVienId || decoded.employeeId || decoded.staffId;
+          }
         }
       }
 
       if (userId) {
         localStorage.setItem('userId', userId);
+      }
+
+      if (nhanVienId) {
+        localStorage.setItem('nhanVienId', nhanVienId);
+        console.log("Đã lưu nhanVienId:", nhanVienId);
+      } else {
+        console.warn("Không tìm thấy nhanVienId trong response đăng nhập!");
       }
     } 
 
@@ -49,6 +62,7 @@ const authService = {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('token');
     localStorage.removeItem('userId'); 
+    localStorage.removeItem('nhanVienId'); 
   },
 
   getAuthHeader: () => {
@@ -58,6 +72,10 @@ const authService = {
   
   getCurrentUserId: () => {
     return localStorage.getItem('userId');
+  },
+
+  getCurrentNhanVienId: () => {
+    return localStorage.getItem('nhanVienId');
   }
 };
 

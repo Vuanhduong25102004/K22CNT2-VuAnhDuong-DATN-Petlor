@@ -4,13 +4,13 @@ import productService from "../../../../services/productService";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// --- COMPONENT CON: Ô TÌM KIẾM THUỐC ---
 const MedicineSearchInput = ({ value, onSelect, placeholder }) => {
   const [query, setQuery] = useState(value || "");
   const [suggestions, setSuggestions] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const wrapperRef = useRef(null);
-  const MEDICINE_CATEGORY_ID = 9;
+
+  const MEDICINE_CATEGORY_ID = 3;
 
   useEffect(() => {
     setQuery(value || "");
@@ -41,11 +41,15 @@ const MedicineSearchInput = ({ value, onSelect, placeholder }) => {
         page: 0,
         size: 10,
       });
-      const list = response.content || response || [];
+      const actualData = response.data || response;
+      const list =
+        actualData.content || (Array.isArray(actualData) ? actualData : []);
+
       setSuggestions(list);
       setShowDropdown(true);
     } catch (error) {
       console.error("Lỗi tìm thuốc:", error);
+      setSuggestions([]);
     }
   };
 
@@ -103,7 +107,6 @@ const MedicineSearchInput = ({ value, onSelect, placeholder }) => {
   );
 };
 
-// --- COMPONENT CHÍNH ---
 const PatientDetail = ({
   appointment,
   petDetail,
@@ -115,14 +118,12 @@ const PatientDetail = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const isSpa = titleHistory === "Lịch sử làm đẹp";
 
-  // --- 1. STATE QUẢN LÝ MODAL XÁC NHẬN (THAY CHO WINDOW.CONFIRM) ---
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
     message: "",
-    onConfirm: null, // Hàm sẽ chạy khi bấm "Đồng ý"
+    onConfirm: null,
   });
 
-  // Helper mở modal xác nhận
   const triggerConfirm = (message, action) => {
     setConfirmModal({
       isOpen: true,
@@ -131,12 +132,10 @@ const PatientDetail = ({
     });
   };
 
-  // Helper đóng modal xác nhận
   const closeConfirm = () => {
     setConfirmModal({ isOpen: false, message: "", onConfirm: null });
   };
 
-  // --- 2. XỬ LÝ LỊCH SỬ ---
   const [combinedHistory, setCombinedHistory] = useState([]);
 
   useEffect(() => {
@@ -226,13 +225,9 @@ const PatientDetail = ({
     setCompleteData({ ...completeData, danhSachThuoc: newList });
   };
 
-  // --- XỬ LÝ API (SỬ DỤNG TRIGGERCONFIRM THAY CHO WINDOW.CONFIRM) ---
-
-  // 1. Tiếp nhận lịch hẹn
   const handleConfirmAppointment = async () => {
     if (!appointment?.lichHenId) return;
 
-    // Thay thế window.confirm bằng triggerConfirm
     triggerConfirm(
       `Xác nhận tiếp nhận lịch hẹn #${appointment.lichHenId}?`,
       async () => {
@@ -245,18 +240,16 @@ const PatientDetail = ({
           toast.error("Lỗi xác nhận lịch hẹn.");
         } finally {
           setIsProcessing(false);
-          closeConfirm(); // Đóng modal sau khi xong
+          closeConfirm();
         }
       },
     );
   };
 
-  // 2. Hoàn thành (Spa hoặc Doctor)
   const handleCompleteClick = async () => {
     if (!appointment?.lichHenId) return;
 
     if (isSpa) {
-      // Logic hoàn thành cho Spa
       triggerConfirm(
         `Xác nhận hoàn thành Spa cho #${appointment.tenThuCung}?`,
         async () => {
@@ -277,12 +270,10 @@ const PatientDetail = ({
         },
       );
     } else {
-      // Logic Doctor mở modal nhập liệu
       setShowCompleteModal(true);
     }
   };
 
-  // 3. Xác nhận trong modal Bác sĩ
   const handleFinalCompleteDoctor = async () => {
     if (completeData.coTiemPhong && !completeData.tenVacXin) {
       toast.warn("Vui lòng nhập tên vắc xin!");
@@ -303,7 +294,6 @@ const PatientDetail = ({
       }
     }
 
-    // Logic này không cần confirm lần nữa vì đang trong modal rồi
     setIsProcessing(true);
     try {
       const payload = {
@@ -388,7 +378,6 @@ const PatientDetail = ({
       />
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         <div className="max-w-4xl mx-auto p-8 py-10 space-y-8">
-          {/* HEADER INFO */}
           <div className="flex items-start gap-8">
             <div className="relative shrink-0">
               <div className="absolute -inset-4 bg-[#007A7A]/5 rounded-[40px] rotate-6"></div>
@@ -450,7 +439,6 @@ const PatientDetail = ({
 
           <hr className="border-gray-100" />
 
-          {/* HISTORY TIMELINE */}
           <div>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-extrabold flex items-center gap-2 text-[#0c1d1d]">
@@ -514,7 +502,6 @@ const PatientDetail = ({
         </div>
       </div>
 
-      {/* FOOTER ACTIONS */}
       <div className="h-20 flex items-center justify-between px-8 bg-white border-t border-gray-100 shrink-0">
         <div className="flex gap-3">
           {appointment.trangThaiLichHen === "CHO_XAC_NHAN" && (
@@ -541,7 +528,6 @@ const PatientDetail = ({
         </div>
       </div>
 
-      {/* --- MODAL CONFIRM (THAY THẾ WINDOW.CONFIRM) --- */}
       {confirmModal.isOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in zoom-in-95 duration-200">
           <div className="bg-white w-full max-w-sm rounded-[24px] shadow-2xl p-6 relative">
@@ -574,7 +560,6 @@ const PatientDetail = ({
         </div>
       )}
 
-      {/* --- MODAL HOÀN THÀNH (BÁC SĨ NHẬP LIỆU) --- */}
       {!isSpa && showCompleteModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-[32px] shadow-2xl relative flex flex-col">

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import registerImageUrl from "../assets/cat1.gif"; // Đảm bảo đường dẫn đúng
-import authService from "../services/authService"; // Đảm bảo đường dẫn đúng
+import registerImageUrl from "../assets/cat1.gif";
+import authService from "../services/authService";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -57,21 +57,17 @@ const RegisterPage = () => {
     }
   };
 
-  // Class chung cho input để dễ quản lý (Đã tăng py-2 lên py-3)
   const inputClasses =
     "block w-full rounded-lg border border-gray-300 py-3 px-4 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 outline-none transition-all shadow-sm";
-  // Class chung cho label (Đã tăng text-xs lên text-sm)
+
   const labelClasses = "block text-sm font-semibold text-gray-700 mb-1.5";
 
   return (
     <div className="bg-white font-display text-text-main antialiased h-screen w-screen overflow-hidden flex">
       <ToastContainer style={{ zIndex: 99999 }} />
 
-      {/* --- LEFT SIDE: FORM (Đã kéo giãn chiều dọc) --- */}
-      {/* Thêm py-8 sm:py-12 để tạo khoảng trống trên dưới */}
       <div className="flex w-full lg:w-[50%] xl:w-[45%] flex-col justify-center items-center px-6 py-8 sm:px-16 sm:py-12 xl:px-24 h-full relative z-20 bg-white overflow-y-auto no-scrollbar">
         <div className="w-full max-w-md my-auto">
-          {/* Header - Tăng mb-6 lên mb-8 */}
           <div className="mb-8 text-center lg:text-left">
             <h1 className="text-3xl font-bold tracking-tight text-text-main">
               Tạo tài khoản mới
@@ -81,9 +77,7 @@ const RegisterPage = () => {
             </p>
           </div>
 
-          {/* Form - Tăng space-y-3 lên space-y-5 */}
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Hàng 1: Họ tên + SĐT - Tăng gap-3 lên gap-4 */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className={labelClasses}>
@@ -115,7 +109,6 @@ const RegisterPage = () => {
               </div>
             </div>
 
-            {/* Hàng 2: Email */}
             <div>
               <label className={labelClasses}>
                 Email <span className="text-red-500">*</span>
@@ -131,7 +124,6 @@ const RegisterPage = () => {
               />
             </div>
 
-            {/* Hàng 3: Địa chỉ */}
             <div>
               <label className={labelClasses}>
                 Địa chỉ <span className="text-red-500">*</span>
@@ -147,7 +139,6 @@ const RegisterPage = () => {
               />
             </div>
 
-            {/* Hàng 4: Mật khẩu + Nhập lại - Tăng gap-3 lên gap-4 */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className={labelClasses}>
@@ -189,7 +180,6 @@ const RegisterPage = () => {
               </div>
             </div>
 
-            {/* Điều khoản - Tăng mt-2 lên mt-4 */}
             <div className="flex items-start mt-4">
               <div className="flex h-6 items-center">
                 <input
@@ -223,7 +213,6 @@ const RegisterPage = () => {
               </label>
             </div>
 
-            {/* Button Đăng ký - Tăng py-2.5 lên py-3.5, mt-2 lên mt-6 */}
             <button
               type="submit"
               disabled={loading}
@@ -233,7 +222,6 @@ const RegisterPage = () => {
             </button>
           </form>
 
-          {/* Social & Footer Login - Tăng mt-4 lên mt-8 */}
           <div className="mt-8">
             <div className="relative flex justify-center text-sm mb-6">
               <div
@@ -247,7 +235,6 @@ const RegisterPage = () => {
               </span>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              {/* Tăng py-2 lên py-2.5 */}
               <button className="flex items-center justify-center gap-3 rounded-lg border border-gray-200 bg-white py-2.5 text-sm font-semibold hover:bg-gray-50 transition-all shadow-sm">
                 <img
                   src="https://www.svgrepo.com/show/475656/google-color.svg"
@@ -277,8 +264,6 @@ const RegisterPage = () => {
           </div>
         </div>
       </div>
-
-      {/* --- RIGHT SIDE: IMAGE (Giữ nguyên) --- */}
       <div className="hidden lg:block relative flex-1 bg-gray-900 h-full">
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-10"></div>
         <div className="absolute top-10 left-10 z-30">

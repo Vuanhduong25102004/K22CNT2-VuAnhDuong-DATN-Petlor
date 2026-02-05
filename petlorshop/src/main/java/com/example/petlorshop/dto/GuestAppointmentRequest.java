@@ -12,12 +12,12 @@ public class GuestAppointmentRequest {
     private String emailKhachHang;
     
     private String tenThuCung;
-    private String chungLoai; // Chó, Mèo...
+    private String chungLoai;
     
     private Integer dichVuId;
-    private Integer nhanVienId; // Optional
+    private Integer nhanVienId;
     private LocalDateTime thoiGianBatDau;
     private String ghiChu;
     
-    private LichHen.LoaiLichHen loaiLichHen; // Thêm trường này
+    private LichHen.LoaiLichHen loaiLichHen;
 }

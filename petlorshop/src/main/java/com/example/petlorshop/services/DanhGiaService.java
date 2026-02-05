@@ -51,12 +51,10 @@ public class DanhGiaService {
         DonHang donHang = donHangRepository.findById(request.getDonHangId())
                 .orElseThrow(() -> new RuntimeException("Đơn hàng không tồn tại"));
 
-        // 1. Kiểm tra đơn hàng có phải của user này không
         if (!donHang.getNguoiDung().getUserId().equals(user.getUserId())) {
             throw new RuntimeException("Bạn không có quyền đánh giá đơn hàng này.");
         }
 
-        // 2. Kiểm tra trạng thái đơn hàng (Phải là Đã giao)
         if (donHang.getTrangThai() != DonHang.TrangThaiDonHang.DA_GIAO) {
              throw new RuntimeException("Chỉ có thể đánh giá khi đơn hàng đã giao thành công.");
         }
@@ -67,9 +65,7 @@ public class DanhGiaService {
         danhGia.setSoSao(request.getSoSao());
         danhGia.setNoiDung(request.getNoiDung());
 
-        // Trường hợp 1: Đánh giá sản phẩm cụ thể
         if (request.getSanPhamId() != null) {
-            // Kiểm tra sản phẩm có trong đơn hàng không
             boolean productInOrder = false;
             for (ChiTietDonHang ct : donHang.getChiTietDonHangs()) {
                 if (ct.getSanPham().getSanPhamId().equals(request.getSanPhamId())) {
@@ -81,7 +77,6 @@ public class DanhGiaService {
                 throw new RuntimeException("Sản phẩm này không có trong đơn hàng của bạn.");
             }
 
-            // Kiểm tra đã đánh giá chưa
             if (danhGiaRepository.existsByNguoiDung_UserIdAndSanPham_SanPhamIdAndDonHang_DonHangId(
                     user.getUserId(), request.getSanPhamId(), request.getDonHangId())) {
                 throw new RuntimeException("Bạn đã đánh giá sản phẩm này trong đơn hàng này rồi.");
@@ -91,7 +86,6 @@ public class DanhGiaService {
                     .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
             danhGia.setSanPham(sanPham);
         } 
-        // Trường hợp 2: Đánh giá chung đơn hàng (sanPhamId = null)
         else {
             if (danhGiaRepository.existsByNguoiDung_UserIdAndDonHang_DonHangIdAndSanPhamIsNull(
                     user.getUserId(), request.getDonHangId())) {
@@ -123,7 +117,6 @@ public class DanhGiaService {
         List<DanhGia> danhGiaList = new ArrayList<>();
 
         for (DanhGiaItemRequest item : request.getDanhGiaList()) {
-            // Kiểm tra sản phẩm có trong đơn hàng không
             boolean productInOrder = false;
             for (ChiTietDonHang ct : donHang.getChiTietDonHangs()) {
                 if (ct.getSanPham().getSanPhamId().equals(item.getSanPhamId())) {
@@ -132,14 +125,11 @@ public class DanhGiaService {
                 }
             }
             if (!productInOrder) {
-                // Có thể throw exception hoặc bỏ qua item này. Ở đây chọn throw để strict.
                 throw new RuntimeException("Sản phẩm ID " + item.getSanPhamId() + " không có trong đơn hàng.");
             }
 
-            // Kiểm tra đã đánh giá chưa
             if (danhGiaRepository.existsByNguoiDung_UserIdAndSanPham_SanPhamIdAndDonHang_DonHangId(
                     user.getUserId(), item.getSanPhamId(), request.getDonHangId())) {
-                // Nếu đã đánh giá rồi thì bỏ qua, không tạo thêm
                 continue;
             }
 

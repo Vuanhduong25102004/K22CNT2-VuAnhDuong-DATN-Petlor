@@ -12,11 +12,9 @@ import java.util.List;
 
 @Repository
 public interface DanhMucDichVuRepository extends JpaRepository<DanhMucDichVu, Integer> {
-    // Global Search (List)
     @Query("SELECT d FROM DanhMucDichVu d WHERE LOWER(d.tenDanhMucDv) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(d.moTa) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<DanhMucDichVu> searchByKeyword(@Param("keyword") String keyword);
 
-    // Page Search
     @Query("SELECT d FROM DanhMucDichVu d WHERE LOWER(d.tenDanhMucDv) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(d.moTa) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<DanhMucDichVu> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 }

@@ -1,13 +1,13 @@
 import apiClient from './apiClient';
 
 const productService = {
-  // --- SẢN PHẨM ---
+
   searchGlobal: (keyword) => {
     return apiClient.get('/search', { 
       params: { keyword } 
     });
   },
-  // Sửa: Chấp nhận tham số (params) để lọc và phân trang
+
   getAllProducts: (params) => apiClient.get('/san-pham', { params }),
   
   getProductById: (id) => apiClient.get(`/san-pham/${id}`),
@@ -24,7 +24,6 @@ const productService = {
   
   deleteProduct: (id) => apiClient.delete(`/san-pham/${id}`),
 
-  // --- DỊCH VỤ ---
   getAllServices: (params) => apiClient.get('/dich-vu', { params }),
 
   getServiceById: (id) => apiClient.get(`/dich-vu/${id}`),
@@ -41,7 +40,6 @@ const productService = {
 
   deleteService: (id) => apiClient.delete(`/dich-vu/${id}`),
 
-  // --- DANH MỤC ---
   getAllCategories: () => apiClient.get('/danh-muc-san-pham'),
 
   getCategoryById: (id) => apiClient.get(`/danh-muc-san-pham/${id}`),
@@ -52,7 +50,6 @@ const productService = {
 
   deleteCategory: (id) => apiClient.delete(`/danh-muc-san-pham/${id}`),
 
-  // --- DANH MỤC DỊCH VỤ ---
   getAllServiceCategories: () => apiClient.get('/danh-muc-dich-vu'),
 
 };

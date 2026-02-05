@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
-// --- 1. IMPORT TOASTIFY ---
 import { ToastContainer, toast, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -28,7 +27,6 @@ const CartPage = () => {
     selectedStat,
   } = useCart();
 
-  // State cho Modal Xóa (cũ)
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
@@ -71,14 +69,13 @@ const CartPage = () => {
     if (appliedVoucher) {
       setAppliedVoucher(null);
       setDiscountAmount(0);
-      // Thông báo nhẹ khi voucher bị hủy do thay đổi giá
+
       toast.info("Voucher đã bị hủy do thay đổi giỏ hàng.", {
         autoClose: 2000,
       });
     }
   }, [selectedStat.totalPrice]);
 
-  // LOGIC SẮP XẾP: MỚI NHẤT LÊN ĐẦU
   const sortedItems = useMemo(() => {
     if (!cartData?.items) return [];
     return [...cartData.items].sort((a, b) => {
@@ -93,7 +90,6 @@ const CartPage = () => {
     selectedStat.totalPrice - discountAmount,
   );
 
-  // --- 2. HÀM XỬ LÝ MÃ VỚI TOAST ĐẸP ---
   const handleApplyVoucher = async (code) => {
     if (selectedStat.totalPrice === 0) {
       toast.warn("Vui lòng chọn sản phẩm trước khi áp mã!", {
@@ -119,7 +115,6 @@ const CartPage = () => {
         setDiscountAmount(discount);
         setIsVoucherModalOpen(false);
 
-        // Toast thành công đẹp
         toast.success(
           <div>
             <div className="font-bold text-sm">Áp dụng mã thành công!</div>
@@ -136,7 +131,7 @@ const CartPage = () => {
     } catch (error) {
       const errorMsg =
         error.response?.data?.message || "Lỗi khi áp dụng mã khuyến mãi!";
-      toast.error(errorMsg); // Toast lỗi
+      toast.error(errorMsg);
       setAppliedVoucher(null);
       setDiscountAmount(0);
     }
@@ -220,7 +215,6 @@ const CartPage = () => {
 
   return (
     <div className="w-full font-display bg-[#F5F5F5] text-gray-900 min-h-screen pt-24 pb-32">
-      {/* --- 3. ĐẶT TOAST CONTAINER --- */}
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -233,11 +227,10 @@ const CartPage = () => {
         pauseOnHover
         theme="light"
         transition={Slide}
-        style={{ zIndex: 99999, marginTop: "60px" }} // Tránh bị Header che
+        style={{ zIndex: 99999, marginTop: "60px" }}
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* --- THANH TÌM KIẾM --- */}
         <div className="mb-6 hidden md:block" data-aos="fade-down">
           <div className="bg-white p-4 rounded-sm shadow-sm border border-gray-100 flex justify-between items-center">
             <div className="flex items-center gap-2 shrink-0">
@@ -294,7 +287,6 @@ const CartPage = () => {
           </div>
         ) : (
           <>
-            {/* --- TABLE HEADER --- */}
             <div
               className="bg-white rounded-sm shadow-sm border border-gray-100 mb-4 px-6 py-4 hidden md:block"
               data-aos="fade-up"
@@ -320,7 +312,6 @@ const CartPage = () => {
               </div>
             </div>
 
-            {/* --- DANH SÁCH SẢN PHẨM --- */}
             <div
               className="bg-white rounded-sm shadow-sm border border-gray-100 mb-4 overflow-hidden"
               data-aos="fade-up"
@@ -348,7 +339,6 @@ const CartPage = () => {
                   key={item.id}
                   className="px-6 py-6 border-b border-gray-50 last:border-0"
                 >
-                  {/* Desktop Layout */}
                   <div className={`hidden md:grid ${gridColsClass}`}>
                     <div className="flex items-center">
                       <input
@@ -424,7 +414,6 @@ const CartPage = () => {
                     </div>
                   </div>
 
-                  {/* Mobile Layout */}
                   <div className="flex md:hidden gap-4">
                     <div className="flex items-center">
                       <input
@@ -484,7 +473,6 @@ const CartPage = () => {
         )}
       </main>
 
-      {/* STICKY FOOTER */}
       {cartData?.items?.length > 0 && (
         <div
           className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-4px_10px_rgba(0,0,0,0.03)]"

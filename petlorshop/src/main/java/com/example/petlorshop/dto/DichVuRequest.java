@@ -15,6 +15,6 @@ public class DichVuRequest {
     private String tenDichVu;
     private String moTa;
     private BigDecimal giaDichVu;
-    private Integer thoiLuongUocTinh; // Sửa ở đây
+    private Integer thoiLuongUocTinh;
     private Integer danhMucDvId;
 }

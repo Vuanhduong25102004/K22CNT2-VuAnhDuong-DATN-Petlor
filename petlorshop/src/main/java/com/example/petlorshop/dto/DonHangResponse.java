@@ -27,7 +27,7 @@ public class DonHangResponse {
     private String lyDoHuy;
     private Integer userId;
     private String tenNguoiNhan;
-    private String anhNguoiNhan; // Thêm trường ảnh đại diện
+    private String anhNguoiNhan;
     private String maKhuyenMai;
     private List<ChiTietDonHangResponse> chiTietDonHangs;
     private boolean daDanhGiaChung;

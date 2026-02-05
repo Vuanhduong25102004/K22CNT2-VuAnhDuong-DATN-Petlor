@@ -1,7 +1,7 @@
 import apiClient from "./apiClient";
 
 const blogService = {
-  // Lấy danh sách (đã có)
+
   getPublicPosts: () => {
     return apiClient.get("/bai-viet/cong-khai");
   },

@@ -1,7 +1,6 @@
 import apiClient from "./apiClient";
 
 const userService = {
-  // --- NGƯỜI DÙNG (Giữ nguyên) ---
   getAllUsers: (params) => apiClient.get("/nguoi-dung", { params }),
   getUserById: (id) => apiClient.get(`/nguoi-dung/${id}`),
   getMe: () => apiClient.get("/nguoi-dung/me"),
@@ -20,11 +19,10 @@ const userService = {
   }),
   deleteUser: (id) => apiClient.delete(`/nguoi-dung/${id}`),
 
-  // --- NHÂN VIÊN (CẬP NHẬT PHẦN NÀY) ---
+
   getAllStaff: (params) => apiClient.get("/nhan-vien", { params }),
   getStaffById: (id) => apiClient.get(`/nhan-vien/${id}`),
 
-  // 1. Cập nhật Create Staff dùng multipart/form-data
   createStaff: (formData) => {
     return apiClient.post("/nhan-vien", formData, {
       headers: { "Content-Type": "multipart/form-data" },

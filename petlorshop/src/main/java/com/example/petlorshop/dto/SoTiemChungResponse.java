@@ -20,6 +20,6 @@ public class SoTiemChungResponse {
     private LocalDate ngayTaiChung;
     private Integer nhanVienId;
     private String tenBacSi;
-    private Integer lichHenId; // Thêm trường này
+    private Integer lichHenId;
     private String ghiChu;
 }

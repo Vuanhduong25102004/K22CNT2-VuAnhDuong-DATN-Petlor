@@ -20,6 +20,6 @@ public class NguoiDungResponse {
     private String diaChi;
     private String anhDaiDien;
     private LocalDateTime ngayTao;
-    private Role role; // Đã đổi từ String sang Role
+    private Role role;
     private Integer nhanVienId;
 }

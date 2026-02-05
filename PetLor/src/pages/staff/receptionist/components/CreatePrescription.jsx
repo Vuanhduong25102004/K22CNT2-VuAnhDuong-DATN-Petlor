@@ -3,9 +3,6 @@ import React from "react";
 const CreatePrescription = () => {
   return (
     <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#fbfcfc] font-sans text-[#101918]">
-      {/* ====================================================================================
-          HEADER
-         ==================================================================================== */}
       <header className="h-16 border-b border-[#e9f1f0] bg-white flex items-center justify-between px-8 shrink-0 z-20">
         <div className="flex items-center gap-3">
           <button className="p-2 hover:bg-[#f9fbfb] rounded-full transition-colors text-[#588d87]">
@@ -32,12 +29,8 @@ const CreatePrescription = () => {
         </div>
       </header>
 
-      {/* ====================================================================================
-          MAIN CONTENT
-         ==================================================================================== */}
       <main className="flex-1 overflow-y-auto p-8 custom-scrollbar pb-32">
         <div className="max-w-5xl mx-auto space-y-6">
-          {/* SECTION 1: THÔNG TIN BỆNH NHI */}
           <section className="bg-white rounded-2xl border border-[#e9f1f0] shadow-sm overflow-hidden">
             <div className="p-6 border-b border-[#e9f1f0]">
               <h3 className="text-base font-bold text-[#101918] flex items-center gap-2">
@@ -96,7 +89,6 @@ const CreatePrescription = () => {
             </div>
           </section>
 
-          {/* SECTION 2: CHI TIẾT ĐƠN THUỐC */}
           <section className="bg-white rounded-2xl border border-[#e9f1f0] shadow-sm overflow-hidden">
             <div className="p-6 border-b border-[#e9f1f0] flex justify-between items-center">
               <h3 className="text-base font-bold text-[#101918] flex items-center gap-2">
@@ -133,7 +125,6 @@ const CreatePrescription = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#e9f1f0]">
-                    {/* Row 1: Có dữ liệu */}
                     <tr>
                       <td className="px-4 py-4">
                         <div className="relative">
@@ -182,7 +173,6 @@ const CreatePrescription = () => {
                       </td>
                     </tr>
 
-                    {/* Row 2: Placeholder */}
                     <tr>
                       <td className="px-4 py-4">
                         <input
@@ -230,7 +220,6 @@ const CreatePrescription = () => {
             </div>
           </section>
 
-          {/* SECTION 3: CHẨN ĐOÁN & GHI CHÚ */}
           <section className="bg-white rounded-2xl border border-[#e9f1f0] shadow-sm overflow-hidden">
             <div className="p-6 border-b border-[#e9f1f0]">
               <h3 className="text-base font-bold text-[#101918] flex items-center gap-2">
@@ -266,12 +255,7 @@ const CreatePrescription = () => {
         </div>
       </main>
 
-      {/* ====================================================================================
-          FOOTER (FIXED)
-         ==================================================================================== */}
       <footer className="absolute bottom-0 left-0 right-0 h-20 bg-white border-t border-[#e9f1f0] px-8 flex items-center justify-between z-10 lg:left-0">
-        {/* Note: Left-64 was removed to make it fit within this component container. 
-            If sidebar is outside, this footer should span full width of this component */}
         <div className="flex items-center gap-4 text-sm text-[#588d87]">
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-[#2a9d90]"></span> Đang

@@ -22,5 +22,5 @@ public class LichHenUpdateRequest {
     
     private String ghiChu;
     
-    private LichHen.LoaiLichHen loaiLichHen; // Thêm trường này
+    private LichHen.LoaiLichHen loaiLichHen;
 }

@@ -16,6 +16,6 @@ public class SoTiemChungRequest {
     private LocalDate ngayTiem;
     private LocalDate ngayTaiChung;
     private Integer nhanVienId;
-    private Integer lichHenId; // Thêm trường này
+    private Integer lichHenId;
     private String ghiChu;
 }

@@ -17,12 +17,10 @@ public class DanhGiaResponse {
     private String noiDung;
     private LocalDateTime ngayDanhGia;
     
-    // Thông tin sản phẩm được đánh giá (null nếu là đánh giá chung đơn hàng)
     private Integer sanPhamId;
     private String tenSanPham;
     private String hinhAnhSanPham;
 
-    // Thông tin phản hồi từ shop
     private String phanHoi;
     private LocalDateTime ngayPhanHoi;
 }

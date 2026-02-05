@@ -38,7 +38,6 @@ public class NguoiDungService {
     @Autowired
     private FileStorageService fileStorageService;
 
-    // Danh sách các Role được coi là nhân viên
     private static final List<Role> STAFF_ROLES = Arrays.asList(Role.ADMIN, Role.DOCTOR, Role.SPA, Role.STAFF, Role.RECEPTIONIST);
 
     @Transactional
@@ -55,7 +54,6 @@ public class NguoiDungService {
             try {
                 role = Role.valueOf(request.getRole().toUpperCase());
             } catch (IllegalArgumentException e) {
-                // Nếu role không hợp lệ, giữ mặc định là USER hoặc ném lỗi tùy logic
                 role = Role.USER;
             }
         }
@@ -75,7 +73,6 @@ public class NguoiDungService {
         newUser.setAnhDaiDien(fileName);
         NguoiDung savedUser = nguoiDungRepository.save(newUser);
 
-        // Nếu Role thuộc nhóm nhân viên (bao gồm cả ADMIN), tự động tạo bản ghi trong bảng NhanVien
         if (STAFF_ROLES.contains(role)) {
             NhanVien newNhanVien = new NhanVien();
             newNhanVien.setHoTen(savedUser.getHoTen());
@@ -104,7 +101,7 @@ public class NguoiDungService {
                 savedUser.getDiaChi(),
                 savedUser.getAnhDaiDien(),
                 savedUser.getNgayTao(),
-                savedUser.getRole(), // Đã sửa: truyền trực tiếp Enum Role
+                savedUser.getRole(),
                 nhanVienId
         );
     }
@@ -166,7 +163,6 @@ public class NguoiDungService {
         NguoiDung nguoiDung = nguoiDungRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
         
-        // Prevent users from changing their own role via profile update
         request.setRole(null); 
         
         return updateNguoiDungInternal(nguoiDung, request, anhDaiDien);
@@ -207,7 +203,6 @@ public class NguoiDungService {
                     roleChanged = true;
                 }
             } catch (IllegalArgumentException e) {
-                // Ignore invalid role update
             }
         }
 
@@ -218,7 +213,6 @@ public class NguoiDungService {
 
         NguoiDung savedUser = nguoiDungRepository.save(nguoiDung);
 
-        // Nếu user đã có bản ghi nhân viên, cập nhật thông tin
         if (savedUser.getNhanVien() != null) {
             NhanVien nhanVien = savedUser.getNhanVien();
             nhanVien.setHoTen(savedUser.getHoTen());
@@ -232,7 +226,6 @@ public class NguoiDungService {
             
             nhanVienRepository.save(nhanVien);
         }
-        // Nếu user chưa có bản ghi nhân viên nhưng role mới thuộc nhóm nhân viên, tạo mới
         else if (roleChanged && STAFF_ROLES.contains(savedUser.getRole())) {
             NhanVien newNhanVien = new NhanVien();
             newNhanVien.setHoTen(savedUser.getHoTen());

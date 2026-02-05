@@ -23,17 +23,14 @@ public class PhieuNhapRequest {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ChiTietPhieuNhapDto {
-        // Nếu có ID thì là nhập thêm hàng cũ, nếu null thì là tạo mới
         private Integer sanPhamId;
         
-        // Các trường này bắt buộc nếu sanPhamId là null (tạo mới)
         private String tenSanPham;
         private String moTaChiTiet;
-        private BigDecimal giaBan; // Giá bán ra
+        private BigDecimal giaBan;
         private Integer danhMucId;
         private String hinhAnh;
 
-        // Thông tin nhập hàng
         private Integer soLuong;
         private BigDecimal giaNhap;
     }

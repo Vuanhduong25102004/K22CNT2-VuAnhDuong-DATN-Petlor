@@ -79,7 +79,7 @@ public class DonThuocService {
                 donThuoc.getDonThuocId(),
                 donThuoc.getLichHen().getLichHenId(),
                 donThuoc.getBacSi() != null ? donThuoc.getBacSi().getHoTen() : "Không rõ",
-                donThuoc.getBacSi() != null ? donThuoc.getBacSi().getAnhDaiDien() : null, // Lấy ảnh bác sĩ
+                donThuoc.getBacSi() != null ? donThuoc.getBacSi().getAnhDaiDien() : null,
                 donThuoc.getLichHen().getTenKhachHang(),
                 donThuoc.getLichHen().getSdtKhachHang(),
                 donThuoc.getThuCung() != null ? donThuoc.getThuCung().getTenThuCung() : "Không rõ",
