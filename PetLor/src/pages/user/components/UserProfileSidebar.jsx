@@ -54,7 +54,7 @@ const UserProfileSidebar = ({ user }) => {
             </h2>
             <p className="text-xs text-gray-500">
               {/* Hiển thị chức danh nếu là Bác sĩ */}
-              {user?.role === "DOCTOR" ? "Bác sĩ Thú Y" : "Thành viên Bạc"}
+              {user?.role === "DOCTOR" ? "Bác sĩ Thú Y" : "Thành viên"}
             </p>
           </div>
         </div>

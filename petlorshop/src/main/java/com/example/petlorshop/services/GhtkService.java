@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 public class GhtkService {
 
     private static final String GHTK_FEE_URL = "https://services.giaohangtietkiem.vn/services/shipment/fee";
-    
+
     @Autowired
     private CuaHangService cuaHangService;
 
@@ -29,17 +29,20 @@ public class GhtkService {
         try {
             CuaHang shopInfo = cuaHangService.getThongTinCuaHang();
             String token = shopInfo.getGhtkToken();
-            String pickProvince = shopInfo.getTinhThanh();
-            String pickDistrict = shopInfo.getQuanHuyen();
-            
+
+            // Lấy từ DB nhưng nếu null thì fallback
+            String pickProvince = shopInfo.getTinhThanh() != null ? shopInfo.getTinhThanh() : "Hà Nội";
+            String pickDistrict = shopInfo.getQuanHuyen() != null ? shopInfo.getQuanHuyen() : "Quận Cầu Giấy";
+
             if (token == null || token.isEmpty()) {
                 System.err.println("GHTK Token chưa được cấu hình!");
                 return BigDecimal.valueOf(30000);
             }
 
+            token = token.trim();
+
             HttpHeaders headers = new HttpHeaders();
             headers.set("Token", token);
-            headers.set("X-Client-Source", "S22581636");
 
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(GHTK_FEE_URL)
                     .queryParam("pick_province", pickProvince)
@@ -58,6 +61,8 @@ public class GhtkService {
 
             HttpEntity<?> entity = new HttpEntity<>(headers);
 
+            System.out.println("GHTK Request URL: " + builder.toUriString());
+
             ResponseEntity<String> response = restTemplate.exchange(
                     builder.toUriString(),
                     HttpMethod.GET,
@@ -65,19 +70,23 @@ public class GhtkService {
                     String.class
             );
 
+            System.out.println("GHTK Response Body: " + response.getBody());
+
             if (response.getStatusCode().is2xxSuccessful()) {
                 JsonNode root = objectMapper.readTree(response.getBody());
                 if (root.path("success").asBoolean()) {
                     int fee = root.path("fee").path("fee").asInt();
                     return BigDecimal.valueOf(fee);
                 } else {
-                    System.err.println("GHTK Error: " + root.path("message").asText());
+                    System.err.println("GHTK Error Message: " + root.path("message").asText());
                 }
+            } else {
+                System.err.println("GHTK HTTP Error: " + response.getStatusCode());
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         return BigDecimal.valueOf(30000);
     }
 }

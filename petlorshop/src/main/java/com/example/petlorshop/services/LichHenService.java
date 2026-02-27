@@ -35,6 +35,7 @@ public class LichHenService {
     @Autowired private DonThuocRepository donThuocRepository;
     @Autowired private SanPhamRepository sanPhamRepository;
     @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private NotificationService notificationService;
 
     private static final LocalTime OPENING_TIME = LocalTime.of(8, 0);
     private static final LocalTime CLOSING_TIME = LocalTime.of(18, 0);
@@ -138,6 +139,13 @@ public class LichHenService {
         lichHen.setLoaiLichHen(request.getLoaiLichHen() != null ? request.getLoaiLichHen() : LichHen.LoaiLichHen.THUONG_LE);
 
         LichHen savedLichHen = lichHenRepository.save(lichHen);
+
+        notificationService.sendGlobalNotification("Có lịch hẹn mới #" + savedLichHen.getLichHenId() + " từ " + nguoiDung.getHoTen());
+
+        if (assignedNhanVien.getEmail() != null) {
+            notificationService.sendDoctorNotification(assignedNhanVien.getEmail(), "Bạn có lịch hẹn mới #" + savedLichHen.getLichHenId() + " vào lúc " + savedLichHen.getThoiGianBatDau());
+        }
+
         return convertToResponse(savedLichHen);
     }
 
@@ -178,6 +186,11 @@ public class LichHenService {
         lichHen.setLoaiLichHen(request.getLoaiLichHen() != null ? request.getLoaiLichHen() : LichHen.LoaiLichHen.THUONG_LE);
 
         LichHen savedLichHen = lichHenRepository.save(lichHen);
+
+        if (assignedNhanVien.getEmail() != null) {
+            notificationService.sendDoctorNotification(assignedNhanVien.getEmail(), "Bạn có lịch hẹn mới #" + savedLichHen.getLichHenId() + " (đặt bởi Lễ tân)");
+        }
+
         return convertToResponse(savedLichHen);
     }
     
@@ -222,6 +235,13 @@ public class LichHenService {
         lichHen.setLoaiLichHen(request.getLoaiLichHen() != null ? request.getLoaiLichHen() : LichHen.LoaiLichHen.THUONG_LE);
 
         LichHen savedLichHen = lichHenRepository.save(lichHen);
+
+        notificationService.sendGlobalNotification("Có lịch hẹn mới #" + savedLichHen.getLichHenId() + " từ khách vãng lai " + request.getTenKhachHang());
+
+        if (assignedNhanVien.getEmail() != null) {
+            notificationService.sendDoctorNotification(assignedNhanVien.getEmail(), "Bạn có lịch hẹn mới #" + savedLichHen.getLichHenId() + " (Khách vãng lai)");
+        }
+
         return convertToResponse(savedLichHen);
     }
 
@@ -388,6 +408,15 @@ public class LichHenService {
         
         lichHen.setTrangThai(LichHen.TrangThai.DA_XAC_NHAN);
         LichHen savedLichHen = lichHenRepository.save(lichHen);
+
+        // Thông báo cho khách hàng
+        if (lichHen.getNguoiDung() != null) {
+            notificationService.sendPrivateNotification(
+                lichHen.getNguoiDung().getEmail(), 
+                "Lịch hẹn #" + savedLichHen.getLichHenId() + " của bạn đã được xác nhận bởi bác sĩ " + user.getHoTen()
+            );
+        }
+
         return convertToResponse(savedLichHen);
     }
 
@@ -471,6 +500,15 @@ public class LichHenService {
         }
         
         LichHen savedLichHen = lichHenRepository.save(lichHen);
+
+        // Thông báo cho khách hàng
+        if (lichHen.getNguoiDung() != null) {
+            notificationService.sendPrivateNotification(
+                lichHen.getNguoiDung().getEmail(), 
+                "Lịch hẹn #" + savedLichHen.getLichHenId() + " đã hoàn thành. Cảm ơn bạn đã sử dụng dịch vụ!"
+            );
+        }
+
         return convertToResponse(savedLichHen);
     }
 
@@ -494,6 +532,10 @@ public class LichHenService {
         lichHen.setTrangThai(LichHen.TrangThai.DA_HUY);
         lichHen.setLyDoHuy(lyDoHuy);
         LichHen savedLichHen = lichHenRepository.save(lichHen);
+
+        // Thông báo cho Admin/Lễ tân
+        notificationService.sendGlobalNotification("Khách hàng " + lichHen.getNguoiDung().getHoTen() + " đã hủy lịch hẹn #" + savedLichHen.getLichHenId());
+
         return convertToResponse(savedLichHen);
     }
 

@@ -1,5 +1,6 @@
 package com.example.petlorshop.repositories;
 
+import com.example.petlorshop.dto.DashboardResponse;
 import com.example.petlorshop.models.LichHen;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,38 +20,40 @@ public interface LichHenRepository extends JpaRepository<LichHen, Integer> {
                                             @Param("newStart") LocalDateTime newStart,
                                             @Param("newEnd") LocalDateTime newEnd);
 
-    // Sửa lại query này để dùng BETWEEN cho chuẩn JPA và tránh lỗi FUNCTION('DATE') trên một số DB
     @Query("SELECT lh FROM LichHen lh WHERE lh.nhanVien.nhanVienId = :nhanVienId AND lh.thoiGianBatDau BETWEEN :start AND :end ORDER BY lh.thoiGianBatDau")
     List<LichHen> findByNhanVienIdAndDateRange(@Param("nhanVienId") Integer nhanVienId,
                                         @Param("start") LocalDateTime start,
                                         @Param("end") LocalDateTime end);
 
-    // Tìm tất cả lịch hẹn trong khoảng thời gian (cho Lễ tân)
     @Query("SELECT lh FROM LichHen lh WHERE lh.thoiGianBatDau BETWEEN :start AND :end ORDER BY lh.thoiGianBatDau")
     List<LichHen> findAllByDateRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-    // Global Search (List)
     @Query("SELECT l FROM LichHen l WHERE LOWER(l.ghiChu) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<LichHen> searchByKeyword(@Param("keyword") String keyword);
 
-    // Page Search
     @Query("SELECT l FROM LichHen l WHERE LOWER(l.ghiChu) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<LichHen> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     List<LichHen> findByNguoiDung_Email(String email);
     
-    // Tìm lịch hẹn theo ID nhân viên
     List<LichHen> findByNhanVien_NhanVienId(Integer nhanVienId);
 
-    // Đếm số lịch hẹn trong khoảng thời gian (dùng cho hôm nay)
     @Query("SELECT COUNT(lh) FROM LichHen lh WHERE lh.nhanVien.nhanVienId = :nhanVienId AND lh.thoiGianBatDau BETWEEN :start AND :end")
     long countLichHenByTimeRange(@Param("nhanVienId") Integer nhanVienId, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-    // Đếm số ca khẩn cấp trong khoảng thời gian
     @Query("SELECT COUNT(lh) FROM LichHen lh WHERE lh.nhanVien.nhanVienId = :nhanVienId AND lh.loaiLichHen = :loaiLichHen AND lh.thoiGianBatDau BETWEEN :start AND :end")
     long countCaKhanCapByTimeRange(@Param("nhanVienId") Integer nhanVienId, @Param("loaiLichHen") LichHen.LoaiLichHen loaiLichHen, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-    // Đếm số ca khám đã hoàn thành (Bỏ DISTINCT để đếm tổng lượt khám)
     @Query("SELECT COUNT(lh) FROM LichHen lh WHERE lh.nhanVien.nhanVienId = :nhanVienId AND lh.trangThai = :trangThai")
     long countBenhNhanDaTiepNhan(@Param("nhanVienId") Integer nhanVienId, @Param("trangThai") LichHen.TrangThai trangThai);
+
+    // --- Dashboard Queries ---
+
+    // Top dịch vụ phổ biến (dựa trên số lượng lịch hẹn đã hoàn thành)
+    @Query("SELECT new com.example.petlorshop.dto.DashboardResponse$TopServiceDto(dv.tenDichVu, COUNT(lh)) " +
+           "FROM LichHen lh JOIN lh.dichVu dv " +
+           "WHERE lh.trangThai = 'DA_HOAN_THANH' " +
+           "GROUP BY dv.dichVuId, dv.tenDichVu " +
+           "ORDER BY COUNT(lh) DESC")
+    List<DashboardResponse.TopServiceDto> findTopServices(Pageable pageable);
 }

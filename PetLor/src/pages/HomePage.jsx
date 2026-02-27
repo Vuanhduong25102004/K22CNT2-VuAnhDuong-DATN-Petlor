@@ -277,7 +277,7 @@ const Homepage = () => {
           </div>
           <Link
             className="bg-white border border-gray-200 px-6 py-3 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition-colors"
-            to="/shop"
+            to="/products"
           >
             Xem tất cả
           </Link>
@@ -304,9 +304,6 @@ const Homepage = () => {
                       "https://via.placeholder.com/300x300?text=No+Image";
                   }}
                 />
-                <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
-                  New
-                </div>
               </div>
               <div className="p-6 flex flex-col flex-grow">
                 <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2 min-h-[56px]">

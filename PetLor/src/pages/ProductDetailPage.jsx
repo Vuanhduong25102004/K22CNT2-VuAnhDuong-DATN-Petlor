@@ -134,6 +134,28 @@ const ProductDetailPage = () => {
     }
   };
 
+  const handleInputChange = (e) => {
+    if (!product || product.stock <= 0) return;
+
+    const value = e.target.value;
+
+    if (value === "") {
+      setQuantity("");
+      return;
+    }
+
+    const numValue = parseInt(value);
+    if (!isNaN(numValue)) {
+      if (numValue < 1) setQuantity(1);
+      else if (numValue > product.stock) setQuantity(product.stock);
+      else setQuantity(numValue);
+    }
+  };
+
+  const handleInputBlur = () => {
+    if (quantity === "") setQuantity(1);
+  };
+
   const handleReviewPageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalReviewPages) {
       setReviewPage(newPage);
@@ -288,11 +310,7 @@ const ProductDetailPage = () => {
             </div>
 
             <div className="flex flex-col" data-aos="fade-left">
-              <div className="mb-4">
-                <span className="px-4 py-1.5 bg-primary/10 text-primary text-[11px] font-extrabold rounded-full uppercase tracking-[0.1em]">
-                  Best Seller
-                </span>
-              </div>
+              <div className="mb-4"></div>
               <h1 className="text-3xl lg:text-5xl font-extrabold text-slate-900 mb-4 leading-tight">
                 {product.name}
               </h1>
@@ -324,16 +342,7 @@ const ProductDetailPage = () => {
                   <span className="text-4xl font-extrabold text-primary tracking-tight">
                     {formatCurrency(product.price)}
                   </span>
-                  <span className="text-lg text-slate-400 line-through">
-                    {formatCurrency(product.price * 1.2)}
-                  </span>
-                  <span className="bg-red-500 text-white text-[11px] font-black px-2.5 py-1 rounded-lg">
-                    -20%
-                  </span>
                 </div>
-                <p className="text-sm font-medium text-slate-500">
-                  Giá tốt nhất trong 30 ngày qua
-                </p>
               </div>
 
               <div className="space-y-8 mb-10">
@@ -363,12 +372,17 @@ const ProductDetailPage = () => {
                             remove
                           </span>
                         </button>
+
                         <input
-                          className="w-12 text-center border-none bg-transparent focus:ring-0 text-base font-bold text-slate-900"
-                          type="text"
+                          className="w-14 text-center border-none bg-transparent focus:ring-0 text-base font-bold text-slate-900"
+                          type="number" // Đổi thành type="number" để hiển thị bàn phím số trên điện thoại
                           value={quantity}
-                          readOnly
+                          onChange={handleInputChange}
+                          onBlur={handleInputBlur}
+                          min="1"
+                          max={product.stock}
                         />
+
                         <button
                           onClick={() => handleQuantityChange(1)}
                           className="w-10 h-10 flex items-center justify-center hover:bg-slate-50 rounded-xl transition-colors text-slate-500"

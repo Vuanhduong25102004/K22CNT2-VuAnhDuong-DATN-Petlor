@@ -189,6 +189,20 @@ const ProfilePage = () => {
                     defaultValue="Công nghệ thông tin"
                   />
                 </div>
+                <div className="space-y-2.5">
+                  <label className="text-sm font-extrabold text-gray-500 flex items-center gap-2 ml-1 uppercase tracking-wider">
+                    <span className="material-symbols-outlined text-emerald-600 text-lg">
+                      school
+                    </span>
+                    Khóa
+                  </label>
+                  <input
+                    className="w-full px-5 py-4 bg-gray-50 border border-transparent rounded-xl focus:ring-2 focus:ring-emerald-600 focus:bg-white outline-none font-semibold text-gray-900"
+                    readOnly
+                    type="text"
+                    defaultValue="K22CNT2"
+                  />
+                </div>
               </div>
             </div>
           </div>

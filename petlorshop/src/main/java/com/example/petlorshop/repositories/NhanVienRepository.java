@@ -1,5 +1,6 @@
 package com.example.petlorshop.repositories;
 
+import com.example.petlorshop.dto.DashboardResponse;
 import com.example.petlorshop.models.NhanVien;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,4 +26,8 @@ public interface NhanVienRepository extends JpaRepository<NhanVien, Integer> {
     Page<NhanVien> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     Optional<NhanVien> findByNguoiDung_UserId(Integer userId);
+
+    // Lấy danh sách nhân viên cho Dashboard (Tên, Chức vụ, Ảnh)
+    @Query("SELECT new com.example.petlorshop.dto.DashboardResponse$StaffDto(n.hoTen, n.chucVu, n.anhDaiDien) FROM NhanVien n")
+    List<DashboardResponse.StaffDto> findAllStaffForDashboard();
 }

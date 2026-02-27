@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+    <h2>WebSocket Test</h2>
+    <p>Mở Console (F12) để xem log chi tiết.</p>
+    <div id="messages" style="border: 1px solid #ccc; padding: 10px; min-height: 200px;"></div>
+
+    <script>
+        // =================================================================
+        // BƯỚC QUAN TRỌNG: DÁN TOKEN CỦA BẠN VÀO ĐÂY
+        // =================================================================
+        var token = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiQURNSU4iLCJob1RlbiI6IlZ1IEFuaCBEdW9uZyIsInVzZXJJZCI6MSwic3ViIjoidnVhbmhkdW9uZzI1MTAyMDA0MkBnbWFpbC5jb20iLCJpYXQiOjE3NzIxOTk2MzUsImV4cCI6MTc3MjI4NjAzNX0.Ey1dWJYURfR22j6tPCWM8fMnASzQcXA7fHKYGzmkY9U"; 
+        // =================================================================
+
+        var socket = new SockJS('http://localhost:8080/ws');
+        var stompClient = Stomp.over(socket);
+
+        stompClient.connect(
+            // Header xác thực
+            {'Authorization': 'Bearer ' + token}, 
+            
+            // Callback khi kết nối thành công
+            function (frame) {
+                console.log('Connected: ' + frame);
+                logMessage("Connected to WebSocket!", "green");
+
+                // 1. Đăng ký kênh chung cho Admin/Lễ tân
+                stompClient.subscribe('/topic/admin-notifications', function (message) {
+                    logMessage("Admin/Receptionist: " + message.body, "red");
+                });
+                logMessage("Subscribed to /topic/admin-notifications", "gray");
+
+                // 2. Đăng ký kênh riêng cho User (tự động map theo token)
+                stompClient.subscribe('/user/queue/notifications', function (message) {
+                    logMessage("Private User: " + message.body, "blue");
+                });
+                logMessage("Subscribed to /user/queue/notifications", "gray");
+
+                // 3. Đăng ký kênh riêng cho Bác sĩ
+                stompClient.subscribe('/user/queue/doctor-notifications', function (message) {
+                    logMessage("Doctor: " + message.body, "purple");
+                });
+                logMessage("Subscribed to /user/queue/doctor-notifications", "gray");
+            },
+
+            // Callback khi kết nối thất bại
+            function(error) {
+                console.error('Connection error: ' + error);
+                logMessage("Connection failed: " + error, "red");
+            }
+        );
+
+        function logMessage(message, color) {
+            var p = document.createElement('p');
+            p.style.color = color;
+            p.appendChild(document.createTextNode(message));
+            document.getElementById('messages').appendChild(p);
+        }
+    </script>
+</body>
+</html>

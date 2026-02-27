@@ -112,7 +112,7 @@ const showConfirmToast = (message, onConfirm) => {
       background: "white",
       boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.15)", // Shadow đậm hơn chút để nổi bật
       padding: "16px",
-      border: "1px solid #2a9d90", // Border xanh để nhấn mạnh
+      border: "1px solid #2a9d90",
       minWidth: "350px",
     },
   });

@@ -409,12 +409,6 @@ const ProductsPage = () => {
                         />
                       </Link>
 
-                      {!isOutOfStock && (
-                        <div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider shadow-sm">
-                          NEW
-                        </div>
-                      )}
-
                       {isOutOfStock && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none">
                           <div className="bg-gray-800 text-white px-4 py-2 rounded-lg font-bold uppercase tracking-wider shadow-lg transform -rotate-12 border-2 border-white">

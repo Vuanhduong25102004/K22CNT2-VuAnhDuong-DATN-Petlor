@@ -53,12 +53,6 @@ const AppointmentFilters = ({
         </div>
         {/* Buttons */}
         <div className="flex space-x-3">
-          <button className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
-            <span className="material-symbols-outlined text-sm mr-2">
-              calendar_month
-            </span>{" "}
-            Lịch biểu
-          </button>
           <button
             className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-green-600 focus:outline-none"
             onClick={onOpenAddModal}

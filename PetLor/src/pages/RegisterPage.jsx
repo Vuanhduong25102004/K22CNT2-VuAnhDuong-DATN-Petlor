@@ -216,7 +216,7 @@ const RegisterPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-lg bg-primary py-3.5 text-base font-bold text-[#102216] shadow-md hover:opacity-90 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 mt-6 hover:shadow-lg"
+              className="w-full rounded-lg bg-primary py-3.5 text-base font-bold text-white shadow-md hover:opacity-90 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 mt-6 hover:shadow-lg"
             >
               {loading ? "Đang xử lý..." : "Đăng ký ngay"}
             </button>

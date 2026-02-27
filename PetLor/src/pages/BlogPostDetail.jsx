@@ -116,9 +116,22 @@ const BlogPostDetail = () => {
           </h1>
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 text-sm">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full border-2 border-primary/20 bg-gray-100 flex items-center justify-center text-primary font-bold text-xl overflow-hidden">
-                {post.tenTacGia ? post.tenTacGia.charAt(0) : "A"}
-              </div>
+              {/* Cập nhật: Logic hiển thị ảnh tác giả */}
+              {post.anhTacGia ? (
+                <img
+                  src={getImageUrl(post.anhTacGia)}
+                  alt={post.tenTacGia}
+                  className="w-12 h-12 rounded-full border-2 border-primary/20 object-cover"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                  }}
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-full border-2 border-primary/20 bg-gray-100 flex items-center justify-center text-primary font-bold text-xl overflow-hidden">
+                  {post.tenTacGia ? post.tenTacGia.charAt(0) : "A"}
+                </div>
+              )}
+
               <div>
                 <p className="font-bold text-gray-900">
                   {post.tenTacGia || "Admin"}
@@ -200,7 +213,7 @@ const BlogPostDetail = () => {
               {relatedPosts.map((related, index) => (
                 <Link
                   key={related.baiVietId || index}
-                  to={`/bai-viet/${related.slug}`}
+                  to={`/blog/${related.slug}`}
                   className="group block h-full"
                 >
                   <article className="bg-white rounded-3xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all h-full flex flex-col">

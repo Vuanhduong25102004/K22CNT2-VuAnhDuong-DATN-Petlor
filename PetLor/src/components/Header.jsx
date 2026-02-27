@@ -2,18 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import authService from "../services/authService";
 import userService from "../services/userService";
-// Import useCart hook
 import { useCart } from "../context/CartContext";
 
 const Header = () => {
   const [user, setUser] = useState(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Get cartData from CartContext
   const { cartData } = useCart();
 
-  // Logic active link
   const isActive = (path) => {
     return location.pathname === path
       ? "text-primary font-bold"
@@ -28,7 +26,6 @@ const Header = () => {
           const response = await userService.getMe();
           setUser(response);
         } catch (error) {
-          console.error("Failed to fetch user info:", error);
           authService.logout();
           setUser(null);
         }
@@ -36,9 +33,17 @@ const Header = () => {
         setUser(null);
       }
     };
-
     fetchUser();
+    setIsMenuOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleLogout = () => {
     authService.logout();
@@ -46,43 +51,30 @@ const Header = () => {
     navigate("/");
   };
 
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-
-  // Class chung cho các nút tròn (Search, Cart, Logout)
   const iconButtonClass =
     "w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-slate-100 text-slate-600";
-
-  // Calculate unique item count
-  // We use cartData?.items?.length to count distinct products, ignoring their individual quantities.
   const cartItemCount = cartData?.items?.length || 0;
+
+  const navLinks = [
+    { path: "/", label: "Trang chủ" },
+    { path: "/services", label: "Dịch vụ" },
+    { path: "/products", label: "Sản phẩm" },
+    { path: "/aboutus", label: "Về chúng tôi" },
+    { path: "/blog", label: "Bài viết" },
+    { path: "/profilepage", label: "Thông tin cá nhân" },
+  ];
 
   return (
     <header
       className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${
         isScrolled
-          ? "bg-white/50 backdrop-blur-md shadow-sm" // Khi kéo xuống: Trong suốt mờ ảo (Glassmorphism)
+          ? "bg-white/50 backdrop-blur-md shadow-sm"
           : "bg-white shadow-sm"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        {/* LEFT SECTION: LOGO & NAV */}
         <div className="flex items-center gap-8">
-          {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
             <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
               <span className="material-symbols-outlined">pets</span>
@@ -92,49 +84,22 @@ const Header = () => {
             </span>
           </Link>
 
-          {/* Navigation - Desktop */}
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-            <Link className={`${isActive("/")} transition-colors`} to="/">
-              Trang chủ
-            </Link>
-            <Link
-              className={`${isActive("/services")} transition-colors`}
-              to="/services"
-            >
-              Dịch vụ
-            </Link>
-            <Link
-              className={`${isActive("/products")} transition-colors`}
-              to="/products"
-            >
-              Sản phẩm
-            </Link>
-            <Link
-              className={`${isActive("/aboutus")} transition-colors`}
-              to="/aboutus"
-            >
-              Về chúng tôi
-            </Link>
-            <Link
-              className={`${isActive("/blog")} transition-colors`}
-              to="/blog"
-            >
-              Bài viết
-            </Link>
-            <Link
-              className={`${isActive("/profilepage")} transition-colors`}
-              to="/profilepage"
-            >
-              Thông tin cá nhân
-            </Link>
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                className={`${isActive(link.path)} transition-colors`}
+                to={link.path}
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
         </div>
 
-        {/* RIGHT SECTION: ACTIONS & AUTH */}
         <div className="flex items-center gap-3">
           <Link to="/cart" className={`relative ${iconButtonClass}`}>
             <span className="material-symbols-outlined">shopping_cart</span>
-            {/* Render badge dynamically if count > 0 */}
             {cartItemCount > 0 && (
               <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">
                 {cartItemCount > 99 ? "99+" : cartItemCount}
@@ -142,7 +107,6 @@ const Header = () => {
             )}
           </Link>
 
-          {/* User Auth Logic */}
           {user ? (
             <div className="flex items-center gap-3 ml-2">
               <Link
@@ -160,17 +124,11 @@ const Header = () => {
                   }
                   alt={user.hoTen}
                   className="w-8 h-8 rounded-full object-cover border border-white shadow-sm"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = `https://ui-avatars.com/api/?name=${user.hoTen}&background=random`;
-                  }}
                 />
               </Link>
 
-              {/* Nút Logout - Đã sửa thành tròn và căn giữa */}
               <button
                 onClick={handleLogout}
-                // Sử dụng lại logic căn giữa, nhưng override màu sắc khi hover
                 className="w-10 h-10 flex items-center justify-center rounded-full transition-colors text-slate-400 hover:text-red-600 hover:bg-red-50"
                 title="Đăng xuất"
               >
@@ -180,7 +138,7 @@ const Header = () => {
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-4 ml-2">
+            <div className="hidden sm:flex items-center gap-4 ml-2">
               <Link
                 to="/login"
                 className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors"
@@ -195,15 +153,59 @@ const Header = () => {
             </div>
           )}
 
-          {/* Nút Đặt lịch (Chỉ hiện khi đã đăng nhập) */}
           {user && (
-            <Link to="/booking">
-              <button className="hidden lg:block ml-2 bg-primary text-white px-5 py-2.5 rounded-full font-semibold text-sm hover:opacity-90 hover:shadow-lg hover:-translate-y-0.5 transition-all">
+            <Link to="/booking" className="hidden lg:block">
+              <button className="ml-2 bg-primary text-white px-5 py-2.5 rounded-full font-semibold text-sm hover:opacity-90 hover:shadow-lg hover:-translate-y-0.5 transition-all">
                 Đặt lịch ngay
               </button>
             </Link>
           )}
+
+          <button
+            className="md:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-600 transition-colors"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            <span className="material-symbols-outlined">
+              {isMenuOpen ? "close" : "menu"}
+            </span>
+          </button>
         </div>
+      </div>
+
+      <div
+        className={`md:hidden overflow-hidden transition-all duration-300 bg-white shadow-inner ${
+          isMenuOpen
+            ? "max-h-screen border-t border-slate-100"
+            : "max-h-0 border-t-0"
+        }`}
+      >
+        <nav className="flex flex-col p-4 gap-4 text-sm font-medium">
+          {navLinks.map((link) => (
+            <Link
+              key={link.path}
+              className={`${isActive(link.path)} py-2 transition-colors`}
+              to={link.path}
+            >
+              {link.label}
+            </Link>
+          ))}
+          {!user && (
+            <div className="flex flex-col gap-3 pt-2 border-t border-slate-50">
+              <Link
+                to="/login"
+                className="text-center py-3 text-slate-600 font-semibold border border-slate-200 rounded-full"
+              >
+                Đăng nhập
+              </Link>
+              <Link
+                to="/booking"
+                className="text-center py-3 bg-primary text-white font-semibold rounded-full shadow-sm"
+              >
+                Đặt lịch ngay
+              </Link>
+            </div>
+          )}
+        </nav>
       </div>
     </header>
   );

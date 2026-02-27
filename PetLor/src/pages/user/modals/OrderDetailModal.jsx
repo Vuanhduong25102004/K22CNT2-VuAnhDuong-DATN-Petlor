@@ -6,7 +6,6 @@ import {
 } from "../../../utils/formatters";
 
 const OrderDetailModal = ({ isOpen, onClose, detail, loading }) => {
-  // Logic tắt cuộn chuột
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -31,7 +30,6 @@ const OrderDetailModal = ({ isOpen, onClose, detail, loading }) => {
         data-aos="zoom-in"
         data-aos-duration="400"
       >
-        {/* Header */}
         <div className="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/30">
           <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
             <span className="material-icons-outlined text-[#10B981]">
@@ -41,13 +39,13 @@ const OrderDetailModal = ({ isOpen, onClose, detail, loading }) => {
           </h3>
           <button
             onClick={onClose}
-            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 transition-all"
           >
             <span className="material-icons">close</span>
           </button>
         </div>
 
-        <div className="p-8 max-h-[75vh] overflow-y-auto custom-scrollbar">
+        <div className="p-4 md:p-8 max-h-[75vh] overflow-y-auto custom-scrollbar">
           {loading ? (
             <div className="flex flex-col items-center py-10">
               <div className="w-10 h-10 border-4 border-[#10B981] border-t-transparent rounded-full animate-spin mb-4"></div>
@@ -55,8 +53,7 @@ const OrderDetailModal = ({ isOpen, onClose, detail, loading }) => {
             </div>
           ) : (
             detail && (
-              <div className="space-y-8">
-                {/* Status & ID */}
+              <div className="space-y-6 md:space-y-8">
                 <div className="flex flex-col sm:flex-row justify-between gap-4">
                   <div>
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
@@ -66,11 +63,10 @@ const OrderDetailModal = ({ isOpen, onClose, detail, loading }) => {
                       #ORD-{detail.donHangId}
                     </p>
                   </div>
-                  <div className="flex flex-col items-end">
+                  <div className="flex flex-col items-start sm:items-end">
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
                       Trạng thái
                     </p>
-                    {/* Dùng badge từ formatters */}
                     <div
                       className={`flex items-center gap-2 px-4 py-1.5 rounded-xl border ${ui.bgColor} ${ui.borderColor} ${ui.textColor} font-bold text-sm`}
                     >
@@ -79,7 +75,6 @@ const OrderDetailModal = ({ isOpen, onClose, detail, loading }) => {
                   </div>
                 </div>
 
-                {/* Thông tin giao hàng */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-3xl border border-gray-100">
                   <div className="space-y-3">
                     <p className="text-xs font-bold text-[#10B981] uppercase flex items-center gap-2">
@@ -116,7 +111,6 @@ const OrderDetailModal = ({ isOpen, onClose, detail, loading }) => {
                   </div>
                 </div>
 
-                {/* Danh sách sản phẩm */}
                 <div className="space-y-4">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
                     Sản phẩm đã đặt ({detail.chiTietDonHangs?.length})
@@ -128,10 +122,16 @@ const OrderDetailModal = ({ isOpen, onClose, detail, loading }) => {
                         className="flex gap-4 py-4 items-center"
                       >
                         <div className="w-16 h-16 bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 flex-shrink-0">
+                          {/* SỬA TẠI ĐÂY: Sử dụng fallback giữa hinhAnh và hinhAnhUrl */}
                           <img
-                            src={`${API_URL}/uploads/${item.hinhAnhUrl}`}
+                            src={`${API_URL}/uploads/${item.hinhAnh || item.hinhAnhUrl}`}
                             className="w-full h-full object-cover"
                             alt={item.tenSanPham}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src =
+                                "https://via.placeholder.com/150?text=No+Image";
+                            }}
                           />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -156,20 +156,16 @@ const OrderDetailModal = ({ isOpen, onClose, detail, loading }) => {
                   </div>
                 </div>
 
-                {/* Tổng kết tiền */}
                 <div className="bg-gray-50 rounded-3xl p-6 space-y-3 border border-gray-100 shadow-sm">
                   <div className="flex justify-between text-sm text-gray-500 font-medium">
                     <span>Tổng tiền hàng:</span>
                     <span>{formatCurrency(detail.tongTienHang)}</span>
                   </div>
-
                   <div className="flex justify-between text-sm font-bold text-emerald-600">
                     <span>Giảm giá khuyến mãi:</span>
                     <span>-{formatCurrency(detail.soSienGiam || 0)}</span>
                   </div>
-
                   <div className="h-[1px] bg-gray-200 my-2"></div>
-
                   <div className="flex justify-between items-end">
                     <span className="font-extrabold text-gray-900">
                       Tổng thanh toán:
@@ -180,7 +176,6 @@ const OrderDetailModal = ({ isOpen, onClose, detail, loading }) => {
                   </div>
                 </div>
 
-                {/* Lý do hủy */}
                 {detail.trangThai === "Đã hủy" && (
                   <div className="p-4 bg-red-50 rounded-2xl border border-red-100 flex items-start gap-3">
                     <span className="material-icons text-red-500 mt-0.5">
@@ -204,7 +199,7 @@ const OrderDetailModal = ({ isOpen, onClose, detail, loading }) => {
         <div className="p-6 bg-gray-50 flex justify-end">
           <button
             onClick={onClose}
-            className="px-10 py-3 bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all shadow-lg"
+            className="w-full sm:w-auto px-10 py-3 bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all shadow-lg"
           >
             Đóng
           </button>

@@ -40,6 +40,8 @@ public class DonHangService {
     private DonThuocRepository donThuocRepository;
     @Autowired
     private DanhGiaRepository danhGiaRepository;
+    @Autowired
+    private NotificationService notificationService;
 
     public Page<DonHangResponse> getAllDonHang(Pageable pageable, String keyword) {
         if (StringUtils.hasText(keyword)) {
@@ -152,7 +154,11 @@ public class DonHangService {
             khuyenMaiService.suDungMaKhuyenMai(calculationResult.getKhuyenMai().getMaCode());
         }
 
-        return donHangRepository.save(donHang);
+        DonHang savedDonHang = donHangRepository.save(donHang);
+
+        notificationService.sendGlobalNotification("Có đơn hàng mới #" + savedDonHang.getDonHangId() + " từ " + nguoiDung.getHoTen());
+
+        return savedDonHang;
     }
     
     @Transactional
@@ -209,7 +215,11 @@ public class DonHangService {
             khuyenMaiService.suDungMaKhuyenMai(calculationResult.getKhuyenMai().getMaCode());
         }
 
-        return donHangRepository.save(donHang);
+        DonHang savedDonHang = donHangRepository.save(donHang);
+
+        notificationService.sendGlobalNotification("Có đơn hàng mới #" + savedDonHang.getDonHangId() + " từ khách vãng lai " + request.getHoTenNguoiNhan());
+
+        return savedDonHang;
     }
 
     @Transactional
@@ -297,6 +307,15 @@ public class DonHangService {
         }
 
         DonHang savedDonHang = donHangRepository.save(donHang);
+
+        // Gửi thông báo cho khách hàng nếu có tài khoản
+        if (savedDonHang.getNguoiDung() != null) {
+            notificationService.sendPrivateNotification(
+                savedDonHang.getNguoiDung().getEmail(), // Dùng email làm principal name
+                "Đơn hàng #" + savedDonHang.getDonHangId() + " của bạn đã chuyển sang trạng thái: " + savedDonHang.getTrangThai().getDisplayName()
+            );
+        }
+
         return convertToResponse(savedDonHang);
     }
 

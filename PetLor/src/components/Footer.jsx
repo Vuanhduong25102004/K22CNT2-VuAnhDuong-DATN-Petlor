@@ -79,7 +79,7 @@ const Footer = () => {
                 type="email"
               />
               <button
-                className="bg-primary text-[#111813] px-4 rounded-r-lg font-bold text-sm hover:bg-opacity-90 transition-opacity"
+                className="bg-primary text-white px-4 rounded-r-lg font-bold text-sm hover:bg-opacity-90 transition-opacity"
                 type="submit"
               >
                 Gửi

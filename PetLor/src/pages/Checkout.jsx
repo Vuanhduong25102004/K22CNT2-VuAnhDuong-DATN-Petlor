@@ -19,7 +19,6 @@ const Checkout = () => {
   const { selectedItems, totalAmount, appliedVoucher } = location.state || {};
 
   const [currentUser, setCurrentUser] = useState(null);
-
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -35,15 +34,14 @@ const Checkout = () => {
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
-
   const [selectedProvinceId, setSelectedProvinceId] = useState("");
   const [selectedDistrictId, setSelectedDistrictId] = useState("");
-
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [loading, setLoading] = useState(false);
-
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [createdOrderId, setCreatedOrderId] = useState(null);
+
+  // State mới lưu mã giao dịch tạm cho QR Code
+  const [tempTransactionCode, setTempTransactionCode] = useState("");
 
   const SHIPPING_FEE = 30000;
   const DISCOUNT = 0;
@@ -93,7 +91,6 @@ const Checkout = () => {
         } catch (error) {
           console.error("Lỗi lấy thông tin user:", error);
           setCurrentUser(null);
-
           setPaymentMethod("MOMO");
         }
       } else {
@@ -181,76 +178,37 @@ const Checkout = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handlePlaceOrder = async () => {
-    if (!isFormValid) {
-      toast.error("Vui lòng điền đầy đủ thông tin giao hàng!");
-      return;
-    }
+  const constructOrderPayload = () => {
+    const itemsPayload = selectedItems.map((item) => ({
+      sanPhamId: item.sanPhamId || item.id,
+      soLuong: item.soLuong,
+    }));
 
-    setLoading(true);
+    return {
+      hoTenNguoiNhan: formData.fullName,
+      soDienThoaiNhan: formData.phone,
+      diaChiGiaoHang: formData.diaChi,
+      tinhThanh: formData.tinhThanh,
+      quanHuyen: formData.quanHuyen,
+      phuongXa: formData.phuongXa,
+      phuongThucThanhToan: paymentMethod,
+      maKhuyenMai: formData.voucherCode,
+      chiTietDonHangs: itemsPayload,
+      ghiChu: formData.note,
+      email: currentUser ? currentUser.email : formData.email,
+    };
+  };
 
-    try {
-      const itemsPayload = selectedItems.map((item) => ({
-        sanPhamId: item.sanPhamId || item.id,
-        soLuong: item.soLuong,
-      }));
-
-      const basePayload = {
-        hoTenNguoiNhan: formData.fullName,
-        soDienThoaiNhan: formData.phone,
-        diaChiGiaoHang: formData.diaChi,
-        tinhThanh: formData.tinhThanh,
-        quanHuyen: formData.quanHuyen,
-        phuongXa: formData.phuongXa,
-        phuongThucThanhToan: paymentMethod,
-        maKhuyenMai: formData.voucherCode,
-        chiTietDonHangs: itemsPayload,
-        ghiChu: formData.note,
+  const submitOrderToBackend = async (payload) => {
+    if (!currentUser) {
+      return await orderService.createOrder(payload, true);
+    } else {
+      const userPayload = {
+        ...payload,
+        userId: currentUser.userId,
+        hoTen: formData.fullName,
       };
-
-      let orderResponse;
-
-      if (!currentUser) {
-        if (paymentMethod === "COD") {
-          toast.warn(
-            "Khách vãng lai vui lòng chọn thanh toán Online (VNPAY/MOMO)!",
-            {
-              icon: "💳",
-            },
-          );
-          setLoading(false);
-          return;
-        }
-
-        const guestPayload = { ...basePayload, email: formData.email };
-        const res = await orderService.createOrder(guestPayload, true);
-        orderResponse = res.data || res;
-      } else {
-        const userPayload = {
-          ...basePayload,
-          userId: currentUser.userId,
-          hoTen: formData.fullName,
-        };
-        const res = await orderService.createOrder(userPayload, false);
-        orderResponse = res.data || res;
-      }
-
-      if (paymentMethod === "COD") {
-        finishOrderProcess();
-      } else {
-        const newOrderId = orderResponse?.id || "MDH" + Date.now();
-        setCreatedOrderId(newOrderId);
-        setShowPaymentModal(true);
-        setLoading(false);
-        toast.info("Đơn hàng đã tạo! Vui lòng quét mã QR để thanh toán.");
-      }
-    } catch (error) {
-      console.error("❌ LỖI KHI GỌI API:", error);
-      const errorMsg =
-        error.response?.data?.message || "Đặt hàng thất bại. Vui lòng thử lại!";
-
-      toast.error(errorMsg);
-      setLoading(false);
+      return await orderService.createOrder(userPayload, false);
     }
   };
 
@@ -272,6 +230,62 @@ const Checkout = () => {
     setTimeout(() => {
       navigate("/");
     }, 2800);
+  };
+
+  const handlePlaceOrder = async () => {
+    if (!isFormValid) {
+      toast.error("Vui lòng điền đầy đủ thông tin giao hàng!");
+      return;
+    }
+
+    if (paymentMethod === "COD") {
+      if (!currentUser) {
+        toast.warn(
+          "Khách vãng lai vui lòng chọn thanh toán Online (VNPAY/MOMO)!",
+          { icon: "💳" },
+        );
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const payload = constructOrderPayload();
+        await submitOrderToBackend(payload);
+        finishOrderProcess();
+      } catch (error) {
+        console.error("❌ LỖI KHI GỌI API:", error);
+        const errorMsg =
+          error.response?.data?.message ||
+          "Đặt hàng thất bại. Vui lòng thử lại!";
+        toast.error(errorMsg);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      const tempCode = "MDH" + Date.now();
+      setTempTransactionCode(tempCode);
+      setShowPaymentModal(true);
+    }
+  };
+
+  const handleConfirmOnlinePayment = async () => {
+    setLoading(true);
+    try {
+      const payload = constructOrderPayload();
+      payload.ghiChu = `${payload.ghiChu || ""} [Mã GD Online: ${tempTransactionCode}]`;
+
+      await submitOrderToBackend(payload);
+
+      setShowPaymentModal(false);
+      finishOrderProcess();
+    } catch (error) {
+      console.error("❌ LỖI KHI GỌI API:", error);
+      const errorMsg =
+        error.response?.data?.message || "Xác nhận đơn hàng thất bại!";
+      toast.error(errorMsg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const selectClassNames = {
@@ -705,7 +719,7 @@ const Checkout = () => {
                   : "bg-primary text-white hover:brightness-105 active:scale-[0.98] shadow-lg shadow-primary/20"
               }`}
             >
-              {loading ? (
+              {loading && !showPaymentModal ? (
                 <span>ĐANG XỬ LÝ...</span>
               ) : (
                 <>
@@ -739,9 +753,9 @@ const Checkout = () => {
             <div className="p-8 flex flex-col items-center justify-center space-y-4">
               <div className="relative group">
                 <img
-                  src={`https://img.vietqr.io/image/MB-0969696969-compact2.png?amount=${FINAL_TOTAL}&addInfo=${paymentMethod}%20${
-                    createdOrderId || "DONHANG"
-                  }`}
+                  src={`https://img.vietqr.io/image/MB-0969696969-compact2.png?amount=${FINAL_TOTAL}&addInfo=${encodeURIComponent(
+                    paymentMethod + " " + tempTransactionCode,
+                  )}`}
                   alt="QR Code Payment"
                   className="w-64 h-64 object-contain border-2 border-dashed border-gray-300 rounded-lg p-2"
                 />
@@ -773,13 +787,20 @@ const Checkout = () => {
                 Đóng / Hủy
               </button>
               <button
-                onClick={finishOrderProcess}
+                onClick={handleConfirmOnlinePayment}
+                disabled={loading}
                 className="flex-1 py-3 rounded-xl bg-green-600 text-white font-bold hover:bg-green-700 shadow-lg shadow-green-600/20 transition-colors flex items-center justify-center gap-2"
               >
-                <span className="material-symbols-outlined text-sm">
-                  check_circle
-                </span>
-                Đã thanh toán
+                {loading ? (
+                  <span>Đang xử lý...</span>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-sm">
+                      check_circle
+                    </span>
+                    Đã thanh toán
+                  </>
+                )}
               </button>
             </div>
           </div>

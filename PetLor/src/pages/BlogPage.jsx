@@ -10,15 +10,12 @@ const IMAGE_BASE_URL = "http://localhost:8080/uploads/";
 const BlogPage = () => {
   const [posts, setPosts] = useState([]);
   const [trendingPosts, setTrendingPosts] = useState([]);
-
   const [featuredPost, setFeaturedPost] = useState(null);
   const [recentPosts, setRecentPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [categories, setCategories] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
-
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -109,6 +106,7 @@ const BlogPage = () => {
       setTimeout(() => AOS.refresh(), 100);
     }
   };
+
   const handleSearchClick = () => fetchPosts(keyword, selectedCategoryId);
 
   const handleKeyDown = (e) => {
@@ -164,7 +162,9 @@ const BlogPage = () => {
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 text-gray-900 font-sans mt-13">
       <div
-        className={`transition-opacity duration-300 ${loading ? "opacity-50 pointer-events-none" : "opacity-100"}`}
+        className={`transition-opacity duration-300 ${
+          loading ? "opacity-50 pointer-events-none" : "opacity-100"
+        }`}
       >
         {featuredPost && (
           <section className="mb-16" data-aos="fade-up">
@@ -202,11 +202,19 @@ const BlogPage = () => {
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center font-bold">
-                        {featuredPost.tenTacGia
-                          ? featuredPost.tenTacGia.charAt(0)
-                          : "A"}
-                      </div>
+                      {featuredPost.anhTacGia ? (
+                        <img
+                          src={getImageUrl(featuredPost.anhTacGia)}
+                          alt={featuredPost.tenTacGia}
+                          className="w-10 h-10 rounded-full object-cover border border-gray-200"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center font-bold">
+                          {featuredPost.tenTacGia
+                            ? featuredPost.tenTacGia.charAt(0)
+                            : "A"}
+                        </div>
+                      )}
                       <span className="text-sm font-bold text-gray-900">
                         {featuredPost.tenTacGia}
                       </span>
@@ -240,7 +248,9 @@ const BlogPage = () => {
           >
             <span className="truncate">{getSelectedCategoryName()}</span>
             <span
-              className={`material-symbols-outlined text-gray-400 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`}
+              className={`material-symbols-outlined text-gray-400 transition-transform duration-200 ${
+                isDropdownOpen ? "rotate-180" : ""
+              }`}
             >
               expand_more
             </span>
@@ -252,7 +262,11 @@ const BlogPage = () => {
                 <li>
                   <button
                     onClick={() => handleSelectCategory(null)}
-                    className={`w-full text-left px-6 py-3 text-sm font-medium transition-colors hover:bg-primary/5 hover:text-primary flex items-center justify-between group ${selectedCategoryId === null ? "bg-primary/10 text-primary" : "text-gray-600"}`}
+                    className={`w-full text-left px-6 py-3 text-sm font-medium transition-colors hover:bg-primary/5 hover:text-primary flex items-center justify-between group ${
+                      selectedCategoryId === null
+                        ? "bg-primary/10 text-primary"
+                        : "text-gray-600"
+                    }`}
                   >
                     Tất cả
                     {selectedCategoryId === null && (
@@ -266,7 +280,11 @@ const BlogPage = () => {
                   <li key={cat.danhMucBvId}>
                     <button
                       onClick={() => handleSelectCategory(cat.danhMucBvId)}
-                      className={`w-full text-left px-6 py-3 text-sm font-medium transition-colors hover:bg-primary/5 hover:text-primary flex items-center justify-between group ${selectedCategoryId === cat.danhMucBvId ? "bg-primary/10 text-primary" : "text-gray-600"}`}
+                      className={`w-full text-left px-6 py-3 text-sm font-medium transition-colors hover:bg-primary/5 hover:text-primary flex items-center justify-between group ${
+                        selectedCategoryId === cat.danhMucBvId
+                          ? "bg-primary/10 text-primary"
+                          : "text-gray-600"
+                      }`}
                     >
                       {cat.tenDanhMuc}
                       {selectedCategoryId === cat.danhMucBvId && (
@@ -307,7 +325,9 @@ const BlogPage = () => {
       </section>
 
       <div
-        className={`grid grid-cols-1 lg:grid-cols-12 gap-12 transition-opacity duration-300 relative z-0 ${loading ? "opacity-50 pointer-events-none" : "opacity-100"}`}
+        className={`grid grid-cols-1 lg:grid-cols-12 gap-12 transition-opacity duration-300 relative z-0 ${
+          loading ? "opacity-50 pointer-events-none" : "opacity-100"
+        }`}
       >
         <div className="lg:col-span-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -348,10 +368,18 @@ const BlogPage = () => {
                         </span>{" "}
                         {formatDate(article.ngayDang)}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <span className="material-symbols-outlined text-sm">
-                          person
-                        </span>{" "}
+                      <span className="flex items-center gap-2">
+                        {article.anhTacGia ? (
+                          <img
+                            src={getImageUrl(article.anhTacGia)}
+                            alt={article.tenTacGia}
+                            className="w-5 h-5 rounded-full object-cover border border-gray-200"
+                          />
+                        ) : (
+                          <span className="material-symbols-outlined text-sm">
+                            person
+                          </span>
+                        )}
                         {article.tenTacGia}
                       </span>
                     </div>

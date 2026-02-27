@@ -14,13 +14,12 @@ const AdminHeader = ({ user, title }) => {
 
       {/* Phần các nút chức năng bên phải */}
       <div className="flex items-center gap-6">
-        {/* Thanh tìm kiếm */}
         <div className="relative">
           <span className="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
             search
           </span>
           <input
-            className="w-64 rounded-full border bordder-slate-200 bg-slate-50 py-1.5 pl-10 pr-4 text-sm focus:border-primary focus:ring-primary"
+            className="w-64 rounded-full bg-slate-50 py-1.5 pl-10 pr-4 text-sm focus:border-primary focus:ring-primary"
             placeholder="Tìm kiếm..."
             type="text"
           />
