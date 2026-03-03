@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,8 +10,12 @@ import {
   SafeAreaView,
   Dimensions,
   FlatList,
+  ActivityIndicator,
+  Platform,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { getAllProducts, BASE_URL } from "../api/productApi";
+import { addToCartAPI } from "../api/cartApi";
 
 const { width } = Dimensions.get("window");
 
@@ -25,100 +29,150 @@ const COLORS = {
   border: "#F3F4F6",
   star: "#FACC15",
   white: "#FFFFFF",
+  red: "#EF4444", // Thêm màu đỏ cho toast lỗi
 };
 
 const CATEGORIES = ["Tất cả", "Thức ăn", "Đồ chơi", "Phụ kiện", "Thuốc"];
 
-const PRODUCTS = [
-  {
-    id: "1",
-    name: "Hạt Royal Canin",
-    price: "185.000 ₫",
-    rating: 4.8,
-    discount: "-10%",
-    image: "https://images.unsplash.com/photo-1589924691195-41432c84c161?w=400",
-  },
-  {
-    id: "2",
-    name: "Xương gặm canxi",
-    price: "45.000 ₫",
-    rating: 4.5,
-    image: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400",
-  },
-  {
-    id: "3",
-    name: "Whiskas Cá Biển",
-    price: "15.000 ₫",
-    rating: 4.9,
-    isNew: true,
-    image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400",
-  },
-  {
-    id: "4",
-    name: "Vòng Cổ Cao Cấp",
-    price: "50.000 ₫",
-    rating: 4.7,
-    image: "https://images.unsplash.com/photo-1544568100-847a948585b9?w=400",
-  },
-  {
-    id: "5",
-    name: "Sữa tắm SOS",
-    price: "120.000 ₫",
-    rating: 4.6,
-    image: "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=400",
-  },
-  {
-    id: "6",
-    name: "Nệm Thú Cưng",
-    price: "350.000 ₫",
-    rating: 5.0,
-    image: "https://images.unsplash.com/photo-1541599540903-216a46ca1dfc?w=400",
-  },
-];
+// 1. CHUYỂN HÀM XỬ LÝ ẢNH RA NGOÀI (Chống nháy ảnh)
+const getImageUrl = (imageName) => {
+  if (!imageName) return "https://via.placeholder.com/400";
+  if (imageName.startsWith("http")) return imageName;
+  return `${BASE_URL}/uploads/${imageName}`;
+};
 
-const ShopScreen = () => {
-  const [activeTab, setActiveTab] = useState("Tất cả");
+// 2. CHUYỂN HÀM FORMAT GIÁ RA NGOÀI
+const formatPrice = (price) => {
+  if (!price) return "0 ₫";
+  return price.toLocaleString("vi-VN") + " ₫";
+};
 
-  const renderProduct = ({ item }) => (
+// 3. TÁCH COMPONENT SẢN PHẨM RA NGOÀI (Chống render lại nguyên list)
+const ProductItem = ({ item, onAddToCart }) => {
+  let discountPercent = null;
+  if (item.giaGiam > 0 && item.giaGiam < item.gia) {
+    discountPercent = `-${Math.round(((item.gia - item.giaGiam) / item.gia) * 100)}%`;
+  }
+
+  return (
     <View style={styles.productCard}>
       <View style={styles.imageContainer}>
-        {item.discount && (
+        {discountPercent ? (
           <View style={[styles.badge, { backgroundColor: "#EF4444" }]}>
-            <Text style={styles.badgeText}>{item.discount}</Text>
+            <Text style={styles.badgeText}>{discountPercent}</Text>
           </View>
-        )}
-        {item.isNew && (
-          <View style={[styles.badge, { backgroundColor: COLORS.primary }]}>
-            <Text style={styles.badgeText}>MỚI</Text>
-          </View>
-        )}
+        ) : null}
+
         <TouchableOpacity style={styles.favoriteBtn}>
           <MaterialIcons name="favorite-border" size={16} color="#9CA3AF" />
         </TouchableOpacity>
-        <Image source={{ uri: item.image }} style={styles.productImage} />
+
+        <Image
+          source={{ uri: getImageUrl(item.hinhAnh) }}
+          style={styles.productImage}
+        />
       </View>
 
       <Text style={styles.productName} numberOfLines={1}>
-        {item.name}
+        {item.tenSanPham}
       </Text>
 
       <View style={styles.ratingRow}>
         <MaterialIcons name="star" size={14} color={COLORS.star} />
-        <Text style={styles.ratingText}>{item.rating}</Text>
+        <Text style={styles.ratingText}>5.0</Text>
       </View>
 
       <View style={styles.priceRow}>
-        <Text style={styles.productPrice}>{item.price}</Text>
-        {/* Nút Add: Shadow-lg shadow-primary/30 */}
-        <TouchableOpacity style={styles.addBtn}>
+        <View>
+          <Text style={styles.productPrice}>
+            {formatPrice(item.giaGiam > 0 ? item.giaGiam : item.gia)}
+          </Text>
+          {item.giaGiam > 0 && item.giaGiam < item.gia ? (
+            <Text style={styles.originalPrice}>{formatPrice(item.gia)}</Text>
+          ) : null}
+        </View>
+
+        <TouchableOpacity
+          style={styles.addBtn}
+          activeOpacity={0.7}
+          onPress={() => onAddToCart(item)}
+        >
           <MaterialIcons name="add" size={20} color="white" />
         </TouchableOpacity>
       </View>
     </View>
   );
+};
+
+// --- COMPONENT CHÍNH ---
+const ShopScreen = () => {
+  const [activeTab, setActiveTab] = useState("Tất cả");
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // STATE QUẢN LÝ CUSTOM TOAST
+  const [toast, setToast] = useState({
+    visible: false,
+    message: "",
+    type: "success",
+  });
+
+  const showToast = (message, type = "success") => {
+    setToast({ visible: true, message, type });
+    setTimeout(() => {
+      setToast({ visible: false, message: "", type: "success" });
+    }, 3000); // Tự tắt sau 3 giây
+  };
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getAllProducts();
+        if (data && data.content) {
+          setProducts(data.content);
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải trang Shop:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  // XỬ LÝ NÚT THÊM GIỎ HÀNG BẰNG TOAST
+  const handleAddToCart = async (sanPham) => {
+    try {
+      await addToCartAPI(sanPham.sanPhamId, 1);
+      // Hiện thông báo thành công xanh lá
+      showToast(`Đã thêm "${sanPham.tenSanPham}" vào giỏ hàng!`, "success");
+    } catch (error) {
+      const errorMsg = error.message || "Lỗi kết nối. Vui lòng thử lại!";
+      // Hiện thông báo lỗi màu đỏ
+      showToast(errorMsg, "error");
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* HIỂN THỊ TOAST THÔNG BÁO Ở CẠNH TRÊN */}
+      {toast.visible && (
+        <View
+          style={[
+            styles.toastContainer,
+            toast.type === "error" ? styles.toastError : styles.toastSuccess,
+          ]}
+        >
+          <MaterialIcons
+            name={toast.type === "error" ? "error-outline" : "check-circle"}
+            size={24}
+            color="white"
+          />
+          <Text style={styles.toastText}>{toast.message}</Text>
+        </View>
+      )}
+
       <View style={styles.header}>
         <View style={styles.searchContainer}>
           <MaterialIcons
@@ -142,7 +196,6 @@ const ShopScreen = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
       >
-        {/* Categories Section - Scroll X */}
         <View>
           <ScrollView
             horizontal
@@ -171,16 +224,29 @@ const ShopScreen = () => {
           </ScrollView>
         </View>
 
-        {/* Grid Sản phẩm */}
-        <FlatList
-          data={PRODUCTS}
-          renderItem={renderProduct}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          scrollEnabled={false}
-          contentContainerStyle={styles.gridContainer}
-          columnWrapperStyle={styles.columnWrapper}
-        />
+        {isLoading ? (
+          <ActivityIndicator
+            size="large"
+            color={COLORS.primary}
+            style={{ marginTop: 50 }}
+          />
+        ) : (
+          <FlatList
+            data={products}
+            // Gọi component con và truyền hàm xử lý
+            renderItem={({ item }) => (
+              <ProductItem item={item} onAddToCart={handleAddToCart} />
+            )}
+            keyExtractor={(item) => item.sanPhamId.toString()}
+            numColumns={2}
+            scrollEnabled={false}
+            contentContainerStyle={styles.gridContainer}
+            columnWrapperStyle={styles.columnWrapper}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>Không có sản phẩm nào.</Text>
+            }
+          />
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -196,41 +262,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#F1F5F9",
   },
-  headerTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: COLORS.text,
-    trackingTight: -0.5,
-  },
-  cartBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#F8FAFC",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  cartDot: {
-    position: "absolute",
-    top: 8,
-    right: 10,
-    width: 8,
-    height: 8,
-    backgroundColor: "#EF4444",
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: "white",
-  },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F3F4F6", // bg-gray-100
+    backgroundColor: "#F3F4F6",
     borderRadius: 12,
     paddingHorizontal: 12,
     height: 48,
@@ -264,7 +299,7 @@ const styles = StyleSheet.create({
   columnWrapper: { justifyContent: "space-between" },
   productCard: {
     backgroundColor: COLORS.surface,
-    width: (width - 64) / 2, // 24*2 padding + 16 gap
+    width: "47%",
     borderRadius: 16,
     padding: 12,
     marginBottom: 16,
@@ -328,6 +363,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   productPrice: { fontSize: 14, fontWeight: "800", color: COLORS.primary },
+  originalPrice: {
+    fontSize: 10,
+    textDecorationLine: "line-through",
+    color: COLORS.muted,
+  },
   addBtn: {
     width: 28,
     height: 28,
@@ -340,6 +380,33 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 4,
+  },
+  emptyText: { textAlign: "center", marginTop: 20, color: COLORS.muted },
+
+  toastContainer: {
+    position: "absolute",
+    top: 15,
+    left: 20,
+    right: 20,
+    padding: 16,
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    zIndex: 9999,
+    elevation: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+  },
+  toastSuccess: { backgroundColor: COLORS.primary },
+  toastError: { backgroundColor: COLORS.red },
+  toastText: {
+    color: "white",
+    fontSize: 15,
+    fontWeight: "600",
+    marginLeft: 10,
+    flex: 1,
   },
 });
 

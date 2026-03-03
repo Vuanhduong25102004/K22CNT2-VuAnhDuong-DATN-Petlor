@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -11,12 +11,45 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS, SHADOW } from "../constants/theme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Import components con
 import ServiceItem from "../components/home/ServiceItem";
 import ProductCard from "../components/home/ProductCard";
 
+// const debugStorage = async () => {
+//   try {
+//     // 1. Chỉ lấy danh sách các chìa khóa (keys)
+//     const keys = await AsyncStorage.getAllKeys();
+
+//     console.log("\n====================================");
+//     console.log("📦 DỮ LIỆU ĐANG LƯU TRONG STORAGE:");
+
+//     if (!keys || keys.length === 0) {
+//       console.log("Trống trơn, không có gì cả!");
+//     } else {
+//       // 2. Dùng vòng lặp for...of để lấy từng giá trị (an toàn 100%, không lo lỗi multiGet)
+//       for (const key of keys) {
+//         const value = await AsyncStorage.getItem(key);
+
+//         console.log(`\n🔑 Key: ${key}`);
+//         try {
+//           console.log(`📄 Value:`, JSON.parse(value));
+//         } catch (e) {
+//           console.log(`📄 Value: ${value}`);
+//         }
+//       }
+//     }
+//     console.log("\n====================================\n");
+//   } catch (error) {
+//     console.error("Lỗi khi đọc Storage:", error);
+//   }
+// };
+
 const HomeScreen = () => {
+  // useEffect(() => {
+  //   debugStorage();
+  // }, []);
   return (
     <ScrollView
       style={styles.container}

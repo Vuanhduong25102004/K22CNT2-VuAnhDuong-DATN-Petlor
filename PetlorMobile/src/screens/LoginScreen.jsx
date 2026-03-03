@@ -10,6 +10,9 @@ import {
 } from "react-native";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { loginAPI } from "../api/authApi";
 
 const COLORS = {
   primary: "#047857",
@@ -42,7 +45,40 @@ const SHADOW = {
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Lỗi", "Vui lòng nhập đầy đủ email và mật khẩu!");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const data = await loginAPI(email, password);
+      await AsyncStorage.setItem("accessToken", data.accessToken);
+
+      const userInfo = {
+        userId: data.userId,
+        hoTen: data.hoTen,
+        email: data.email,
+        role: data.role,
+        nhanVienId: data.nhanVienId,
+      };
+      await AsyncStorage.setItem("userInfo", JSON.stringify(userInfo));
+
+      Alert.alert("Thành công", `Chào mừng ${data.hoTen} đã quay lại!`);
+      navigation.replace("Main");
+    } catch (error) {
+      Alert.alert(
+        "Đăng nhập thất bại",
+        error.message || "Sai tài khoản hoặc mật khẩu",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -126,7 +162,7 @@ const LoginScreen = ({ navigation }) => {
             <TouchableOpacity
               activeOpacity={0.8}
               style={styles.loginBtnContainer}
-              onPress={() => navigation.replace("Main")}
+              onPress={handleLogin}
             >
               <LinearGradient
                 colors={[COLORS.primary, "#059669"]}

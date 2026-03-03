@@ -349,9 +349,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  calendarGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  calendarGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
   dayHeader: {
-    width: (width - 48 - 48) / 7,
+    width: "14.28%",
     textAlign: "center",
     fontSize: 12,
     fontWeight: "700",
@@ -359,23 +362,29 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   dayCell: {
-    width: (width - 48 - 48) / 7,
+    width: "14.28%",
     height: 40,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
+    marginBottom: 8,
   },
   dayCellActive: { backgroundColor: COLORS.primary, elevation: 4 },
   dayText: { fontSize: 14, color: COLORS.text },
 
   // Time
-  timeGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  timeGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
   timeItem: {
-    width: (width - 48 - 30) / 4,
+    width: "23%",
     paddingVertical: 10,
     borderRadius: 12,
     alignItems: "center",
     borderWidth: 1,
+    marginBottom: 10,
   },
   timeActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
   timeInactive: { backgroundColor: COLORS.surface, borderColor: COLORS.border },

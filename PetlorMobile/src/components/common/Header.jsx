@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -11,12 +11,30 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 import { COLORS } from "../../constants/theme";
 import { useNavigation } from "@react-navigation/native";
+import { getCurrentUser, BASE_URL } from "../../api/userApi";
 
 const Header = () => {
   const navigation = useNavigation();
+  const [avatar, setAvatar] = useState(null);
+
+  useEffect(() => {
+    const fetchAvatar = async () => {
+      try {
+        const userData = await getCurrentUser();
+
+        if (userData && userData.anhDaiDien) {
+          setAvatar(`${BASE_URL}/uploads/${userData.anhDaiDien}`);
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải Header:", error);
+      }
+    };
+
+    fetchAvatar();
+  }, []);
+
   return (
     <View style={styles.container}>
-      {/* Logo Section */}
       <View style={styles.logoRow}>
         <View style={styles.logoIcon}>
           <MaterialIcons name="pets" size={24} color={COLORS.primary} />
@@ -24,9 +42,7 @@ const Header = () => {
         <Text style={styles.logoText}>PetLor</Text>
       </View>
 
-      {/* Action Section */}
       <View style={styles.actionsRow}>
-        {/* Giỏ hàng mới thêm vào */}
         <TouchableOpacity
           style={styles.cartBtn}
           onPress={() => navigation.navigate("Cart")}
@@ -39,7 +55,6 @@ const Header = () => {
           <View style={styles.cartDot} />
         </TouchableOpacity>
 
-        {/* Thông báo */}
         <TouchableOpacity style={styles.notifBtn}>
           <MaterialIcons
             name="notifications-none"
@@ -49,10 +64,11 @@ const Header = () => {
           <View style={styles.badge} />
         </TouchableOpacity>
 
-        {/* Avatar */}
         <TouchableOpacity style={styles.avatarContainer}>
           <Image
-            source={{ uri: "https://i.pravatar.cc/150?img=11" }}
+            source={{
+              uri: avatar ? avatar : "https://i.pravatar.cc/150?img=11",
+            }}
             style={styles.avatar}
           />
         </TouchableOpacity>
@@ -72,7 +88,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.95)",
     zIndex: 100,
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9", // Thêm một đường kẻ mờ cho chuyên nghiệp
+    borderBottomColor: "#F1F5F9",
   },
   logoRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   logoIcon: {
@@ -84,9 +100,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logoText: { fontSize: 20, fontWeight: "800", color: COLORS.primary },
-  actionsRow: { flexDirection: "row", alignItems: "center", gap: 10 }, // Giảm gap xuống 10 để vừa 3 icon
-
-  // Style cho nút Giỏ hàng
+  actionsRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   cartBtn: {
     width: 40,
     height: 40,
@@ -107,7 +121,6 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "white",
   },
-
   notifBtn: {
     width: 40,
     height: 40,
