@@ -116,7 +116,6 @@ const CartScreen = ({ navigation }) => {
     type: "success",
   });
 
-  // --- STATE CHO MODAL XÁC NHẬN XÓA ---
   const [isConfirmVisible, setIsConfirmVisible] = useState(false);
   const [itemToRemove, setItemToRemove] = useState(null);
 
@@ -153,6 +152,7 @@ const CartScreen = ({ navigation }) => {
       showToast("Không thể cập nhật số lượng.", "error");
     }
   };
+
   const handleRemoveItem = (sanPhamId) => {
     setItemToRemove(sanPhamId);
     setIsConfirmVisible(true);
@@ -175,8 +175,11 @@ const CartScreen = ({ navigation }) => {
   const cartItems = cartData?.items || [];
   const tongSoLuong = cartData?.tongSoLuong || 0;
   const subTotal = cartData?.tongTien || 0;
-  const shippingFee = subTotal > 0 ? 15000 : 0;
 
+  // THÊM LẠI PHÍ VẬN CHUYỂN MẶC ĐỊNH 30K (chỉ tính phí khi có hàng trong giỏ)
+  const shippingFee = subTotal > 0 ? 30000 : 0;
+
+  // CỘNG PHÍ SHIP VÀO TỔNG TIỀN
   const calculatedTotal = subTotal + shippingFee - discountAmount;
   const finalTotal = calculatedTotal > 0 ? calculatedTotal : 0;
 
@@ -268,6 +271,7 @@ const CartScreen = ({ navigation }) => {
       return;
     }
 
+    // Truyền thêm shippingFee sang trang Checkout
     navigation.navigate("Checkout", {
       subTotal: subTotal,
       shippingFee: shippingFee,
@@ -387,12 +391,15 @@ const CartScreen = ({ navigation }) => {
                   {subTotal.toLocaleString("vi-VN")} ₫
                 </Text>
               </View>
+
+              {/* THÊM LẠI HIỂN THỊ PHÍ VẬN CHUYỂN */}
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>Phí vận chuyển</Text>
                 <Text style={styles.summaryValue}>
                   {shippingFee.toLocaleString("vi-VN")} ₫
                 </Text>
               </View>
+
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>Giảm giá</Text>
                 <Text style={[styles.summaryValue, { color: COLORS.primary }]}>
@@ -422,7 +429,6 @@ const CartScreen = ({ navigation }) => {
         </>
       )}
 
-      {/* MODAL KHUYẾN MÃI CŨ */}
       <Modal
         visible={isPromoModalVisible}
         animationType="fade"
@@ -496,7 +502,6 @@ const CartScreen = ({ navigation }) => {
         </View>
       </Modal>
 
-      {/* --- MODAL XÁC NHẬN XÓA SIÊU ĐẸP --- */}
       <Modal
         visible={isConfirmVisible}
         animationType="fade"
@@ -790,7 +795,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // --- STYLES MỚI CHO HỘP XÁC NHẬN ---
   confirmOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -814,7 +818,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: "rgba(239, 68, 68, 0.1)", // Nền đỏ nhạt
+    backgroundColor: "rgba(239, 68, 68, 0.1)",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,

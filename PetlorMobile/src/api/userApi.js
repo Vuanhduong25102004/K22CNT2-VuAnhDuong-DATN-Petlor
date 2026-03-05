@@ -1,7 +1,7 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const BASE_URL = "http://192.168.1.3:8080";
+export const BASE_URL = "http://192.168.1.4:8080";
 
 export const getCurrentUser = async () => {
   try {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,12 +7,17 @@ import {
   TouchableOpacity,
   Image,
   SafeAreaView,
-  Dimensions,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 
-const { width } = Dimensions.get("window");
+// Import các hàm API
+import { getMyPetsAPI } from "../api/bookingApi";
+import { getCurrentUser, BASE_URL } from "../api/userApi"; // Thêm getCurrentUser ở đây
 
 const COLORS = {
   primary: "#10B981",
@@ -63,92 +68,163 @@ const MENU_ITEMS = [
 ];
 
 const ProfileScreen = ({ navigation }) => {
+  const [userData, setUserData] = useState(null);
+  const [pets, setPets] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // --- LOGIC LẤY ẢNH GIỐNG HEADER ---
+  const fetchProfileData = async () => {
+    try {
+      setIsLoading(true);
+
+      // 1. Lấy thông tin User từ server (giống Header)
+      const user = await getCurrentUser();
+      if (user) {
+        setUserData(user);
+      }
+
+      // 2. Lấy danh sách thú cưng
+      const petsData = await getMyPetsAPI();
+      setPets(petsData);
+    } catch (error) {
+      console.log("ProfileScreen: Lỗi tải dữ liệu", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Cập nhật liên tục khi quay lại trang
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfileData();
+    }, []),
+  );
+
+  // --- HÀM TẠO ĐƯỜNG DẪN ẢNH (Giống Header) ---
+  const getUserAvatar = () => {
+    if (userData?.anhDaiDien) {
+      return { uri: `${BASE_URL}/uploads/${userData.anhDaiDien}` };
+    }
+    // Ảnh mặc định giống Header nếu không có ảnh
+    return { uri: "https://i.pravatar.cc/150?img=11" };
+  };
+
+  const getPetImage = (hinhAnh) => {
+    if (hinhAnh) {
+      return { uri: `${BASE_URL}/uploads/${hinhAnh}` };
+    }
+    return { uri: "https://via.placeholder.com/300?text=Pet" };
+  };
+
+  // --- ĐĂNG XUẤT ---
+  const handleLogout = () => {
+    Alert.alert("Xác nhận", "Bạn có chắc chắn muốn đăng xuất?", [
+      { text: "Hủy", style: "cancel" },
+      {
+        text: "Đăng xuất",
+        style: "destructive",
+        onPress: async () => {
+          await AsyncStorage.multiRemove(["accessToken", "userInfo"]);
+          navigation.reset({ index: 0, routes: [{ name: "Login" }] });
+        },
+      },
+    ]);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Profile Info Section */}
+        {/* Thông tin cá nhân */}
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
             <Image
-              source={{ uri: "https://i.pravatar.cc/300?img=12" }}
+              source={getUserAvatar()} // Gọi hàm lấy ảnh đã xử lý logic uploads
               style={styles.avatar}
             />
             <TouchableOpacity style={styles.editAvatarBtn}>
               <MaterialIcons name="edit" size={16} color="white" />
             </TouchableOpacity>
           </View>
-          <Text style={styles.userName}>Nguyễn Minh Anh</Text>
-          <Text style={styles.userEmail}>minhanh.nguyen@example.com</Text>
+          <Text style={styles.userName}>{userData?.hoTen || "Người dùng"}</Text>
+          <Text style={styles.userEmail}>
+            {userData?.email || "Chưa có email"}
+          </Text>
           <TouchableOpacity style={styles.editProfileBtn}>
             <Text style={styles.editProfileText}>Chỉnh sửa hồ sơ</Text>
           </TouchableOpacity>
         </View>
 
-        {/* My Pets Section */}
+        {/* Thú cưng của tôi */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Thú cưng của tôi</Text>
-            <TouchableOpacity style={styles.addBtnSmall}>
+            <Text style={styles.sectionTitle}>
+              Thú cưng của tôi ({pets.length})
+            </Text>
+            <TouchableOpacity
+              style={styles.addBtnSmall}
+              onPress={() => navigation.navigate("AddPet")}
+            >
               <MaterialIcons name="add" size={20} color={COLORS.primary} />
             </TouchableOpacity>
           </View>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.petList}
-          >
-            {/* Pet Card 1 */}
-            <View style={styles.petCard}>
-              <Image
-                source={{
-                  uri: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=300",
-                }}
-                style={styles.petImg}
-              />
-              <LinearGradient
-                colors={["transparent", "rgba(0,0,0,0.7)"]}
-                style={styles.petGradient}
-              />
-              <View style={styles.petInfo}>
-                <Text style={styles.petName}>Mochi</Text>
-                <Text style={styles.petBreed}>Corgi</Text>
-              </View>
-            </View>
-
-            {/* Pet Card 2 */}
-            <View style={styles.petCard}>
-              <Image
-                source={{
-                  uri: "https://images.unsplash.com/photo-1552053831-71594a27632d?w=300",
-                }}
-                style={styles.petImg}
-              />
-              <LinearGradient
-                colors={["transparent", "rgba(0,0,0,0.7)"]}
-                style={styles.petGradient}
-              />
-              <View style={styles.petInfo}>
-                <Text style={styles.petName}>Lu</Text>
-                <Text style={styles.petBreed}>Golden</Text>
-              </View>
-            </View>
-
-            {/* Add Pet Placeholder */}
-            <TouchableOpacity style={styles.addPetCard}>
-              <MaterialIcons name="pets" size={32} color={COLORS.muted} />
-              <Text style={styles.addPetText}>Thêm bé</Text>
-            </TouchableOpacity>
-          </ScrollView>
+          {isLoading ? (
+            <ActivityIndicator
+              color={COLORS.primary}
+              style={{ marginLeft: 24 }}
+            />
+          ) : (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.petList}
+            >
+              {Array.isArray(pets) &&
+                pets.map((pet) => (
+                  <TouchableOpacity key={pet.thuCungId} style={styles.petCard}>
+                    <Image
+                      source={getPetImage(pet.hinhAnh)}
+                      style={styles.petImg}
+                    />
+                    <LinearGradient
+                      colors={["transparent", "rgba(0,0,0,0.7)"]}
+                      style={styles.petGradient}
+                    />
+                    <View style={styles.petInfo}>
+                      <Text style={styles.petName}>{pet.tenThuCung}</Text>
+                      <Text style={styles.petBreed}>{pet.giongLoai}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              <TouchableOpacity
+                style={styles.addPetCard}
+                onPress={() => navigation.navigate("AddPet")}
+              >
+                <MaterialIcons name="pets" size={32} color={COLORS.muted} />
+                <Text style={styles.addPetText}>Thêm bé</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          )}
         </View>
 
-        {/* Menu Items Section */}
+        {/* Menu danh mục */}
         <View style={styles.menuContainer}>
           {MENU_ITEMS.map((item) => (
-            <TouchableOpacity key={item.id} style={styles.menuItem}>
+            <TouchableOpacity
+              key={item.id}
+              style={styles.menuItem}
+              onPress={() => {
+                // Điều hướng dựa trên ID của menu item
+                if (item.id === 1) {
+                  navigation.navigate("BookingHistory");
+                } else if (item.id === 2) {
+                  navigation.navigate("OrderHistory");
+                } else if (item.id === 3) navigation.navigate("AddressList");
+              }}
+            >
               <View style={[styles.menuIconBox, { backgroundColor: item.bg }]}>
                 <MaterialIcons name={item.icon} size={22} color={item.color} />
               </View>
@@ -158,9 +234,9 @@ const ProfileScreen = ({ navigation }) => {
           ))}
         </View>
 
-        {/* Logout Section */}
+        {/* Nút đăng xuất */}
         <View style={styles.logoutSection}>
-          <TouchableOpacity style={styles.logoutBtn}>
+          <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
             <MaterialIcons name="logout" size={20} color={COLORS.red} />
             <Text style={styles.logoutText}>Đăng xuất</Text>
           </TouchableOpacity>
@@ -171,31 +247,10 @@ const ProfileScreen = ({ navigation }) => {
   );
 };
 
+// --- GIỮ NGUYÊN STYLES ---
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  header: {
-    backgroundColor: COLORS.surface,
-    paddingHorizontal: 24,
-    paddingTop: 15,
-    paddingBottom: 15,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  headerTitle: { fontSize: 20, fontWeight: "800", color: COLORS.text },
-  headerBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#F8FAFC",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  scrollContent: { paddingBottom: 120, paddingTop: 20 },
-
-  // Profile Info
+  scrollContent: { paddingBottom: 50, paddingTop: 20 },
   profileSection: { alignItems: "center", marginBottom: 30 },
   avatarContainer: { position: "relative", marginBottom: 15 },
   avatar: {
@@ -232,8 +287,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#F1F5F9",
   },
   editProfileText: { fontSize: 14, fontWeight: "700", color: COLORS.text },
-
-  // Pets Section
   section: { marginBottom: 30 },
   sectionHeader: {
     flexDirection: "row",
@@ -288,8 +341,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   addPetText: { fontSize: 12, fontWeight: "700", color: COLORS.muted },
-
-  // Menu Section
   menuContainer: {
     marginHorizontal: 24,
     backgroundColor: COLORS.surface,
@@ -323,8 +374,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: COLORS.text,
   },
-
-  // Logout
   logoutSection: { paddingHorizontal: 24, alignItems: "center" },
   logoutBtn: {
     width: "100%",

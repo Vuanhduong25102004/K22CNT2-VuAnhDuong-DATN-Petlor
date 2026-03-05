@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,28 +10,38 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { COLORS } from "../../constants/theme";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native"; // Dùng useFocusEffect để cập nhật liên tục khi quay lại trang
 import { getCurrentUser, BASE_URL } from "../../api/userApi";
 
 const Header = () => {
   const navigation = useNavigation();
   const [avatar, setAvatar] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Thêm biến kiểm tra đăng nhập
 
-  useEffect(() => {
-    const fetchAvatar = async () => {
-      try {
-        const userData = await getCurrentUser();
+  // Dùng useFocusEffect thay cho useEffect để mỗi khi người dùng quay lại trang Home (sau khi Login), Header sẽ load lại
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUserData = async () => {
+        try {
+          const userData = await getCurrentUser();
 
-        if (userData && userData.anhDaiDien) {
-          setAvatar(`${BASE_URL}/uploads/${userData.anhDaiDien}`);
+          if (userData) {
+            setIsLoggedIn(true);
+            if (userData.anhDaiDien) {
+              setAvatar(`${BASE_URL}/uploads/${userData.anhDaiDien}`);
+            }
+          } else {
+            setIsLoggedIn(false);
+          }
+        } catch (error) {
+          setIsLoggedIn(false);
+          console.log("Header: Người dùng chưa đăng nhập");
         }
-      } catch (error) {
-        console.error("Lỗi khi tải Header:", error);
-      }
-    };
+      };
 
-    fetchAvatar();
-  }, []);
+      fetchUserData();
+    }, []),
+  );
 
   return (
     <View style={styles.container}>
@@ -43,6 +53,7 @@ const Header = () => {
       </View>
 
       <View style={styles.actionsRow}>
+        {/* Nút Giỏ hàng */}
         <TouchableOpacity
           style={styles.cartBtn}
           onPress={() => navigation.navigate("Cart")}
@@ -52,26 +63,47 @@ const Header = () => {
             size={22}
             color={COLORS.textLight}
           />
-          <View style={styles.cartDot} />
+          {/* Chỉ hiện dấu chấm đỏ giỏ hàng nếu đã đăng nhập */}
+          {isLoggedIn && <View style={styles.cartDot} />}
         </TouchableOpacity>
 
+        {/* Nút Thông báo */}
         <TouchableOpacity style={styles.notifBtn}>
           <MaterialIcons
             name="notifications-none"
             size={24}
             color={COLORS.textLight}
           />
-          <View style={styles.badge} />
+          {isLoggedIn && <View style={styles.badge} />}
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.avatarContainer}>
-          <Image
-            source={{
-              uri: avatar ? avatar : "https://i.pravatar.cc/150?img=11",
-            }}
-            style={styles.avatar}
-          />
-        </TouchableOpacity>
+        {/* --- XỬ LÝ HIỂN THỊ AVATAR --- */}
+        {isLoggedIn ? (
+          // Nếu đã đăng nhập: Hiện ảnh đại diện
+          <TouchableOpacity
+            style={styles.avatarContainer}
+            onPress={() => navigation.navigate("Profile")} // Hoặc trang cá nhân của bạn
+          >
+            <Image
+              source={{
+                uri: avatar ? avatar : "https://i.pravatar.cc/150?img=11",
+              }}
+              style={styles.avatar}
+            />
+          </TouchableOpacity>
+        ) : (
+          // Nếu chưa đăng nhập: Hiện nút Đăng nhập hoặc Icon mặc định
+          <TouchableOpacity
+            style={styles.loginBtn}
+            onPress={() => navigation.navigate("Login")}
+          >
+            <MaterialIcons
+              name="account-circle"
+              size={32}
+              color={COLORS.primary}
+            />
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -150,6 +182,10 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   avatar: { width: "100%", height: "100%" },
+  loginBtn: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
 
 export default Header;
